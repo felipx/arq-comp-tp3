@@ -13,7 +13,7 @@ module adder
     input  wire [NB_ADDER - 1 : 0] i_b  ,  //! Second input
 );
 
-    //! Adder Model
+    //! Output Logic
     assign o_sum = i_a + i_b;
     
 endmodule

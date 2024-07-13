@@ -14,7 +14,7 @@ module mux_2to1
     input  wire                  i_sel   //! Select signal
 );
 
-    //! Mux 2to1 Model
+    //! Output Logic
     assign o_mux = sel ? i_b : i_a;
     
 endmodule
