@@ -83,5 +83,7 @@ module cpu_core
             .i_rst  (i_rst                                  ),
             .clk    (clk                                    ) 
         );
+
+    //TODO: 
     
 endmodule
