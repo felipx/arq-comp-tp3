@@ -14,7 +14,6 @@ module cpu_core
     parameter IMEM_DATA_WIDTH = 32     //! Size of each memory location
     
 ) (
-    // outputs
     input i_rst,
     input clk
 );
@@ -33,9 +32,9 @@ module cpu_core
     )
         u_pc_adder
         (
-            .o_sum (adder_to_mux2to1    ),
-            .i_a   (pc_out_connect      ),
-            .i_b   (32'h4               )   //! PC increments by 4
+            .o_sum (adder_to_mux2to1),
+            .i_a   (pc_out_connect  ),
+            .i_b   (32'h4           )   //! PC increments by 4
 
         );
     
@@ -59,11 +58,11 @@ module cpu_core
     )
         u_pc
         (
-            .o_pc  (pc_out_connect      ),
-            .i_pc  (mux2to1_to_pc       ),
-            .i_en  (1'b1                ),  //TODO: check if needed
-            .i_rst (i_rst               ),
-            .clk   (clk                 )
+            .o_pc  (pc_out_connect),
+            .i_pc  (mux2to1_to_pc ),
+            .i_en  (1'b1          ),  //TODO: check if needed
+            .i_rst (i_rst         ),
+            .clk   (clk           )
         );
     
     // Instruction Memory
@@ -99,7 +98,7 @@ module cpu_core
             .i_rst   (i_rst            ),  
             .clk     (clk              ) 
         );
-
+    
     // Integer Register File
     regfile
     #(
@@ -115,7 +114,36 @@ module cpu_core
             .i_waddr (),
             .i_wdata (),
             .i_wen   (),
-            .i_rst   (),
-            .clk     () 
-        )
+            .i_rst   (i_rst),
+            .clk     (clk  ) 
+        );
+    
+    // Immediate Generator
+    imm_gen
+    #(
+        .DATA_WIDTH (IMEM_DATA_WIDTH)
+    )
+        u_imm_gen
+        (
+            .o_imm   (), //TODO
+            .i_instr ()  //TODO
+        );
+    
+    // Base Integer Control Unit
+    base_integer_ctrl_unit
+    #(
+
+    )
+        u_base_integer_ctrl_unit
+        (
+            .o_RegWrite (),
+            .o_MemRead  (),
+            .o_MemWrite (),
+            .o_ALUSrc   (),
+            .o_MemToReg (),
+            .o_Branch   (),
+            .o_Jump     (),
+            .o_ALUOp    (),
+            .i_opcode   ()
+        );
 endmodule
