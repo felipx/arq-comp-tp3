@@ -9,8 +9,11 @@ module if_id_reg
     parameter NB_INSTR = 32,                //! Instruction width
     parameter NB_PC    = 32                 //! Program Counter width
 ) (
+    // Outputs
     output reg [NB_INSTR - 1 : 0] o_instr,  //! Instruction output
     output reg [NB_PC    - 1 : 0] o_pc,     //! Program Counter output
+    
+    // Inputs
     input      [NB_INSTR - 1 : 0] i_instr,  //! Instruction input
     input      [NB_PC    - 1 : 0] i_pc,     //! Program Counter input
     input                         i_en,     //! Enable input

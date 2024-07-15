@@ -2,6 +2,7 @@ module base_integer_ctrl_unit
 # (
 
 ) (
+    // Outputs
     output reg          o_RegWrite,  //! Register Write enable
     output reg          o_MemRead ,  //! Memory Read enable
     output reg          o_MemWrite,  //! Memory Write enable
@@ -10,6 +11,8 @@ module base_integer_ctrl_unit
     output reg          o_Branch  ,  //! Branch control
     output reg          o_Jump    ,  //! Jump control
     output reg  [1 : 0] o_ALUOp   ,  //! ALU Operation
+    
+    // Input
     input  wire [6 : 0] i_opcode     //! Opcode from the instruction
 );
 

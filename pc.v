@@ -8,7 +8,10 @@ module pc
 #(
     parameter NB_PC = 32                //! NB of Program Counter
 ) (
+    // Output
     output wire [NB_PC - 1 : 0] o_pc ,  //! Program Counter output
+    
+    // Inputs
     input  wire [NB_PC - 1 : 0] i_pc ,  //! Program Counter input
     input  wire                 i_en ,  //! Enable input
     input  wire                 i_rst,  //! Reset

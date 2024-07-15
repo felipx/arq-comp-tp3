@@ -14,6 +14,7 @@ module cpu_core
     parameter IMEM_DATA_WIDTH = 32     //! Size of each memory location
     
 ) (
+    // Inputs
     input i_rst,
     input clk
 );

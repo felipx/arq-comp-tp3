@@ -9,8 +9,11 @@ module regfile
     parameter ADDR_WIDTH = 5 ,                //! Address width
     parameter DATA_WIDTH = 32                 //! Size of each memory location 
 ) (
+    // Outputs
     output reg [DATA_WIDTH - 1 : 0] o_dout1,  //! Data output for read port 1
     output reg [DATA_WIDTH - 1 : 0] o_dout2,  //! Data output for read port 2
+    
+    // Inputs
     input      [ADDR_WIDTH - 1 : 0] i_addr1,  //! Read register address 1
     input      [ADDR_WIDTH - 1 : 0] i_addr2,  //! Read register address 2
     input      [ADDR_WIDTH - 1 : 0] i_waddr,  //! Write register address

@@ -8,7 +8,10 @@ module adder
 #(
     parameter NB_ADDER = 32                //! NB of Adder
 ) (
+    // Output
     output wire [NB_ADDER - 1 : 0] o_sum,  //! Adder output
+    
+    // Inputs
     input  wire [NB_ADDER - 1 : 0] i_a  ,  //! First input
     input  wire [NB_ADDER - 1 : 0] i_b  ,  //! Second input
 );
