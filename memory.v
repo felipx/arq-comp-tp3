@@ -9,7 +9,10 @@ module memory
     parameter ADDR_WIDTH = 10,                //! Address width
     parameter DATA_WIDTH = 32                 //! Size of each memory location
 ) (
+    // Output
     output reg  [DATA_WIDTH - 1 : 0] o_dout,  //! Data output
+    
+    // Inputs
     input  wire [DATA_WIDTH - 1 : 0] i_din ,  //! Data input
     input  wire [ADDR_WIDTH - 1 : 0] i_addr,  //! Address input
     input  wire                      i_wen ,  //! Write enable input
