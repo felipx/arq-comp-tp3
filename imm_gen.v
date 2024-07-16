@@ -1,6 +1,12 @@
+//! @title IMMEDIATE GENERATOR
+//! @file imm_gen.v
+//! @author Felipe Montero Bruni
+//! @date 07-2024
+//! @version 0.1
+
 module imm_gen
 #(
-    parameter DATA_WIDTH = 32            //! Data width of the immediate
+    parameter DATA_WIDTH = 32                //! Data width of the immediate
 ) (
     output reg [DATA_WIDTH - 1 : 0] o_imm  , //! Immediate output
     input      [DATA_WIDTH - 1 : 0] i_instr  //! Instruction input
