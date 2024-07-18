@@ -105,8 +105,6 @@ module cpu_core
             .i_rst  (i_rst                                  ),
             .clk    (clk                                    ) 
         );
-
-    //TODO: 
     
     // IF/ID Pipeline Register
     if_id_reg

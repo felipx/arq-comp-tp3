@@ -1,0 +1,99 @@
+module alu_ctrl_unit
+#(
+    parameter NB_CTRL   = 5,                  //! Control signal width for ALU
+    parameter NB_ALU_OP = 3,                  //! Width of ALU op input
+    parameter NB_FUNCT7 = 7,                  //! Width of funct7 field
+    parameter NB_FUNCT3 = 3                   //! Width of funct3 filed
+) (
+    // Output
+    output reg [NB_CTRL   - 1 : 0] o_alu_op,  //! ALU operation control signal
+    
+    // Inputs
+    input wire [NB_ALU_OP - 1 : 0] i_alu_op,  //! ALUOp from Control Unit
+    input wire [6:0]               i_funct7,  //! funct7 field from instruction
+    input wire [2:0]               i_funct3,  //! funct3 field from instruction
+);
+    //! ALU Operations
+    localparam ALU_ADD    = 5'b00000;
+    localparam ALU_SUB    = 5'b00001;
+    localparam ALU_SLL    = 5'b00010;
+    localparam ALU_SLT    = 5'b00011;
+    localparam ALU_SLTU   = 5'b00100;
+    localparam ALU_XOR    = 5'b00101;
+    localparam ALU_SRL    = 5'b00110;
+    localparam ALU_SRA    = 5'b00111;
+    localparam ALU_OR     = 5'b01000;
+    localparam ALU_AND    = 5'b01001;
+    localparam ALU_MUL    = 5'b01010;
+    localparam ALU_MULH   = 5'b01011;
+    localparam ALU_MULHSU = 5'b01100;
+    localparam ALU_MULHU  = 5'b01101;
+    localparam ALU_DIV    = 5'b01110;
+    localparam ALU_DIVU   = 5'b01111;
+    localparam ALU_REM    = 5'b10000;
+    localparam ALU_REMU   = 5'b10001;
+
+    //! ALU Control Unit Model
+    always @(*) begin
+        case (i_alu_op)
+            3'b000: begin // Load/Store Instructions
+                o_alu_op = ALU_ADD;
+            end
+            3'b001: begin // Branch Instructions
+                case (i_funct3)
+                    3'b000: o_alu_op = ALU_SUB;  // BEQ
+                    3'b001: o_alu_op = ALU_SUB;  // BNE
+                    3'b100: o_alu_op = ALU_SLT;  // BLT
+                    3'b101: o_alu_op = ALU_SLT;  // BGE
+                    3'b110: o_alu_op = ALU_SLTU; // BLTU
+                    3'b111: o_alu_op = ALU_SLTU; // BGEU
+                    default: o_alu_op = ALU_ADD;
+                endcase
+            end
+            3'b010: begin // I-Type Arithmetic Instructions
+                case (i_funct3)
+                    3'b000: o_alu_op = ALU_ADD;  // ADDI
+                    3'b010: o_alu_op = ALU_SLT;  // SLTI
+                    3'b011: o_alu_op = ALU_SLTU; // SLTIU
+                    3'b100: o_alu_op = ALU_XOR;  // XORI
+                    3'b110: o_alu_op = ALU_OR;   // ORI
+                    3'b111: o_alu_op = ALU_AND;  // ANDI
+                    3'b001: o_alu_op = ALU_SLL;  // SLLI
+                    3'b101: begin
+                        case (i_funct7)
+                            7'b0000000: o_alu_op = ALU_SRL; // SRLI
+                            7'b0100000: o_alu_op = ALU_SRA; // SRAI
+                            default: o_alu_op = ALU_ADD;
+                        endcase
+                    end
+                    default: o_alu_op = ALU_ADD;
+                endcase
+            end
+            3'b011: begin // R-Type Instructions
+                case ({i_funct7, i_funct3})
+                    10'b0000000_000: o_alu_op = ALU_ADD;
+                    10'b0100000_000: o_alu_op = ALU_SUB;
+                    10'b0000000_001: o_alu_op = ALU_SLL;
+                    10'b0000000_010: o_alu_op = ALU_SLT;
+                    10'b0000000_011: o_alu_op = ALU_SLTU;
+                    10'b0000000_100: o_alu_op = ALU_XOR;
+                    10'b0000000_101: o_alu_op = ALU_SRL;
+                    10'b0100000_101: o_alu_op = ALU_SRA;
+                    10'b0000000_110: o_alu_op = ALU_OR;
+                    10'b0000000_111: o_alu_op = ALU_AND;
+                    10'b0000001_000: o_alu_op = ALU_MUL;
+                    10'b0000001_001: o_alu_op = ALU_MULH;
+                    10'b0000001_010: o_alu_op = ALU_MULHSU;
+                    10'b0000001_011: o_alu_op = ALU_MULHU;
+                    10'b0000001_100: o_alu_op = ALU_DIV;
+                    10'b0000001_101: o_alu_op = ALU_DIVU;
+                    10'b0000001_110: o_alu_op = ALU_REM;
+                    10'b0000001_111: o_alu_op = ALU_REMU;
+                    default: o_alu_op = ALU_ADD;
+                endcase
+            end
+            default: o_alu_op = ALU_ADD;
+        endcase
+    end
+
+endmodule
