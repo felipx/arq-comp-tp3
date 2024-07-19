@@ -1,10 +1,10 @@
-//! @title FORWARDING UNIT
-//! @file forwarding_unit.v
+//! @title EX FORWARDING UNIT
+//! @file ex_forwarding_unit.v
 //! @author Felipe Montero Bruni
 //! @date 07-2024
 //! @version 0.1
 
-module forwarding_unit
+module ex_forwarding_unit
 # (
 
 ) (
