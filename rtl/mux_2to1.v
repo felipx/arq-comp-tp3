@@ -1,4 +1,4 @@
-//! @title MUX_2TO1
+//! @title 2:1 MULTIPLEXOR
 //! @file mux_2to1.v
 //! @author Felipe Montero Bruni
 //! @date 07-2024
@@ -6,7 +6,7 @@
 
 module mux_2to1
 #(
-    parameter NB_MUX = 32                //! NB of Adder
+    parameter NB_MUX = 32                //! NB of data
 ) (
     // Output
     output wire [NB_MUX - 1 : 0] o_mux,  //! Mux output
