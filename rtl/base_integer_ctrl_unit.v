@@ -10,7 +10,7 @@ module base_integer_ctrl_unit
     parameter NB_OPCODE = 7;
 ) (
     // Outputs
-    output reg [NB_CTRL    - 1 : 0] o_ctrl,   //! Control signals output
+    output reg  [NB_CTRL    - 1 : 0] o_ctrl,  //! Control signals output
     
     // Input
     input  wire [NB_OPCODE - 1 : 0] i_opcode  //! Opcode from the instruction
