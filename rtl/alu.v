@@ -5,12 +5,12 @@ module alu
 ) (
     // Outputs
     output reg [NB_DATA - 1 : 0] o_result,  //! ALU result
-    output                       o_zero     //! Zero flag (if result is zero)
-
-    // Inputs
+    output                       o_zero  ,  //! Zero flag (if result is zero)
+                                          
+    // Inputs                             
     input      [NB_DATA - 1 : 0] i_data1 ,  //! First operand
     input      [NB_DATA - 1 : 0] i_data2 ,  //! Second operand
-    input      [NB_CTRL - 1 : 0] i_alu_op,  //! ALU operation control signal
+    input      [NB_CTRL - 1 : 0] i_alu_op   //! ALU operation control signal
     
 );
     // ALU Operation Encoding

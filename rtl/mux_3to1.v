@@ -9,9 +9,9 @@ module mux_3to1
     parameter NB_MUX = 32                  //! NB of data
 ) (
     // Output
-    output reg [DATA_WIDTH-1:0] o_data,    //! Data output
-    
-    // Inputs
+    output reg [DATA_WIDTH-1:0] o_data ,   //! Data output
+                                       
+    // Inputs                           
     input      [DATA_WIDTH-1:0] i_data0,   //! Input data 0
     input      [DATA_WIDTH-1:0] i_data1,   //! Input data 1
     input      [DATA_WIDTH-1:0] i_data2,   //! Input data 2

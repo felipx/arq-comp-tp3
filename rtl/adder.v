@@ -10,10 +10,10 @@ module adder
 ) (
     // Output
     output wire [NB_ADDER - 1 : 0] o_sum,  //! Adder output
-    
-    // Inputs
+                                         
+    // Inputs                            
     input  wire [NB_ADDER - 1 : 0] i_a  ,  //! First input
-    input  wire [NB_ADDER - 1 : 0] i_b  ,  //! Second input
+    input  wire [NB_ADDER - 1 : 0] i_b     //! Second input
 );
 
     //! Output Logic

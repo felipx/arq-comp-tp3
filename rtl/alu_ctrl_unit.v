@@ -2,16 +2,14 @@ module alu_ctrl_unit
 #(
     parameter NB_CTRL   = 5,                  //! Control signal width for ALU
     parameter NB_ALU_OP = 3,                  //! Width of ALU op input
-    parameter NB_FUNCT7 = 7,                  //! Width of funct7 field
-    parameter NB_FUNCT3 = 3                   //! Width of funct3 filed
 ) (
     // Output
     output reg [NB_CTRL   - 1 : 0] o_alu_op,  //! ALU operation control signal
-    
-    // Inputs
+                                            
+    // Inputs                               
     input wire [NB_ALU_OP - 1 : 0] i_alu_op,  //! ALUOp from Control Unit
-    input wire [6:0]               i_funct7,  //! funct7 field from instruction
-    input wire [2:0]               i_funct3,  //! funct3 field from instruction
+    input wire [6             : 0] i_funct7,  //! funct7 field from instruction
+    input wire [2             : 0] i_funct3   //! funct3 field from instruction
 );
     //! ALU Operations
     localparam ALU_ADD    = 5'b00000;
