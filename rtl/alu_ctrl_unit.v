@@ -1,15 +1,19 @@
+//! @title ALU CONTROL UNIT
+//! @file alu_ctrl_unit.v
+//! @author Felipe Montero Bruni
+//! @date 07-2024
+//! @version 0.1
+
 module alu_ctrl_unit
-#(
-    parameter NB_CTRL   = 5,                  //! Control signal width for ALU
-    parameter NB_ALU_OP = 3,                  //! Width of ALU op input
-) (
+#()
+(
     // Output
-    output reg [NB_CTRL   - 1 : 0] o_alu_op,  //! ALU operation control signal
+    output reg [4 : 0] o_alu_op,  //! ALU operation control signal
                                             
     // Inputs                               
-    input wire [NB_ALU_OP - 1 : 0] i_alu_op,  //! ALUOp from Control Unit
-    input wire [6             : 0] i_funct7,  //! funct7 field from instruction
-    input wire [2             : 0] i_funct3   //! funct3 field from instruction
+    input wire [1 : 0] i_alu_op,  //! ALUOp from Control Unit
+    input wire [6 : 0] i_funct7,  //! funct7 field from instruction
+    input wire [2 : 0] i_funct3   //! funct3 field from instruction
 );
     //! ALU Operations
     localparam ALU_ADD    = 5'b00000;
@@ -34,10 +38,10 @@ module alu_ctrl_unit
     //! ALU Control Unit Model
     always @(*) begin
         case (i_alu_op)
-            3'b000: begin // Load/Store Instructions
+            2'b00: begin // Load/Store Instructions
                 o_alu_op = ALU_ADD;
             end
-            3'b001: begin // Branch Instructions
+            2'b01: begin // Branch Instructions
                 case (i_funct3)
                     3'b000: o_alu_op = ALU_SUB;  // BEQ
                     3'b001: o_alu_op = ALU_SUB;  // BNE
@@ -48,7 +52,7 @@ module alu_ctrl_unit
                     default: o_alu_op = ALU_ADD;
                 endcase
             end
-            3'b010: begin // I-Type Arithmetic Instructions
+            2'b10: begin // I-Type Arithmetic Instructions
                 case (i_funct3)
                     3'b000: o_alu_op = ALU_ADD;  // ADDI
                     3'b010: o_alu_op = ALU_SLT;  // SLTI
@@ -67,7 +71,7 @@ module alu_ctrl_unit
                     default: o_alu_op = ALU_ADD;
                 endcase
             end
-            3'b011: begin // R-Type Instructions
+            2'b11: begin // R-Type Instructions
                 case ({i_funct7, i_funct3})
                     10'b0000000_000: o_alu_op = ALU_ADD;
                     10'b0100000_000: o_alu_op = ALU_SUB;

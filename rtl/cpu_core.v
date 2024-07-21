@@ -45,12 +45,71 @@ module cpu_core
     wire [NB_INSTRUCTION - 1 : 0] int_regfile_data2_to_id_ex_reg;  //! Integer Refile data2 to ID/EX pipelinereg
     
     // Immediate Generator output connections
-    wire [NB_DATA        - 1 : 0] imm_out_connect;
+    wire [NB_DATA        - 1 : 0] imm_out_connect;                 //! Immediate Generator output connection
     
     // Control Unit output connections
     wire [NB_CTRL        - 1 : 0] ctrl_unit_out_connect;
-    
-    
+
+    // Hazard Detection Unit output connections
+    wire                          hdu_pcWrite_to_pc       ;
+    wire                          hdu_IfIdWrite_to_IfIdReg;
+    wire                          hdu_to_nop_mux          ;
+
+    // Hazard Detection Unit Mux (NOP insertion Mux) connections
+    wire [NB_CTRL        - 1 : 0] hdu_mux_to_id_ex_reg;
+
+    // ID/EX Register output connections
+    wire [NB_DATA        - 1 : 0] id_ex_ctrl_out_connect       ;  //! Ctrl signals from ID/EX reg connection
+    wire [NB_PC          - 1 : 0] id_ex_pc_out_connect         ;  //! PC from ID/EX reg connection
+    wire [NB_DATA        - 1 : 0] id_ex_imm_out_connect        ;  //! ID/EX Immediate output connection
+    wire [NB_DATA        - 1 : 0] id_ex_rs1_data_out_connect   ;  //! ID/EX rs1 reg output connection
+    wire [NB_DATA        - 1 : 0] id_ex_rs2_data_out_connect   ;  //! ID/EX rs1 reg output connection
+    wire [NB_INSTRUCTION - 1 : 0] id_ex_instruction_out_connect;  //! Instruction from ID/EX reg connection
+
+    // Branch target Address Calculator Adder output connections
+    wire [NB_DATA        - 1 : 0] adder_addr_out_connect;
+
+    // EX Forwarding Unit output connections
+    wire [1                  : 0] fowrward_unit_a_out_connect;
+    wire [1                  : 0] fowrward_unit_b_out_connect;
+
+    // Forwarding Mux A output connections
+    wire [NB_DATA        - 1 : 0] forwarding_mux_a_out_connect;
+
+    // Forwarding Mux A output connections
+    wire [NB_DATA        - 1 : 0] forwarding_mux_b_out_connect;
+
+    // ALU input Mux output connections
+    wire [NB_DATA        - 1 : 0] alu_input_mux_out_connect;
+
+    // ALU output connections
+    wire [NB_DATA        - 1 : 0] alu_result_connect;
+    wire                          alu_zero_connect  ;
+
+    // ALU Control Unit output connections
+    wire [4                  : 0] alu_op_out_connect;
+
+    // EX/MEM Register output connections
+    wire [NB_DATA        - 1 : 0] ex_mem_ctrl_out_connect       ;  //! Ctrl signals from EX/MEM reg connection
+    wire [NB_DATA        - 1 : 0] ex_mem_alu_out_connect        ;  //! ALU result from EX/MEM reg connection
+    wire [NB_INSTRUCTION - 1 : 0] ex_mem_instruction_out_connect;  //! Instruction from EX/MEM reg connection
+
+
+
+    // MEM/WB Register output connections
+    wire [NB_DATA        - 1 : 0] mem_wb_ctrl_out_connect       ;  //! Ctrl signals from MEM/WB reg connection
+    wire [NB_DATA        - 1 : 0] mem_wb_data_out_connect       ;  //! Data memory output from MEM/WB reg connection
+    wire [NB_DATA        - 1 : 0] mem_wb_alu_out_connect        ;  //! ALU result output from MEM/WB reg connection
+    wire [NB_INSTRUCTION - 1 : 0] mem_wb_instruction_out_connect;  //! Instruction from MEM/WB reg connection
+
+
+
+
+    // WB Mux output connections
+    wire [NB_DATA        - 1 : 0] wb_mux_out_connect;
+
+
+
     //
     // Instruction Fetch Stage Modules Start
     //
@@ -88,11 +147,11 @@ module cpu_core
     )
         u_pc
         (
-            .o_pc  (pc_out_connect),
-            .i_pc  (mux2to1_to_pc ),
-            .i_en  (1'b1          ),  //TODO: check if needed
-            .i_rst (i_rst         ),
-            .clk   (clk           )
+            .o_pc  (pc_out_connect   ),
+            .i_pc  (mux2to1_to_pc    ),
+            .i_en  (hdu_pcWrite_to_pc),
+            .i_rst (i_rst            ),
+            .clk   (clk              )
         );
     
     // Instruction Memory
@@ -107,7 +166,7 @@ module cpu_core
             .i_din  (i_imem_data                            ),
             .i_addr (pc_out_connect[IMEM_ADDR_WIDTH - 1 : 0]),  //! Truncate the address to fit the memory's address width
             .i_wen  (i_mem_wen                              ),
-            .i_ren  (                                       ),  //! TODO
+            .i_ren  (~i_mem_wen                             ),  //! TODO: Check if OK
             .i_rst  (i_rst                                  ),
             .clk    (clk                                    ) 
         );
@@ -124,7 +183,7 @@ module cpu_core
             .o_pc    (if_id_pc_out_connect         ),
             .i_instr (imem_to_if_id_reg            ),  
             .i_pc    (pc_out_connect               ),   
-            .i_en    (1'b1                         ),  //! TODO: Check if OK  
+            .i_en    (hdu_IfIdWrite_to_IfIdReg     ),  
             .i_rst   (i_rst                        ),  
             .clk     (clk                          ) 
         );
@@ -144,9 +203,9 @@ module cpu_core
             .o_dout2 (int_regfile_data2_to_id_ex_reg        ),
             .i_addr1 (if_id_instruction_out_connect[19 : 15]),
             .i_addr2 (if_id_instruction_out_connect[24 : 20]),
-            .i_waddr (                                      ),  //TODO
-            .i_wdata (                                      ),  //TODO
-            .i_wen   (                                      ),  //TODO
+            .i_waddr (mem_wb_instruction_out_connect[11 : 7]),
+            .i_wdata (wb_mux_out_connect                    ),
+            .i_wen   (mem_wb_ctrl_out_connect[0]            ),
             .i_rst   (i_rst                                 ),
             .clk     (clk                                   ) 
         );
@@ -165,64 +224,64 @@ module cpu_core
     // Base Integer Control Unit
     base_integer_ctrl_unit
     #(
-        .NB_CTRL   (NB_CTRL  )
+        .NB_CTRL (NB_CTRL)
     )
         u_base_integer_ctrl_unit
         (
             .o_ctrl   (ctrl_unit_out_connect               ),
             .i_opcode (if_id_instruction_out_connect[6 : 0])
         );
-
+    
     // Hazard Detection Unit
     hazard_detection_unit
     #()
         u_hazard_detection_unit
         (
-            .o_pc_write       (),
-            .o_if_id_write    (),
-            .o_control_mux    (),
-            .i_id_ex_mem_read (),
-            .i_id_ex_rd       (),
-            .i_if_id_rs1      (),
-            .i_if_id_rs2      ()
+            .o_pc_write       (hdu_pcWrite_to_pc                    ),
+            .o_if_id_write    (hdu_IfIdWrite_to_IfIdReg             ),
+            .o_control_mux    (hdu_to_nop_mux                       ),
+            .i_id_ex_mem_read (id_ex_ctrl_out_connect[1]            ),
+            .i_id_ex_rd       (id_ex_instruction_out_connect[11 : 7]),
+            .i_if_id_rs1      (if_id_instruction_out_connect[19 : 15]),
+            .i_if_id_rs2      (if_id_instruction_out_connect[24 : 20])
         );
-
+    
     // NOP Instruction Mux
     mux_2to1
     #(
-        .NB_MUX ()
+        .NB_MUX (NB_CTRL)
     )
         u_nop_insertion_mux
         (
-            o_mux (),
-            i_a   (),
-            i_b   (),
-            i_sel () 
+            o_mux (hdu_mux_to_id_ex_reg ),
+            i_a   (ctrl_unit_out_connect),
+            i_b   (32'h000              ),
+            i_sel (hdu_to_nop_mux       ) 
         );
     
     // ID/EX Pipeline Register
     id_ex_reg
     #(
-        .DATA_WIDTH (NB_DATA     ),
+        .DATA_WIDTH (NB_DATA         ),
         .ADDR_WIDTH (ID_EX_ADDR_WIDTH)
     )
         u_id_ex_reg
         (
-            .o_ctrl  (                              ),  //TODO
-            .o_pc    (                              ),  //TODO
-            .o_rs1   (                              ),  //TODO
-            .o_rs2   (                              ),  //TODO
-            .o_imm   (                              ),  //TODO
-            .o_instr (                              ),  //TODO
-            .i_ctrl  (                              ),  //TODO
-            .i_pc    (if_id_pc_out_connect          ),
-            .i_rs1   (int_regfile_data1_to_id_ex_reg),
-            .i_rs2   (int_regfile_data2_to_id_ex_reg),
-            .i_imm   (imm_out_connect               ),
-            .i_instr (if_id_instruction_out_connect ),
-            .i_en    (1'b1                          ),  //TODO: check if OK
-            .i_rst   (i_rst                         ),
-            .clk     (clk                           ) 
+            .o_ctrl  (id_ex_ctrl_out_connect            ),
+            .o_pc    (id_ex_pc_out_connect              ),
+            .o_rs1   (id_ex_rs1_data_out_connect        ),
+            .o_rs2   (id_ex_rs2_data_out_connect        ),
+            .o_imm   (id_ex_imm_out_connect             ),
+            .o_instr (id_ex_instruction_out_connect     ),
+            .i_ctrl  ({{23{1'b0}}, hdu_mux_to_id_ex_reg}),
+            .i_pc    (if_id_pc_out_connect              ),
+            .i_rs1   (int_regfile_data1_to_id_ex_reg    ),
+            .i_rs2   (int_regfile_data2_to_id_ex_reg    ),
+            .i_imm   (imm_out_connect                   ),
+            .i_instr (if_id_instruction_out_connect     ),
+            .i_en    (1'b1                              ),  //TODO: check if OK
+            .i_rst   (i_rst                             ),
+            .clk     (clk                               ) 
         );
     
     //
@@ -232,83 +291,79 @@ module cpu_core
     // Forwarding Mux 1
     mux_3to1
     #(
-        .NB_MUX ()
+        .NB_MUX (NB_DATA)
     )
         u_forwarding_mux_1
         (
-            .o_data  (), 
-            .i_data0 (),
-            .i_data1 (),
-            .i_data2 (),
-            .i_sel   (),
+            .o_data  (forwarding_mux_a_out_connect), 
+            .i_data0 (id_ex_rs1_data_out_connect  ),
+            .i_data1 (wb_mux_out_connect          ),
+            .i_data2 (ex_mem_alu_out_connect      ),
+            .i_sel   (fowrward_unit_a_out_connect ),
         );
     
     // Forwarding Mux 2
     mux_3to1
     #(
-        .NB_MUX ()
+        .NB_MUX (NB_DATA)
     )
         u_forwarding_mux_2
         (
-            .o_data  (), 
-            .i_data0 (),
-            .i_data1 (),
-            .i_data2 (),
-            .i_sel   (),
+            .o_data  (forwarding_mux_b_out_connect), 
+            .i_data0 (id_ex_rs2_data_out_connect  ),
+            .i_data1 (wb_mux_out_connect          ),
+            .i_data2 (ex_mem_alu_out_connect      ),
+            .i_sel   (fowrward_unit_b_out_connect ),
         );
     
     // ALU Input Mux
     mux_2to1
     #(
-        .NB_MUX ()
+        .NB_MUX (NB_DATA)
     )
         u_alu_input_mux
         (
-            o_mux (),
-            i_a   (),
-            i_b   (),
-            i_sel () 
+            o_mux (alu_input_mux_out_connect   ),
+            i_a   (forwarding_mux_b_out_connect),
+            i_b   (id_ex_imm_out_connect       ),
+            i_sel (id_ex_ctrl_out_connect[3]   ) 
         );
     
     // Branch target Address Calculator Adder
     adder
-    # (
-        .NB_ADDER ()
+    #(
+        .NB_ADDER (NB_PC)
     )
         u_branch_target_adder
         (
-            .o_sum (),
-            .i_a   (),
-            .i_b   ()
+            .o_sum (adder_addr_out_connect),
+            .i_a   (id_ex_pc_out_connect  ),
+            .i_b   (id_ex_imm_out_connect )
         );
-
+    
     // ALU
     alu
     #(
-        .NB_DATA (),
-        .NB_CTRL ()
+        .NB_DATA (NB_DATA)
     )
         u_alu
         (
-            .o_result (),
-            .o_zero   (),
-            .i_data1  (),
-            .i_data2  (),
-            .i_alu_op () 
+            .o_result      (alu_result_connect          ),
+            .o_zero        (alu_zero_connect            ),
+            .i_data1       (forwarding_mux_a_out_connect),
+            .i_data2       (alu_input_mux_out_connect   ),
+            .i_alu_op      (alu_op_out_connect          ) 
         );
     
     // ALU Control Unit
     alu_ctrl_unit
-    #(
-        .NB_CTRL   (),
-        .NB_ALU_OP ()
-    )
+    #()
         u_alu_ctrl_unit
         (
-            .o_alu_op (),     
-            .i_alu_op (),
-            .i_funct7 (),
-            .i_funct3 ()
+            .o_alu_op (alu_op_out_connect                    ),     
+            .i_alu_op (id_ex_ctrl_out_connect[8 : 7]         ),
+            .i_funct7 (id_ex_instruction_out_connect[31 : 25]),
+            .i_funct3 (id_ex_instruction_out_connect[14 : 12])
         );
     
     // EX Forwarding Unit
@@ -316,16 +371,16 @@ module cpu_core
     #()
         u_ex_forwarding_unit
         (
-            .o_forward_a    (),   
-            .o_forward_b    (),              
-            .i_ex_rs1       (),
-            .i_ex_rs2       (),
-            .i_mem_rd       (),
-            .i_wb_rd        (),
-            .i_mem_RegWrite (),
-            .i_wb_RegWrite  () 
+            .o_forward_a    (fowrward_unit_a_out_connect           ),   
+            .o_forward_b    (fowrward_unit_b_out_connect           ),              
+            .i_ex_rs1       (id_ex_instruction_out_connect[19 : 15]),
+            .i_ex_rs2       (id_ex_instruction_out_connect[24 : 20]),
+            .i_mem_rd       (ex_mem_instruction_out_connect[11 : 7]),
+            .i_wb_rd        (mem_wb_instruction_out_connect[11 : 7]),
+            .i_mem_RegWrite (ex_mem_ctrl_out_connect[0]            ),
+            .i_wb_RegWrite  (mem_wb_ctrl_out_connect[0]            ) 
         );
-
+    
     // EX/MEM Pipeline Register
     ex_mem_reg
     #(
@@ -334,17 +389,19 @@ module cpu_core
     )
         u_ex_mem_reg
         (
-            .o_ctrl  (),
-            .o_alu   (),
-            .o_data2 (),
-            .o_rd    (),
-            .i_ctrl  (),
-            .i_alu   (),
-            .i_data2 (),
-            .i_rd    (),
-            .i_en    (),
-            .i_rst   (),
-            .clk     () 
+            .o_ctrl    (ex_mem_ctrl_out_connect                                      ),
+            .o_pc_addr (),
+            .o_alu     (ex_mem_alu_out_connect                                       ),
+            .o_data2   (),
+            .o_instr   (ex_mem_instruction_out_connect                               ),
+            .i_ctrl    ({{22{1'b0}}, alu_zero_connect, id_ex_ctrl_out_connect[8 : 0]}),
+            .i_pc_addr (adder_addr_out_connect                                       ),
+            .i_alu     (alu_result_connect                                           ),
+            .i_data2   (forwarding_mux_b_out_connect                                 ),
+            .i_instr   (id_ex_instruction_out_connect                                ),
+            .i_en      (1'b1                                                         ), //TODO: Check if OK
+            .i_rst     (i_rst                                                        ),
+            .clk       (clk                                                          ) 
         );
     
     //
@@ -386,34 +443,34 @@ module cpu_core
     )
         u_mem_wb_reg
         (
-            o_ctrl (),
-            o_data (),
-            o_alu  (),
-            o_rd   (),
-            i_ctrl (),
-            i_data (),
-            i_alu  (),
-            i_rd   (),
-            i_en   (),
-            i_rst  (),
-            clk    () 
+            o_ctrl  (mem_wb_ctrl_out_connect       ),
+            o_data  (mem_wb_data_out_connect       ),
+            o_alu   (mem_wb_alu_out_connect        ),
+            o_instr (mem_wb_instruction_out_connect),
+            i_ctrl  (ex_mem_ctrl_out_connect       ),
+            i_data  (),
+            i_alu   (ex_mem_alu_out_connect        ),
+            i_instr (ex_mem_instruction_out_connect),
+            i_en    (1'b1                          ), //TODO: Check if OK
+            i_rst   (i_rst                         ),
+            clk     (clk                           ) 
         );
     
     //
     // Write Back Stage Modules
     //
-
+    
     // WB Mux
     mux_2to1
     #(
-        .NB_MUX ()
+        .NB_MUX (NB_DATA)
     )
         u_wb_mux
         (
-            .o_mux,
-            .i_a  ,
-            .i_b  ,
-            .i_sel 
+            .o_mux (wb_mux_out_connect        ),
+            .i_a   (mem_wb_alu_out_connect    ),
+            .i_b   (mem_wb_data_out_connect   ),
+            .i_sel (mem_wb_ctrl_out_connect[4]) 
         );
 
 

@@ -5,8 +5,8 @@
 //! @version 0.1
 
 module hazard_detection_unit
-# (
-) (
+#()
+(
     // Outputs
     output reg       o_pc_write   ,     //! Control signal to write to PC
     output reg       o_if_id_write,     //! Control signal to write to IF/ID register

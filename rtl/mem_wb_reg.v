@@ -11,19 +11,19 @@ module mem_wb_reg
     
 ) (
     // Outputs
-    output [DATA_WIDTH - 1 : 0] o_ctrl,  //! Control signals output
-    output [DATA_WIDTH - 1 : 0] o_data,  //! Data from memory output
-    output [DATA_WIDTH - 1 : 0] o_alu ,  //! ALU result output
-    output [DATA_WIDTH - 1 : 0] o_rd  ,  //! ID of Register to be written in the WB stage output
+    output [DATA_WIDTH - 1 : 0] o_ctrl ,  //! Control signals output
+    output [DATA_WIDTH - 1 : 0] o_data ,  //! Data from memory output
+    output [DATA_WIDTH - 1 : 0] o_alu  ,  //! ALU result output
+    output [DATA_WIDTH - 1 : 0] o_instr,  //! Instruction output
                                        
     // Inputs                          
-    input  [DATA_WIDTH - 1 : 0] i_ctrl,  //! Control signals input
-    input  [DATA_WIDTH - 1 : 0] i_data,  //! Data from memory input
-    input  [DATA_WIDTH - 1 : 0] i_alu ,  //! ALU result input
-    input  [DATA_WIDTH - 1 : 0] i_rd  ,  //! ID of Register to be written in the WB stage input
-    input                       i_en  ,  //! Enable signal input
-    input                       i_rst ,  //! Reset signal
-    input                       clk      //! Clock signal    
+    input  [DATA_WIDTH - 1 : 0] i_ctrl ,  //! Control signals input
+    input  [DATA_WIDTH - 1 : 0] i_data ,  //! Data from memory input
+    input  [DATA_WIDTH - 1 : 0] i_alu  ,  //! ALU result input
+    input  [DATA_WIDTH - 1 : 0] i_instr,  //! Instruction input
+    input                       i_en   ,  //! Enable signal input
+    input                       i_rst  ,  //! Reset signal
+    input                       clk       //! Clock signal    
 );
 
     //! Local Parameters
@@ -43,17 +43,17 @@ module mem_wb_reg
             end
         end
         else if (i_en) begin
-            reg_array[0] <= i_ctrl;
-            reg_array[1] <= i_data;
-            reg_array[2] <= i_alu ;
-            reg_array[3] <= i_rd  ;
+            reg_array[0] <= i_ctrl ;
+            reg_array[1] <= i_data ;
+            reg_array[2] <= i_alu  ;
+            reg_array[3] <= i_instr;
         end
     end
 
     // Output Logic
-    assign o_ctrl = reg_array[0];
-    assign o_data = reg_array[1];
-    assign o_alu  = reg_Array[2];
-    assign o_rd   = reg_Array[3];
+    assign o_ctrl  = reg_array[0];
+    assign o_data  = reg_array[1];
+    assign o_alu   = reg_Array[2];
+    assign o_instr = reg_Array[3];
 
 endmodule

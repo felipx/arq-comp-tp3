@@ -20,9 +20,9 @@ module mux_3to1
 
     always @(*) begin
         case (i_sel)
-            2'b00: o_data   = i_data0;            //! Select input data 0
-            2'b01: o_data   = i_data1;            //! Select input data 1
-            2'b02: o_data   = i_data2;            //! Select input data 2
+            2'b00  : o_data = i_data0;            //! Select input data 0
+            2'b01  : o_data = i_data1;            //! Select input data 1
+            2'b10  : o_data = i_data2;            //! Select input data 2
             default: o_data = {DATA_WIDTH{1'b0}}; //! Default case (should not happen)
         endcase
     end
