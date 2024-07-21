@@ -31,7 +31,7 @@ module base_integer_ctrl_unit
     localparam R_TYPE   = 7'b0110011;
     localparam I_TYPE_1 = 7'b0010011;
     localparam I_TYPE_2 = 7'b0000011;
-    localparam I_TYPE_3 = 7'b1100111;
+    localparam I_TYPE_3 = 7'b1100111; //JARL
     localparam I_TYPE_4 = 7'b1110011;
     localparam S_TYPE   = 7'b0100011;
     localparam B_TYPE   = 7'b1100011;
