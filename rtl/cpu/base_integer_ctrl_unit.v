@@ -43,7 +43,7 @@ module base_integer_ctrl_unit
 
     // Base Integer Control Unit Logic
     always @(*) begin
-        case (opcode)
+        case (i_opcode)
             R_TYPE: begin         // Arithmetic R Instructions
                 o_ctrl[0]    = 1;
                 o_ctrl[1]    = 0;
@@ -62,8 +62,8 @@ module base_integer_ctrl_unit
                 o_ctrl[3]    = 1;
                 o_ctrl[4]    = 0;
                 o_ctrl[5]    = 0;
-                o_ctrl[6]    = (opcode == I_TYPE_3) ? 1 : 0;
-                o_ctrl[8 :7] = (opcode == I_TYPE_4) ? 2'b00 : 2'b10;
+                o_ctrl[6]    = (i_opcode == I_TYPE_3) ? 1 : 0;
+                o_ctrl[8 :7] = (i_opcode == I_TYPE_4) ? 2'b00 : 2'b10;
                 o_ctrl[10:9] = 2'b00;
             end
             I_TYPE_2: begin      // Load Instructions

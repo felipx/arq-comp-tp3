@@ -24,6 +24,7 @@ module if_id_reg
 );
 
     //! Local Parameters
+    localparam DATA_WIDTH = 32           ;
     localparam ADDR_WIDTH = 2            ;   //! NB of ID/EX address depth
     localparam DATA_DEPTH = 2**ADDR_WIDTH;   // Depth of the register array
 
@@ -50,6 +51,6 @@ module if_id_reg
     // Output Logic
     assign o_instr   = reg_array[0];
     assign o_pc      = reg_array[1];
-    assign o_pc_next = reg_Array[2];
+    assign o_pc_next = reg_array[2];
 
 endmodule

@@ -6,7 +6,7 @@
 
 module memory
 #(
-    parameter ADDR_WIDTH = 10,                //! Address width
+    parameter ADDR_WIDTH = 10                 //! Address width
 ) (
     // Output
     output reg  [31             : 0] o_dout,  //! Data output
