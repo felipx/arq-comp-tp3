@@ -10,10 +10,10 @@ module mem_forwarding_unit
 ) (
     // Outputs
     output reg [1:0] o_forward_b,     //! Forwarding control for source B
-
-    // Inputs
-    input wire [4:0] i_mem_rs2,       //! Source register 2 from MEM stage
-    input wire [4:0] i_wb_rd,         //! Destination register from WB stage
+                                   
+    // Inputs                      
+    input wire [4:0] i_mem_rs2    ,   //! Source register 2 from MEM stage
+    input wire [4:0] i_wb_rd      ,   //! Destination register from WB stage
     input wire       i_wb_RegWrite    //! Register write signal from WB stage
 );
 

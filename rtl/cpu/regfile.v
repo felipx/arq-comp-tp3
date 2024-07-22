@@ -6,7 +6,6 @@
 
 module regfile
 #(
-    parameter ADDR_WIDTH = 5 ,                //! Address width
     parameter DATA_WIDTH = 32                 //! Size of each memory location 
 ) (
     // Outputs
@@ -24,7 +23,8 @@ module regfile
 );
 
     //! Local Parameters
-    localparam DATA_DEPTH = 2**ADDR_WIDTH;
+    localparam ADDR_WIDTH = 5            ;    //! Address width
+    localparam DATA_DEPTH = 2**ADDR_WIDTH;    //! Regfile depth
 
     //! Register array
     reg [DATA_WIDTH-1:0] reg_array [0 : DATA_DEPTH - 1];

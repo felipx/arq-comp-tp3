@@ -1,16 +1,22 @@
+//! @title ALU
+//! @file alu.v
+//! @author Felipe Montero Bruni
+//! @date 07-2024
+//! @version 0.1
+
 module alu
 #(
     parameter NB_DATA = 32,                 //! Data width of the ALU
-    parameter NB_CTRL = 5                   //! Control signal width
 ) (
     // Outputs
     output reg [NB_DATA - 1 : 0] o_result,  //! ALU result
-    output                       o_zero     //! Zero flag (if result is zero)
+    output                       o_zero  ,  //! Zero flag (if result is zero)
 
-    // Inputs
+                                          
+    // Inputs                             
     input      [NB_DATA - 1 : 0] i_data1 ,  //! First operand
     input      [NB_DATA - 1 : 0] i_data2 ,  //! Second operand
-    input      [NB_CTRL - 1 : 0] i_alu_op,  //! ALU operation control signal
+    input      [4           : 0] i_alu_op   //! ALU operation control signal
     
 );
     // ALU Operation Encoding
@@ -58,7 +64,7 @@ module alu
         endcase
     end
 
-    // Zero flag
-    assign o_zero = (o_result == 0) ? 1'b1 : 1'b0;
+    // Result = 0 signal
+    assign o_zero           = (o_result == 0) ? 1'b1 : 1'b0        ;
 
 endmodule
