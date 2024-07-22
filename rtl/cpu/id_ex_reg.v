@@ -48,21 +48,23 @@ module id_ex_reg
             end
         end
         else if (i_en) begin
-            reg_array[0] <= i_ctrl ;
-            reg_array[1] <= i_pc   ;
-            reg_array[2] <= i_rs1  ;
-            reg_array[3] <= i_rs2  ;
-            reg_array[4] <= i_imm  ;
-            reg_array[5] <= i_instr;
+            reg_array[0] <= i_ctrl    ;
+            reg_array[1] <= i_pc      ;
+            reg_array[2] <= i_pc_next ;
+            reg_array[3] <= i_rs1_data;
+            reg_array[4] <= i_rs2_data;
+            reg_array[5] <= i_imm     ;
+            reg_array[6] <= i_instr   ;
         end
     end
 
     // Output Logic
-    assign o_ctrl  = reg_array[0];
-    assign o_pc    = reg_array[1];
-    assign o_rs1   = reg_Array[2];
-    assign o_rs2   = reg_Array[3];
-    assign o_imm   = reg_array[4];
-    assign o_instr = reg_array[5];
+    assign o_ctrl     = reg_array[0];
+    assign o_pc       = reg_array[1];
+    assign o_pc_next  = reg_array[2];
+    assign o_rs1_data = reg_array[3];
+    assign o_rs2_data = reg_array[4];
+    assign o_imm      = reg_array[5];
+    assign o_instr    = reg_array[6];
 
 endmodule

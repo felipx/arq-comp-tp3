@@ -13,9 +13,9 @@ module regfile
     output reg [DATA_WIDTH - 1 : 0] o_dout2,  //! Data output for read port 2
     
     // Inputs
-    input      [ADDR_WIDTH - 1 : 0] i_addr1,  //! Read register address 1
-    input      [ADDR_WIDTH - 1 : 0] i_addr2,  //! Read register address 2
-    input      [ADDR_WIDTH - 1 : 0] i_waddr,  //! Write register address
+    input      [4              : 0] i_addr1,  //! Read register address 1
+    input      [4              : 0] i_addr2,  //! Read register address 2
+    input      [4              : 0] i_waddr,  //! Write register address
     input      [DATA_WIDTH - 1 : 0] i_wdata,  //! Data input for write port
     input                           i_wen  ,  //! Write enable signal
     input                           i_rst  ,  //! Reset signal
