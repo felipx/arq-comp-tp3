@@ -6,35 +6,36 @@
 
 module id_ex_reg
 #(
-    parameter DATA_WIDTH = 32,            //! NB of Data
-    parameter ADDR_WIDTH = 3              //! NB of ID/EX address depth
-    
+    parameter DATA_WIDTH = 32                //! NB of Data
 ) (
     // Outputs
-    output [DATA_WIDTH - 1 : 0] o_ctrl ,  //! Control signals output
-    output [DATA_WIDTH - 1 : 0] o_pc   ,  //! Program Counter output
-    output [DATA_WIDTH - 1 : 0] o_rs1  ,  //! Register 1 output
-    output [DATA_WIDTH - 1 : 0] o_rs2  ,  //! Register 2 output
-    output [DATA_WIDTH - 1 : 0] o_imm  ,  //! Immediate output
-    output [DATA_WIDTH - 1 : 0] o_instr,  //! Instruction output
+    output [DATA_WIDTH - 1 : 0] o_ctrl    ,  //! Control signals output
+    output [DATA_WIDTH - 1 : 0] o_pc      ,  //! Program Counter output
+    output [DATA_WIDTH - 1 : 0] o_pc_next ,  //! Program Counter + 4 output
+    output [DATA_WIDTH - 1 : 0] o_rs1_data,  //! Register 1 output
+    output [DATA_WIDTH - 1 : 0] o_rs2_data,  //! Register 2 output
+    output [DATA_WIDTH - 1 : 0] o_imm     ,  //! Immediate output
+    output [DATA_WIDTH - 1 : 0] o_instr   ,  //! Instruction output
                                                      
     // Inputs                           
-    input  [DATA_WIDTH - 1 : 0] i_ctrl ,  //! Control signals input
-    input  [DATA_WIDTH - 1 : 0] i_pc   ,  //! Program Counter input
-    input  [DATA_WIDTH - 1 : 0] i_rs1  ,  //! Register 1 input
-    input  [DATA_WIDTH - 1 : 0] i_rs2  ,  //! Register 2 input
-    input  [DATA_WIDTH - 1 : 0] i_imm  ,  //! Immediate input
-    input  [DATA_WIDTH - 1 : 0] i_instr,  //! Instruction input
-    input                       i_en   ,  //! Enable signal input
-    input                       i_rst  ,  //! Reset signal
-    input                       clk       //! Clock signal    
+    input  [DATA_WIDTH - 1 : 0] i_ctrl    ,  //! Control signals input
+    input  [DATA_WIDTH - 1 : 0] i_pc      ,  //! Program Counter input
+    input  [DATA_WIDTH - 1 : 0] i_pc_next ,  //! Program Counter + 4 input
+    input  [DATA_WIDTH - 1 : 0] i_rs1_data,  //! Register 1 input
+    input  [DATA_WIDTH - 1 : 0] i_rs2_data,  //! Register 2 input
+    input  [DATA_WIDTH - 1 : 0] i_imm     ,  //! Immediate input
+    input  [DATA_WIDTH - 1 : 0] i_instr   ,  //! Instruction input
+    input                       i_en      ,  //! Enable signal input
+    input                       i_rst     ,  //! Reset signal
+    input                       clk          //! Clock signal    
 );
 
     //! Local Parameters
-    localparam DATA_DEPTH = 2**ADDR_WIDTH;                   // Depth of the register array
+    localparam ADDR_WIDTH = 3            ;   //! NB of ID/EX address depth
+    localparam DATA_DEPTH = 2**ADDR_WIDTH;   // Depth of the register array
 
     //! Internal Signals
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0]; // Register array
+    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 2 : 0]; // Register array
 
     integer index;
 

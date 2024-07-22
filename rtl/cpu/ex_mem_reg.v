@@ -6,20 +6,20 @@
 
 module ex_mem_reg
 #(
-    parameter DATA_WIDTH = 32,            //! NB of Data
-    parameter ADDR_WIDTH = 3              //! NB of EX/MEM reg address depth
-    
+    parameter DATA_WIDTH = 32               //! NB of Data
 ) (
     // Outputs
     output [DATA_WIDTH - 1 : 0] o_ctrl   ,  //! Control signals output
-    output [DATA_WIDTH - 1 : 0] o_pc_addr,  //! PC address output
+    output [DATA_WIDTH - 1 : 0] o_pc_addr,  //! PC+Imm output
+    output [DATA_WIDTH - 1 : 0] o_pc_next,  //! PC+4 output
     output [DATA_WIDTH - 1 : 0] o_alu    ,  //! ALU result output
     output [DATA_WIDTH - 1 : 0] o_data2  ,  //! Data for store instructions output
     output [DATA_WIDTH - 1 : 0] o_instr  ,  //! Instruction output
                                         
     // Inputs                           
     input  [DATA_WIDTH - 1 : 0] i_ctrl   ,  //! Control signals input
-    output [DATA_WIDTH - 1 : 0] i_pc_addr,  //! PC address input
+    input  [DATA_WIDTH - 1 : 0] i_pc_addr,  //! PC+Imm input
+    input  [DATA_WIDTH - 1 : 0] i_pc_next,  //! PC+4 input
     input  [DATA_WIDTH - 1 : 0] i_alu    ,  //! ALU result input
     input  [DATA_WIDTH - 1 : 0] i_data2  ,  //! Data for store instructions input
     input  [DATA_WIDTH - 1 : 0] i_instr  ,  //! Instruction input
@@ -29,10 +29,11 @@ module ex_mem_reg
 );
 
     //! Local Parameters
-    localparam DATA_DEPTH = 2**ADDR_WIDTH;                   // Depth of the register array
+    parameter ADDR_WIDTH = 3             ;  // NB of EX/MEM reg address depth
+    localparam DATA_DEPTH = 2**ADDR_WIDTH;  // Depth of the register array
 
     //! Internal Signals
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0]; // Register array
+    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 2 : 0]; // Register array
 
     integer index;
 
