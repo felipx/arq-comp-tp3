@@ -9,7 +9,7 @@ module cpu_core
     parameter NB_PC              = 32,  //! NB of Program Counter
     parameter NB_INSTRUCTION     = 32,  //! Size of each memory location
     parameter NB_DATA            = 32,  //! Size of Integer Base registers
-    parameter IMEM_ADDR_WIDTH    = 10,  //! Instruction Memory address width
+    parameter IMEM_ADDR_WIDTH    = 5,  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH    = 5 ,  //! Data Memory address width
     parameter NB_CTRL            = 11,  //! NB of control
     
@@ -128,19 +128,19 @@ module cpu_core
             .o_sum (pc_adder_out_connect),
             .i_a   (pc_out_connect      ),
             .i_b   (32'h4               )   //! PC increments by 4
-
         );
     
     // PC's Mux
-    mux_2to1
+    mux_3to1
     #(
         .NB_MUX (NB_PC)
     )
         u_pc_mux_2to1
         (
             .o_mux (mux2to1_to_pc       ),
-            .i_a   (pc_adder_out_connect),
-            .i_b   (                    ),  //TODO: connect signal
+            .i_a   (pc_adder_out_connect),  // PC+4
+            .i_b   (                    ),  // JAL and Branches
+            .i_c   (                    ),  // JALR
             .i_sel (                    )   //TODO: connect signal
         );
     

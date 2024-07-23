@@ -13,13 +13,13 @@ module regfile
     output reg [DATA_WIDTH - 1 : 0] o_dout2,  //! Data output for read port 2
     
     // Inputs
-    input      [4              : 0] i_addr1,  //! Read register address 1
-    input      [4              : 0] i_addr2,  //! Read register address 2
-    input      [4              : 0] i_waddr,  //! Write register address
-    input      [DATA_WIDTH - 1 : 0] i_wdata,  //! Data input for write port
-    input                           i_wen  ,  //! Write enable signal
-    input                           i_rst  ,  //! Reset signal
-    input                           clk       //! Clock signal
+    input wire [4              : 0] i_addr1,  //! Read register address 1
+    input wire [4              : 0] i_addr2,  //! Read register address 2
+    input wire [4              : 0] i_waddr,  //! Write register address
+    input wire [DATA_WIDTH - 1 : 0] i_wdata,  //! Data input for write port
+    input wire                      i_wen  ,  //! Write enable signal
+    input wire                      i_rst  ,  //! Reset signal
+    input wire                      clk       //! Clock signal
 );
 
     //! Local Parameters
