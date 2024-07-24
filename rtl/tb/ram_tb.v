@@ -15,9 +15,10 @@ module ram_tb ();
     reg                       w_en ;
     reg                       r_en ;
 
-    reg [NB_RND - 1 : 0] rnd  ;
-    reg                  i_rst;
-    reg                  clk  ;
+    reg [NB_RND - 1 : 0] rnd_array [DATA_DEPTH - 1 : 0];
+    
+    reg i_rst;
+    reg clk  ;
 
     // RAM
     memory
@@ -37,12 +38,13 @@ module ram_tb ();
             .clk     (clk  )
         );
 
-    integer i;
+    integer i,j;
 
     initial begin
 
         $display("Starting RAM Testbench");
 
+        j     = 0;
         i_rst = 1'b0;
         clk   = 1'b0;
         r_en  = 1'b0;
@@ -56,31 +58,95 @@ module ram_tb ();
         #10 i_rst = 1'b1;
         #10 i_rst = 1'b0;
 
-        w_en = 1'b1;
-        for (i = 0; i < DATA_DEPTH; i = i + 1) begin
-            din = 32'h0010 + i;
-            waddr = i;
+            w_en = 1'b1;
             wsize = 2'b01;
-            #10;
+        
+        for (i = 0; i < DATA_DEPTH; i = i + 1) begin
+            #10 din = 32'h0010 + i;
+                waddr = i;
         end
 
-        $display("Read every byte");
+        $display("SB Read check");
         
-        w_en = 1'b0;
-        r_en = 1'b1;
-        #10;
+        #10 w_en = 1'b0;
+            r_en = 1'b1;
+        
+        
         for (i = 0; i < DATA_DEPTH; i = i + 4) begin
             raddr = i;
             #10;
             if (dout != (((8'h10 + 3 + i) << 24) + ((8'h10 + 2 + i) << 16) + ((8'h10 + 1 + i) << 8) + (8'h10 + i))) begin
                 $display("Error: Wrong value read");
-                $display("Expecting: %h , got: %h",8'h10 + i, dout[7:0]);
+                $display("Expecting: %h , got: %h",(((8'h10 + 3 + i) << 24) + ((8'h10 + 2 + i) << 16) + ((8'h10 + 1 + i) << 8) + (8'h10 + i)), dout);
                 $finish;
             end
         end 
 
+        $display("SH write operation");
+
+        #10 w_en = 1'b1;
+            r_en = 1'b0;
+            wsize = 2'b10;
+        
+        
+        for (i = 0; i < DATA_DEPTH ; i = i + 2) begin
+            #10 waddr = i;
+                rnd_array[j] = $random;
+                din = rnd_array[j];
+                j = j + 1;
+        end
+
+        $display("SH Read check");
+        
+        #10 w_en = 1'b0;
+            r_en = 1'b1;
+            j = 0;
+        
+        for (i = 0; i < DATA_DEPTH; i = i + 4) begin
+            raddr = i;
+            #10;
+            if (dout != ((rnd_array[j+1][15:0] << 16) + rnd_array[j][15:0])) begin
+                $display("Error: Wrong value read");
+                $display("Expecting: %h , got: %h",((rnd_array[j+1][15:0] << 16) + rnd_array[j][15:0]), dout);
+                $finish;
+            end
+            j = j + 2;
+        end
+
+        $display("SW write operation");
+
+        #10 w_en = 1'b1;
+            r_en = 1'b0;
+            wsize = 2'b11;
+            j = 0;
+        
+        for (i = 0; i < DATA_DEPTH; i = i + 4) begin
+            #10 waddr = i;
+                rnd_array[j] = $random;
+                din = rnd_array[j];
+                j = j + 1;
+        end
+
+        $display("SW Read check");
+        
+        #10 w_en = 1'b0;
+            r_en = 1'b1;
+            j = 0;
+        
+        for (i = 0; i < DATA_DEPTH; i = i + 4) begin
+            raddr = i;
+            #10;
+            if (dout != rnd_array[j]) begin
+                $display("Error: Wrong value read");
+                $display("Expecting: %h , got: %h",rnd_array[j], dout);
+                $finish;
+            end
+            j = j + 1;
+        end
+
         #20 $display("RAM Testbench finished");
         #20 $finish;
+
         
     end
     
