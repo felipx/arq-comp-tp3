@@ -62,8 +62,9 @@ module ram_tb ();
             wsize = 2'b01;
         
         for (i = 0; i < DATA_DEPTH; i = i + 1) begin
-            #10 din = 32'h0010 + i;
-                waddr = i;
+            #10 waddr = i; 
+                rnd_array[i] = $random;
+                din = rnd_array[i];    
         end
 
         $display("SB Read check");
@@ -75,9 +76,9 @@ module ram_tb ();
         for (i = 0; i < DATA_DEPTH; i = i + 4) begin
             raddr = i;
             #10;
-            if (dout != (((8'h10 + 3 + i) << 24) + ((8'h10 + 2 + i) << 16) + ((8'h10 + 1 + i) << 8) + (8'h10 + i))) begin
+            if (dout != (((rnd_array[i+3][7:0]) << 24) + ((rnd_array[i+2][7:0]) << 16) + ((rnd_array[i+1][7:0]) << 8) + (rnd_array[i][7:0]))) begin
                 $display("Error: Wrong value read");
-                $display("Expecting: %h , got: %h",(((8'h10 + 3 + i) << 24) + ((8'h10 + 2 + i) << 16) + ((8'h10 + 1 + i) << 8) + (8'h10 + i)), dout);
+                $display("Expecting: %h , got: %h",(((rnd_array[i+3][7:0]) << 24) + ((rnd_array[i+2][7:0]) << 16) + ((rnd_array[i+1][7:0]) << 8) + (rnd_array[i][7:0])), dout);
                 $finish;
             end
         end 

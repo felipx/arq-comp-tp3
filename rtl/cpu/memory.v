@@ -52,7 +52,7 @@ module memory
     always @(posedge clk) begin
         if (i_wen) begin
             case (i_wsize)
-                2'b01, 2'b10, 2'b11: ram[i_waddr + 1] <= i_din[15 :  8];
+                2'b10, 2'b11: ram[i_waddr + 1] <= i_din[15 :  8];
                 default: ram[i_waddr + 1] <= ram[i_waddr + 1];
             endcase
         end
