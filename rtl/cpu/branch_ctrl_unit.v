@@ -41,17 +41,21 @@ module branch_ctrl_unit
         case (i_opcode)
             OPCODE_BRANCH: begin
                 case (i_func3)
-                    FUNC3_BEQ:  if (i_alu_zero)  o_pcSrc = 2'b01;       // BEQ taken if zero flag is set
-                    FUNC3_BNE:  if (!i_alu_zero) o_pcSrc = 2'b01;       // BNE taken if zero flag is not set
-                    FUNC3_BLT:  if (i_alu_result[0]) o_pcSrc = 2'b01;   // BLT taken if less than
-                    FUNC3_BGE:  if (!i_alu_result[0]) o_pcSrc = 2'b01;  // BGE taken if not less than
-                    FUNC3_BLTU: if (i_alu_result[0]) o_pcSrc = 2'b01;   // BLTU taken if less than unsigned
+                    FUNC3_BEQ : if (i_alu_zero)       o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
+                    FUNC3_BNE : if (!i_alu_zero)      o_pcSrc = 2'b01;  // BNE taken if zero flag is not set
+                    FUNC3_BLT : if (i_alu_result[0])  o_pcSrc = 2'b01;  // BLT taken if less than
+                    FUNC3_BGE : if (!i_alu_result[0]) o_pcSrc = 2'b01;  // BGE taken if not less than
+                    FUNC3_BLTU: if (i_alu_result[0])  o_pcSrc = 2'b01;  // BLTU taken if less than unsigned
                     FUNC3_BGEU: if (!i_alu_result[0]) o_pcSrc = 2'b01;  // BGEU taken if not less than unsigned
                 endcase
                 if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
             end
-            OPCODE_JAL, OPCODE_JALR: begin
-                o_pcSrc = 2'b10;  // JAL jump target
+            OPCODE_JAL: begin
+                o_pcSrc = 2'b01;  // JAL jump target (PC+Imm)
+                o_flush = 1'b1;   // Flush pipeline
+            end
+            OPCODE_JALR: begin
+                o_pcSrc = 2'b10;  // JALR jump target (rs1+Imm)
                 o_flush = 1'b1;   // Flush pipeline
             end
             default: begin
