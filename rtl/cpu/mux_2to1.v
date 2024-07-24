@@ -18,6 +18,6 @@ module mux_2to1
 );
 
     //! Output Logic
-    assign o_mux = sel ? i_b : i_a;
+    assign o_mux = i_sel ? i_b : i_a;
     
 endmodule

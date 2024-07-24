@@ -6,7 +6,7 @@
 
 module alu
 #(
-    parameter NB_DATA = 32,                 //! Data width of the ALU
+    parameter NB_DATA = 32                  //! Data width of the ALU
 ) (
     // Outputs
     output reg [NB_DATA - 1 : 0] o_result,  //! ALU result
@@ -53,9 +53,9 @@ module alu
             ALU_OR:     o_result = i_data1 | i_data2;
             ALU_AND:    o_result = i_data1 & i_data2;
             ALU_MUL:    o_result = i_data1 * i_data2;
-            ALU_MULH:   o_result = ($signed(i_data1) * $signed(i_data2)) >> DATA_WIDTH;
-            ALU_MULHSU: o_result = ($signed(i_data1) * i_data2) >> DATA_WIDTH;
-            ALU_MULHU:  o_result = (i_data1 * i_data2) >> DATA_WIDTH;
+            ALU_MULH:   o_result = ($signed(i_data1) * $signed(i_data2)) >> NB_DATA;
+            ALU_MULHSU: o_result = ($signed(i_data1) * i_data2) >> NB_DATA;
+            ALU_MULHU:  o_result = (i_data1 * i_data2) >> NB_DATA;
             ALU_DIV:    o_result = $signed(i_data1) / $signed(i_data2);
             ALU_DIVU:   o_result = i_data1 / i_data2;
             ALU_REM:    o_result = $signed(i_data1) % $signed(i_data2);
