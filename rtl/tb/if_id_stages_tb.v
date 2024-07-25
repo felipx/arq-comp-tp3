@@ -129,7 +129,7 @@ module if_if_stages_tb (
             .i_raddr (pc_out_connect[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
             .i_wsize (i_imem_wsize                           ),
             .i_wen   (i_imem_wen                             ),
-            .i_ren   (~i_imem_wen                             ),  // TODO: Check if OK
+            .i_ren   (~i_imem_wen                            ),  // TODO: Check if OK
             .i_rst   (i_rst                                  ),
             .clk     (clk                                    ) 
         );
