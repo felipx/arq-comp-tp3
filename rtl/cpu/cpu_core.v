@@ -11,16 +11,18 @@ module cpu_core
     parameter NB_DATA            = 32,  //! Size of Integer Base registers
     parameter IMEM_ADDR_WIDTH    = 5,  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH    = 5 ,  //! Data Memory address width
-    parameter NB_CTRL            = 11,  //! NB of control
+    parameter NB_CTRL            = 11   //! NB of control
     
 ) (
     // Outputs
 
     // Inputs
-    input [NB_DATA - 1 : 0] i_imem_data,  //! Instruction memory input
-    input                   i_imem_wen ,  //! Instruction memory write enable
-    input                   i_rst      ,
-    input                   clk
+    input [NB_DATA         - 1 : 0] i_imem_data ,  //! Instruction memory input
+    input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr,  //! Instrunction memory write address
+    input                           i_imem_wen  ,  //! Instruction memory write enable
+    input                           i_mem_wsize ,  //! Instruction memory write size
+    input                           i_rst       ,
+    input                           clk         
 );
     
     //! Internal Signals
@@ -137,15 +139,15 @@ module cpu_core
     // PC's Mux
     mux_3to1
     #(
-        .NB_MUX (NB_PC)
+        .DATA_WIDTH (NB_PC)
     )
-        u_pc_mux_2to1
+        u_pc_mux_3to1
         (
-            .o_mux (mux2to1_to_pc                  ),
-            .i_a   (pc_adder_out_connect           ),  // PC+4
-            .i_b   (adder_addr_out_connect         ),  // JAL and Branches
-            .i_c   (alu_result_connect             ),  // JALR
-            .i_sel (branch_ctrl_unit_pc_out_connect)
+            .o_data  (mux2to1_to_pc                  ),
+            .i_data0 (pc_adder_out_connect           ),  // PC+4
+            .i_data1 (adder_addr_out_connect         ),  // JAL and Branches
+            .i_data2 (alu_result_connect             ),  // JALR
+            .i_sel   (branch_ctrl_unit_pc_out_connect)
         );
     
     // Program Counter
@@ -171,8 +173,9 @@ module cpu_core
         (
             .o_dout  (imem_to_if_id_reg                      ),
             .i_din   (i_imem_data                            ),
-            .i_addr  (pc_out_connect[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_wsize (                                       ),  // TODO
+            .i_waddr (i_imem_waddr                           ),
+            .i_raddr (pc_out_connect[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
+            .i_wsize (i_mem_wsize                            ),
             .i_wen   (i_mem_wen                              ),
             .i_ren   (~i_mem_wen                             ),  // TODO: Check if OK
             .i_rst   (i_rst                                  ),
@@ -259,9 +262,9 @@ module cpu_core
         );
     
     // NOP Instruction Mux
-    mux_2to1
+    mux_4to1
     #(
-        .NB_MUX (NB_CTRL)
+        .DATA_WIDTH (NB_CTRL)
     )
         u_nop_insertion_mux
         (
@@ -310,7 +313,7 @@ module cpu_core
         u_branch_ctrl_unit
         (
             .o_pcSrc      (branch_ctrl_unit_pc_out_connect       ),
-            .o _flush     (branch_ctrl_unit_flush_out_connect    ),
+            .o_flush      (branch_ctrl_unit_flush_out_connect    ),
             .i_alu_result (alu_result_connect                    ),
             .i_alu_zero   (alu_zero_connect                      ),
             .i_opcode     (id_ex_instruction_out_connect[6  :  0]),
@@ -320,7 +323,7 @@ module cpu_core
     // Forwarding Mux 1
     mux_3to1
     #(
-        .NB_MUX (NB_DATA)
+        .DATA_WIDTH (NB_DATA)
     )
         u_forwarding_mux_1
         (
@@ -328,13 +331,13 @@ module cpu_core
             .i_data0 (id_ex_rs1_data_out_connect  ),
             .i_data1 (wb_mux_out_connect          ),
             .i_data2 (ex_mem_alu_out_connect      ),
-            .i_sel   (fowrward_unit_a_out_connect ),
+            .i_sel   (fowrward_unit_a_out_connect ) 
         );
     
     // Forwarding Mux 2
     mux_3to1
     #(
-        .NB_MUX (NB_DATA)
+        .DATA_WIDTH (NB_DATA)
     )
         u_forwarding_mux_2
         (
@@ -342,7 +345,7 @@ module cpu_core
             .i_data0 (id_ex_rs2_data_out_connect  ),
             .i_data1 (wb_mux_out_connect          ),
             .i_data2 (ex_mem_alu_out_connect      ),
-            .i_sel   (fowrward_unit_b_out_connect ),
+            .i_sel   (fowrward_unit_b_out_connect ) 
         );
     
     // ALU Input Mux
@@ -447,7 +450,8 @@ module cpu_core
         (
             .o_dout  (data_memory_out_connect   ),
             .i_din   (ex_mem_data_out_connect   ),
-            .i_addr  (ex_mem_alu_out_connect    ),
+            .i_waddr (ex_mem_alu_out_connect    ),
+            .i_raddr (ex_mem_alu_out_connect    ),
             .i_wsize (),
             .i_wen   (ex_mem_ctrl_out_connect[2]),
             .i_ren   (ex_mem_ctrl_out_connect[1]),
@@ -473,17 +477,17 @@ module cpu_core
     )
         u_mem_wb_reg
         (
-            o_ctrl  (mem_wb_ctrl_out_connect       ),
-            o_data  (mem_wb_data_out_connect       ),
-            o_alu   (mem_wb_alu_out_connect        ),
-            o_instr (mem_wb_instruction_out_connect),
-            i_ctrl  (ex_mem_ctrl_out_connect       ),
-            i_data  (data_memory_out_connect       ),
-            i_alu   (ex_mem_alu_out_connect        ),
-            i_instr (ex_mem_instruction_out_connect),
-            i_en    (1'b1                          ), //TODO: Check if OK
-            i_rst   (i_rst                         ),
-            clk     (clk                           ) 
+            .o_ctrl  (mem_wb_ctrl_out_connect       ),
+            .o_data  (mem_wb_data_out_connect       ),
+            .o_alu   (mem_wb_alu_out_connect        ),
+            .o_instr (mem_wb_instruction_out_connect),
+            .i_ctrl  (ex_mem_ctrl_out_connect       ),
+            .i_data  (data_memory_out_connect       ),
+            .i_alu   (ex_mem_alu_out_connect        ),
+            .i_instr (ex_mem_instruction_out_connect),
+            .i_en    (1'b1                          ), //TODO: Check if OK
+            .i_rst   (i_rst                         ),
+            .clk     (clk                           ) 
         );
     
     //

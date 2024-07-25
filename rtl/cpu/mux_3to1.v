@@ -6,7 +6,7 @@
 
 module mux_3to1
 #(
-    parameter NB_MUX = 32                  //! NB of data
+    parameter DATA_WIDTH = 32                  //! NB of data
 ) (
     // Output
     output reg [DATA_WIDTH - 1 : 0] o_data ,   //! Data output
