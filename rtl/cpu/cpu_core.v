@@ -139,15 +139,15 @@ module cpu_core
     // PC's Mux
     mux_3to1
     #(
-        .NB_MUX (NB_PC)
+        .DATA_WIDTH (NB_PC)
     )
         u_pc_mux_3to1
         (
-            .o_mux (mux2to1_to_pc                  ),
-            .i_a   (pc_adder_out_connect           ),  // PC+4
-            .i_b   (adder_addr_out_connect         ),  // JAL and Branches
-            .i_c   (alu_result_connect             ),  // JALR
-            .i_sel (branch_ctrl_unit_pc_out_connect)
+            .o_data  (mux2to1_to_pc                  ),
+            .i_data0 (pc_adder_out_connect           ),  // PC+4
+            .i_data1 (adder_addr_out_connect         ),  // JAL and Branches
+            .i_data2 (alu_result_connect             ),  // JALR
+            .i_sel   (branch_ctrl_unit_pc_out_connect)
         );
     
     // Program Counter
@@ -264,7 +264,7 @@ module cpu_core
     // NOP Instruction Mux
     mux_4to1
     #(
-        .NB_MUX (NB_CTRL)
+        .DATA_WIDTH (NB_CTRL)
     )
         u_nop_insertion_mux
         (
@@ -323,7 +323,7 @@ module cpu_core
     // Forwarding Mux 1
     mux_3to1
     #(
-        .NB_MUX (NB_DATA)
+        .DATA_WIDTH (NB_DATA)
     )
         u_forwarding_mux_1
         (
@@ -337,7 +337,7 @@ module cpu_core
     // Forwarding Mux 2
     mux_3to1
     #(
-        .NB_MUX (NB_DATA)
+        .DATA_WIDTH (NB_DATA)
     )
         u_forwarding_mux_2
         (
