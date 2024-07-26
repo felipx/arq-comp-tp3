@@ -1,19 +1,19 @@
 module cpu_subsystem
-(
-    input i_imem_data ,
-    input i_imem_waddr,
-    input i_imem_wen  ,
-    input i_mem_wsize ,
-    input i_en        ,
-    input i_rst       ,
-    input clk          
+#(
+    parameter NB_PC              = 32,  //! NB of Program Counter
+    parameter NB_INSTRUCTION     = 32,  //! Size of each memory location
+    parameter NB_DATA            = 32,  //! Size of Integer Base registers
+    parameter IMEM_ADDR_WIDTH    = 8 ,  //! Instruction Memory address width
+    parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
+) (
+    input [NB_INSTRUCTION  - 1 : 0] i_imem_data ,
+    input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr,
+    input [1 : 0]                   i_mem_wsize ,
+    input                           i_imem_wen  ,
+    input                           i_en        ,
+    input                           i_rst       ,
+    input                           clk          
 );
-    localparam NB_PC              = 32;  //! NB of Program Counter
-    localparam NB_INSTRUCTION     = 32;  //! Size of each memory location
-    localparam NB_DATA            = 32;  //! Size of Integer Base registers
-    localparam IMEM_ADDR_WIDTH    = 5 ;  //! Instruction Memory address width
-    localparam DMEM_ADDR_WIDTH    = 5 ;  //! Data Memory address width  
-
     // CPU Core
     cpu_core
     #(
@@ -27,8 +27,8 @@ module cpu_subsystem
         (
             .i_imem_data  (i_imem_data ),
             .i_imem_waddr (i_imem_waddr),
-            .i_imem_wen   (i_imem_wen  ),
             .i_mem_wsize  (i_mem_wsize ),
+            .i_imem_wen   (i_imem_wen  ),
             .i_en         (i_en        ),
             .i_rst        (i_rst       ),
             .clk          (clk         )

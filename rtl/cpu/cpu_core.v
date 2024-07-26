@@ -9,7 +9,7 @@ module cpu_core
     parameter NB_PC              = 32,  //! NB of Program Counter
     parameter NB_INSTRUCTION     = 32,  //! Size of each memory location
     parameter NB_DATA            = 32,  //! Size of Integer Base registers
-    parameter IMEM_ADDR_WIDTH    = 5,  //! Instruction Memory address width
+    parameter IMEM_ADDR_WIDTH    = 8 ,  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
 ) (
     // Outputs
@@ -17,8 +17,8 @@ module cpu_core
     // Inputs
     input [NB_DATA         - 1 : 0] i_imem_data ,  //! Instruction memory input
     input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr,  //! Instrunction memory write address input
+    input [1 : 0]                   i_mem_wsize ,  //! Instruction memory write size input
     input                           i_imem_wen  ,  //! Instruction memory write enable input
-    input                           i_mem_wsize ,  //! Instruction memory write size input
     input                           i_en        ,  //! Enable signal input
     input                           i_rst       ,
     input                           clk         
@@ -184,8 +184,8 @@ module cpu_core
             .i_waddr (i_imem_waddr                           ),
             .i_raddr (pc_out_connect[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
             .i_wsize (i_mem_wsize                            ),
-            .i_wen   (i_mem_wen                              ),
-            .i_ren   (~i_mem_wen & i_en                      ),
+            .i_wen   (i_imem_wen                             ),
+            .i_ren   (~i_imem_wen & i_en                     ),
             .i_rst   (i_rst                                  ),
             .clk     (clk                                    ) 
         );
