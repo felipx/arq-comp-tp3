@@ -9,7 +9,7 @@ module memory
     parameter ADDR_WIDTH = 5                 //! Address width
 ) (
     // Output
-    output reg [31              : 0] o_dout,   //! Data output
+    output reg  [31             : 0] o_dout,   //! Data output
     
     // Inputs
     input  wire [31             : 0] i_din  ,  //! Data input

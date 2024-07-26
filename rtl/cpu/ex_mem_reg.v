@@ -29,7 +29,7 @@ module ex_mem_reg
 );
 
     //! Local Parameters
-    parameter ADDR_WIDTH = 3             ;  // NB of EX/MEM reg address depth
+    localparam ADDR_WIDTH = 3            ;  // NB of EX/MEM reg address depth
     localparam DATA_DEPTH = 2**ADDR_WIDTH;  // Depth of the register array
 
     //! Internal Signals
