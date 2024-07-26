@@ -58,7 +58,7 @@ module ex_mem_reg
     assign o_ctrl    = reg_array[0];
     assign o_pc_addr = reg_array[1];
     assign o_alu     = reg_array[2];
-    assign o_data2   = reg_Array[3];
-    assign o_instr   = reg_Array[4];
+    assign o_data2   = reg_array[3];
+    assign o_instr   = reg_array[4];
 
 endmodule

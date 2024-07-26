@@ -4,7 +4,7 @@
 //! @date 07-2024
 //! @version 0.1
 
-module moduleName
+module data_mem_ctrl_unit
 #(
     parameter DATA_WIDTH = 32
 ) (

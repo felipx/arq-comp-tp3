@@ -10,7 +10,7 @@ module cpu_core
     parameter NB_INSTRUCTION     = 32,  //! Size of each memory location
     parameter NB_DATA            = 32,  //! Size of Integer Base registers
     parameter IMEM_ADDR_WIDTH    = 5,  //! Instruction Memory address width
-    parameter DMEM_ADDR_WIDTH    = 5 ,  //! Data Memory address width
+    parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
 ) (
     // Outputs
 
@@ -276,12 +276,12 @@ module cpu_core
     )
         u_nop_insertion_mux
         (
-            o_data  (id_nop_insert_mux_out_connect                       ),
-            i_data0 (ctrl_unit_out_connect                               ),
-            i_data1 ({NB_CTRL{1'b0}}                                     ),
-            i_data2 ({NB_CTRL{1'b0}}                                     ),
-            i_data3 ({NB_CTRL{1'b0}}                                     ),
-            i_sel   ({hdu_to_nop_mux, branch_ctrl_unit_flush_out_connect}) 
+            .o_data  (id_nop_insert_mux_out_connect                       ),
+            .i_data0 (ctrl_unit_out_connect                               ),
+            .i_data1 ({NB_CTRL{1'b0}}                                     ),
+            .i_data2 ({NB_CTRL{1'b0}}                                     ),
+            .i_data3 ({NB_CTRL{1'b0}}                                     ),
+            .i_sel   ({hdu_to_nop_mux, branch_ctrl_unit_flush_out_connect}) 
         );
     
     // ID/EX Pipeline Register
@@ -363,10 +363,10 @@ module cpu_core
     )
         u_alu_input_mux
         (
-            o_mux (alu_input_mux_out_connect   ),
-            i_a   (forwarding_mux_b_out_connect),
-            i_b   (id_ex_imm_out_connect       ),
-            i_sel (id_ex_ctrl_out_connect[3]   ) 
+            .o_mux (alu_input_mux_out_connect   ),
+            .i_a   (forwarding_mux_b_out_connect),
+            .i_b   (id_ex_imm_out_connect       ),
+            .i_sel (id_ex_ctrl_out_connect[3]   ) 
         );
     
     // Branch target Address Calculator Adder
@@ -521,7 +521,7 @@ module cpu_core
     // WB Mux
     mux_4to1
     #(
-        .NB_MUX (NB_DATA)
+        .DATA_WIDTH (NB_DATA)
     )
         u_wb_mux
         (

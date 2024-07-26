@@ -10,7 +10,7 @@ module branch_ctrl_unit
 ) (
     // Outputs
     output reg [1 : 0] o_pcSrc ,                //! PC source control signal
-    output reg         o _flush,                //! Pipeline flush signal
+    output reg         o_flush ,                //! Pipeline flush signal
     
     // Inputs
     input wire [NB_DATA - 1 : 0] i_alu_result,  //! ALU result
