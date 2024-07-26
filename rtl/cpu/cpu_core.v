@@ -11,8 +11,6 @@ module cpu_core
     parameter NB_DATA            = 32,  //! Size of Integer Base registers
     parameter IMEM_ADDR_WIDTH    = 5,  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH    = 5 ,  //! Data Memory address width
-    parameter NB_CTRL            = 11   //! NB of control
-    
 ) (
     // Outputs
 
@@ -25,6 +23,9 @@ module cpu_core
     input                           i_rst       ,
     input                           clk         
 );
+
+    //! Local Parameters
+    localparam NB_CTRL = 11;                                       //! NB of control
     
     //! Internal Signals
     // PC output connections
