@@ -55,12 +55,10 @@ module alu_ctrl_unit
             2'b10: begin // I-Type Arithmetic Instructions
                 case (i_funct3)
                     3'b000: o_alu_op = ALU_ADD;  // ADDI
+                    3'b001: o_alu_op = ALU_SLL;  // SLLI
                     3'b010: o_alu_op = ALU_SLT;  // SLTI
                     3'b011: o_alu_op = ALU_SLTU; // SLTIU
                     3'b100: o_alu_op = ALU_XOR;  // XORI
-                    3'b110: o_alu_op = ALU_OR;   // ORI
-                    3'b111: o_alu_op = ALU_AND;  // ANDI
-                    3'b001: o_alu_op = ALU_SLL;  // SLLI
                     3'b101: begin
                         case (i_funct7)
                             7'b0000000: o_alu_op = ALU_SRL; // SRLI
@@ -68,30 +66,33 @@ module alu_ctrl_unit
                             default: o_alu_op = ALU_ADD;
                         endcase
                     end
+                    3'b110: o_alu_op = ALU_OR;   // ORI
+                    3'b111: o_alu_op = ALU_AND;  // ANDI
+                    
                     default: o_alu_op = ALU_ADD;
                 endcase
             end
             2'b11: begin // R-Type Instructions
                 case ({i_funct7, i_funct3})
-                    10'b0000000_000: o_alu_op = ALU_ADD;
-                    10'b0100000_000: o_alu_op = ALU_SUB;
-                    10'b0000000_001: o_alu_op = ALU_SLL;
-                    10'b0000000_010: o_alu_op = ALU_SLT;
-                    10'b0000000_011: o_alu_op = ALU_SLTU;
-                    10'b0000000_100: o_alu_op = ALU_XOR;
-                    10'b0000000_101: o_alu_op = ALU_SRL;
-                    10'b0100000_101: o_alu_op = ALU_SRA;
-                    10'b0000000_110: o_alu_op = ALU_OR;
-                    10'b0000000_111: o_alu_op = ALU_AND;
-                    10'b0000001_000: o_alu_op = ALU_MUL;
-                    10'b0000001_001: o_alu_op = ALU_MULH;
-                    10'b0000001_010: o_alu_op = ALU_MULHSU;
-                    10'b0000001_011: o_alu_op = ALU_MULHU;
-                    10'b0000001_100: o_alu_op = ALU_DIV;
-                    10'b0000001_101: o_alu_op = ALU_DIVU;
-                    10'b0000001_110: o_alu_op = ALU_REM;
-                    10'b0000001_111: o_alu_op = ALU_REMU;
-                    default: o_alu_op = ALU_ADD;
+                    10'b0000000000 : o_alu_op = ALU_ADD   ;
+                    10'b0100000000 : o_alu_op = ALU_SUB   ;
+                    10'b0000000100 : o_alu_op = ALU_XOR   ;
+                    10'b0000000110 : o_alu_op = ALU_OR    ;
+                    10'b0000000111 : o_alu_op = ALU_AND   ;
+                    10'b0000000001 : o_alu_op = ALU_SLL   ;
+                    10'b0000000101 : o_alu_op = ALU_SRL   ;
+                    10'b0100000101 : o_alu_op = ALU_SRA   ;
+                    10'b0000000010 : o_alu_op = ALU_SLT   ;
+                    10'b0000000011 : o_alu_op = ALU_SLTU  ;
+                    10'b0000001000 : o_alu_op = ALU_MUL   ;
+                    10'b0000001001 : o_alu_op = ALU_MULH  ;
+                    10'b0000001010 : o_alu_op = ALU_MULHSU;
+                    10'b0000001011 : o_alu_op = ALU_MULHU ;
+                    10'b0000001100 : o_alu_op = ALU_DIV   ;
+                    10'b0000001101 : o_alu_op = ALU_DIVU  ;
+                    10'b0000001110 : o_alu_op = ALU_REM   ;
+                    10'b0000001111 : o_alu_op = ALU_REMU  ;
+                    default        : o_alu_op = ALU_ADD   ;
                 endcase
             end
             default: o_alu_op = ALU_ADD;

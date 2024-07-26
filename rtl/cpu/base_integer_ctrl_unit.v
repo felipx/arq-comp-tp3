@@ -52,7 +52,7 @@ module base_integer_ctrl_unit
                 o_ctrl[4]    = 0;
                 o_ctrl[5]    = 0;
                 o_ctrl[6]    = 0;
-                o_ctrl[8 :7] = 2'b10;
+                o_ctrl[8 :7] = 2'b11;
                 o_ctrl[10:9] = 2'b00;
             end
             I_TYPE_1, I_TYPE_3, I_TYPE_4: begin // Arithmetic I, JALR and Environment Instructions
