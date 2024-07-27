@@ -31,11 +31,10 @@ module id_ex_reg
 );
 
     //! Local Parameters
-    localparam ADDR_WIDTH = 3            ;   //! NB of ID/EX address depth
-    localparam DATA_DEPTH = 2**ADDR_WIDTH;   // Depth of the register array
+    localparam DATA_DEPTH = 7;               // Depth of the register array
 
     //! Internal Signals
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 2 : 0]; // Register array
+    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0]; // Register array
 
     integer index;
 

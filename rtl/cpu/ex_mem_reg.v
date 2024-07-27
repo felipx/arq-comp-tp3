@@ -10,7 +10,6 @@ module ex_mem_reg
 ) (
     // Outputs
     output [DATA_WIDTH - 1 : 0] o_ctrl   ,  //! Control signals output
-    output [DATA_WIDTH - 1 : 0] o_pc_addr,  //! PC+Imm output
     output [DATA_WIDTH - 1 : 0] o_pc_next,  //! PC+4 output
     output [DATA_WIDTH - 1 : 0] o_alu    ,  //! ALU result output
     output [DATA_WIDTH - 1 : 0] o_data2  ,  //! Data for store instructions output
@@ -18,7 +17,6 @@ module ex_mem_reg
                                         
     // Inputs                           
     input  [DATA_WIDTH - 1 : 0] i_ctrl   ,  //! Control signals input
-    input  [DATA_WIDTH - 1 : 0] i_pc_addr,  //! PC+Imm input
     input  [DATA_WIDTH - 1 : 0] i_pc_next,  //! PC+4 input
     input  [DATA_WIDTH - 1 : 0] i_alu    ,  //! ALU result input
     input  [DATA_WIDTH - 1 : 0] i_data2  ,  //! Data for store instructions input
@@ -29,11 +27,10 @@ module ex_mem_reg
 );
 
     //! Local Parameters
-    localparam ADDR_WIDTH = 3            ;  // NB of EX/MEM reg address depth
-    localparam DATA_DEPTH = 2**ADDR_WIDTH;  // Depth of the register array
+    localparam DATA_DEPTH = 5;              // Depth of the register array
 
     //! Internal Signals
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 2 : 0]; // Register array
+    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0]; // Register array
 
     integer index;
 
@@ -47,7 +44,7 @@ module ex_mem_reg
         end
         else if (i_en) begin
             reg_array[0] <= i_ctrl   ;
-            reg_array[1] <= i_pc_addr;
+            reg_array[1] <= i_pc_next;
             reg_array[2] <= i_alu    ;
             reg_array[3] <= i_data2  ;
             reg_array[4] <= i_instr  ;
@@ -56,7 +53,7 @@ module ex_mem_reg
 
     // Output Logic
     assign o_ctrl    = reg_array[0];
-    assign o_pc_addr = reg_array[1];
+    assign o_pc_next = reg_array[1];
     assign o_alu     = reg_array[2];
     assign o_data2   = reg_array[3];
     assign o_instr   = reg_array[4];

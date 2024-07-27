@@ -16,14 +16,14 @@ module mem_wb_reg
     output [DATA_WIDTH - 1 : 0] o_instr  ,  //! Instruction output
                                        
     // Inputs                          
-    input  [DATA_WIDTH - 1 : 0] i_ctrl   ,    //! Control signals input
-    output [DATA_WIDTH - 1 : 0] i_pc_next,    //! PC+4 input
-    input  [DATA_WIDTH - 1 : 0] i_data   ,    //! Data from memory input
-    input  [DATA_WIDTH - 1 : 0] i_alu    ,    //! ALU result input
-    input  [DATA_WIDTH - 1 : 0] i_instr  ,    //! Instruction input
-    input                       i_en     ,    //! Enable signal input
-    input                       i_rst    ,    //! Reset signal
-    input                       clk           //! Clock signal    
+    input  [DATA_WIDTH - 1 : 0] i_ctrl   ,  //! Control signals input
+    output [DATA_WIDTH - 1 : 0] i_pc_next,  //! PC+4 input
+    input  [DATA_WIDTH - 1 : 0] i_data   ,  //! Data from memory input
+    input  [DATA_WIDTH - 1 : 0] i_alu    ,  //! ALU result input
+    input  [DATA_WIDTH - 1 : 0] i_instr  ,  //! Instruction input
+    input                       i_en     ,  //! Enable signal input
+    input                       i_rst    ,  //! Reset signal
+    input                       clk         //! Clock signal    
 );
 
     //! Local Parameters
