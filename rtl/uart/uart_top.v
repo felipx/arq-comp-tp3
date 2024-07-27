@@ -27,7 +27,7 @@ module uart_top
     input  wire [NB_DATA    - 1 : 0] i_wdata   ,           //! FIFO Tx write data input
     input  wire [NB_COUNTER - 1 : 0] i_tick_cmp,           //! Value of baud rate generator at which to generate a tick
     input  wire                      i_rst     ,           //! Reset signal input
-    input  wire                      clk       ,           //! Clock signal input
+    input  wire                      clk                   //! Clock signal input
 );
     
     // Internal Signals
@@ -87,7 +87,7 @@ module uart_top
     
     // UART TX
     uart_tx
-    (
+    #(
         .NB_DATA (NB_DATA)
     )
         u_uart_tx

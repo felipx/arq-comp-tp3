@@ -13,7 +13,7 @@ module branch_ctrl_unit
     output reg         o_flush ,                //! Pipeline flush signal
     
     // Inputs
-    input wire [NB_DATA - 1 : 0] i_alu_result,  //! ALU result
+    input wire                   i_alu_result,  //! First bit of ALU result
     input wire                   i_alu_zero  ,  //! ALU zero flag
     input wire [6 : 0]           i_opcode    ,  //! Instruction opcode
     input wire [2 : 0]           i_func3        //! Instruction func3 field
@@ -41,12 +41,13 @@ module branch_ctrl_unit
         case (i_opcode)
             OPCODE_BRANCH: begin
                 case (i_func3)
-                    FUNC3_BEQ : if (i_alu_zero)       o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
-                    FUNC3_BNE : if (!i_alu_zero)      o_pcSrc = 2'b01;  // BNE taken if zero flag is not set
-                    FUNC3_BLT : if (i_alu_result[0])  o_pcSrc = 2'b01;  // BLT taken if less than
-                    FUNC3_BGE : if (!i_alu_result[0]) o_pcSrc = 2'b01;  // BGE taken if not less than
-                    FUNC3_BLTU: if (i_alu_result[0])  o_pcSrc = 2'b01;  // BLTU taken if less than unsigned
-                    FUNC3_BGEU: if (!i_alu_result[0]) o_pcSrc = 2'b01;  // BGEU taken if not less than unsigned
+                    FUNC3_BEQ : if (i_alu_zero)    o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
+                    FUNC3_BNE : if (!i_alu_zero)   o_pcSrc = 2'b01;  // BNE taken if zero flag is not set
+                    FUNC3_BLT : if (i_alu_result)  o_pcSrc = 2'b01;  // BLT taken if less than
+                    FUNC3_BGE : if (!i_alu_result) o_pcSrc = 2'b01;  // BGE taken if not less than
+                    FUNC3_BLTU: if (i_alu_result)  o_pcSrc = 2'b01;  // BLTU taken if less than unsigned
+                    FUNC3_BGEU: if (!i_alu_result) o_pcSrc = 2'b01;  // BGEU taken if not less than unsigned
+                    default   :                    o_pcSrc = 2'b00;
                 endcase
                 if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
             end

@@ -27,23 +27,23 @@ module regfile
     localparam DATA_DEPTH = 2**ADDR_WIDTH;    //! Regfile depth
 
     //! Register array
-    reg [DATA_WIDTH-1:0] reg_array [0 : DATA_DEPTH - 1];
-
-    //! Initialize registers to zero on reset
+    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0];
+   
     integer i;
+
+    //! Write Operation
     always @(posedge clk) begin
+        // Initialize registers to zero on reset
         if (i_rst) begin
             for (i = 0; i < DATA_DEPTH; i = i + 1) begin
                 reg_array[i] <= {DATA_WIDTH{1'b0}};
             end
         end
-    end
-
-    //! Write Operation
-    always @(posedge clk) begin
-        if (i_wen && !i_rst) begin
-            if (i_waddr != {ADDR_WIDTH{1'b0}}) begin  // Check if writing to x0 register
-                reg_array[i_waddr] <= i_wdata;
+        else begin
+            if (i_wen) begin
+                if (i_waddr != {ADDR_WIDTH{1'b0}}) begin  // Check if writing to x0 register
+                    reg_array[i_waddr] <= i_wdata;
+                end
             end
         end
     end

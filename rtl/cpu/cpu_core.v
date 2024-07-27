@@ -322,7 +322,7 @@ module cpu_core
         (
             .o_pcSrc      (branch_ctrl_unit_pc_out_connect       ),
             .o_flush      (branch_ctrl_unit_flush_out_connect    ),
-            .i_alu_result (alu_result_connect                    ),
+            .i_alu_result (alu_result_connect[0]                 ),
             .i_alu_zero   (alu_zero_connect                      ),
             .i_opcode     (id_ex_instruction_out_connect[6  :  0]),
             .i_func3      (id_ex_instruction_out_connect[14 : 12])
@@ -428,19 +428,19 @@ module cpu_core
     )
         u_ex_mem_reg
         (
-            .o_ctrl    (ex_mem_ctrl_out_connect                                       ),
-            .o_pc_next (ex_mem_pc_next_out_connect                                    ),
-            .o_alu     (ex_mem_alu_out_connect                                        ),
-            .o_data2   (ex_mem_data_out_connect                                       ),
-            .o_instr   (ex_mem_instruction_out_connect                                ),
-            .i_ctrl    ({{20{1'b0}}, alu_zero_connect, id_ex_ctrl_out_connect[10 : 0]}),
-            .i_pc_next (id_ex_pc_next_out_connect                                     ),
-            .i_alu     (alu_result_connect                                            ),
-            .i_data2   (forwarding_mux_b_out_connect                                  ),
-            .i_instr   (id_ex_instruction_out_connect                                 ),
-            .i_en      (i_en                                                          ),
-            .i_rst     (i_rst                                                         ),
-            .clk       (clk                                                           ) 
+            .o_ctrl    (ex_mem_ctrl_out_connect                                                                                     ),
+            .o_pc_next (ex_mem_pc_next_out_connect                                                                                  ),
+            .o_alu     (ex_mem_alu_out_connect                                                                                      ),
+            .o_data2   (ex_mem_data_out_connect                                                                                     ),
+            .o_instr   (ex_mem_instruction_out_connect                                                                              ),
+            .i_ctrl    ({id_ex_ctrl_out_connect[31:12], alu_zero_connect | id_ex_ctrl_out_connect[11], id_ex_ctrl_out_connect[10:0]}),
+            .i_pc_next (id_ex_pc_next_out_connect                                                                                   ),
+            .i_alu     (alu_result_connect                                                                                          ),
+            .i_data2   (forwarding_mux_b_out_connect                                                                                ),
+            .i_instr   (id_ex_instruction_out_connect                                                                               ),
+            .i_en      (i_en                                                                                                        ),
+            .i_rst     (i_rst                                                                                                       ),
+            .clk       (clk                                                                                                         ) 
         );
     
     //
