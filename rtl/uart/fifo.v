@@ -7,7 +7,7 @@
 module fifo 
 #(
     parameter NB_DATA = 8,                               //! NB of data reg
-    parameter NB_ADDR = 4                                //! NB of regs depth
+    parameter NB_ADDR = 5                                //! NB of regs depth
 ) (
     // Outputs
     output [NB_DATA - 1 : 0] o_rdata,                    //! Data output

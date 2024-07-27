@@ -6,26 +6,37 @@
 
 module uart_top
 # (
-    parameter NB_COUNTER   = 9,  //! NB of baud generator counter reg
-    parameter NB_DATA      = 8,  //! NB of UART data reg
-    parameter NB_FIFO_ADDR = 4   //! NB of fifo's regs depth
+    parameter NB_COUNTER   = 9,                            //! NB of baud generator counter reg
+    parameter NB_DATA      = 8,                            //! NB of UART data reg
+    parameter NB_FIFO_ADDR = 5                             //! NB of fifo's regs depth
 ) (
     // Outputs
-    output wire o_tx,  //! UART data output
-    
-    // Inputs
-    input  wire [NB_COUNTER - 1 : 0] i_tick_cmp,  //! Value of baud rate generator at which to generate a tick
-    input  wire                      i_rx      ,  //! UART data input
-    input  wire                      i_rst     ,  //! Reset signal input
-    input  wire                      clk       ,  //! Clock signal input
+    output wire                      o_tx      ,           //! UART Tx data output
+    output wire                      o_tx_done ,           //! UART Tx done signal output
+    output wire                      o_tx_empty,           //! FIFO Tx empty signal output
+    output wire                      o_tx_full ,           //! FIFO Tx full output
+    output wire [NB_DATA    - 1 : 0] o_rdata   ,           //! FIFO Rx data output
+    output wire                      o_rx_empty,           //! FIFO Rx empty signal output
+    output wire                      o_rx_full ,           //! FIFO Rx full output
+                                                 
+    // Inputs                                   
+    input  wire                      i_rx      ,           //! UART Rx data input
+    input  wire                      i_tx_start,           //! UART Tx start signal input
+    input  wire                      i_ren     ,           //! FIFO Rx read enable input
+    input  wire                      i_wen     ,           //! FIFO Tx write enable input           
+    input  wire [NB_DATA    - 1 : 0] i_wdata   ,           //! FIFO Tx write data input
+    input  wire [NB_COUNTER - 1 : 0] i_tick_cmp,           //! Value of baud rate generator at which to generate a tick
+    input  wire                      i_rst     ,           //! Reset signal input
+    input  wire                      clk       ,           //! Clock signal input
 );
+    
     // Internal Signals
-    wire                   baud_rate_gen_tick_to_uart   ;
-
-    wire [NB_DATA - 1 : 0] uart_rx_data_to_fifo_rx_wdata;
-    wire                   uart_rx_done_to_fifo_rx_wr   ;
-
-    wire [NB_DATA - 1 : 0] fifo_tx_rdata_to_uart_tx     ;
+    wire                   baud_rate_gen_tick_to_uart   ;  //! Baud rate generator tick to uart connection
+    
+    wire [NB_DATA - 1 : 0] uart_rx_data_to_fifo_rx_wdata;  //! UART Rx data to FIFO Rx connection
+    wire                   uart_rx_done_to_fifo_rx_wr   ;  //! UART Rx done to FIDO Rx connection
+    
+    wire [NB_DATA - 1 : 0] fifo_tx_rdata_to_uart_tx     ;  //! FIFO Tx data to UART Tx connection
     
     // Baud Rate Generator
     counter
@@ -64,10 +75,10 @@ module uart_top
     )
         u_uart_rx_fifo
         (
-            .o_rdata (                             ), //TODO
-            .o_empty (                             ), //TODO
-            .o_full  (                             ), //TODO
-            .i_rd    (                             ), //TODO
+            .o_rdata (o_rdata                      ),
+            .o_empty (o_rx_empty                   ),
+            .o_full  (o_rx_full                    ),
+            .i_rd    (i_ren                        ),
             .i_wr    (uart_rx_done_to_fifo_rx_wr   ),
             .i_wdata (uart_rx_data_to_fifo_rx_wdata),
             .i_rst   (i_rst                        ),
@@ -81,13 +92,13 @@ module uart_top
     )
         u_uart_tx
         (
-            .o_tx       (o_tx                    ),
-            .o_tx_done  (                        ), //TODO
-            .i_data     (fifo_tx_rdata_to_uart_tx),
-            .i_tx_start (                        ), //TODO
-            .i_stick    (                        ), //TODO
-            .i_rst      (i_rst                   ),
-            .clk        (clk                     ) 
+            .o_tx       (o_tx                      ),
+            .o_tx_done  (o_tx_done                 ),
+            .i_data     (fifo_tx_rdata_to_uart_tx  ),
+            .i_tx_start (i_tx_start                ),
+            .i_stick    (baud_rate_gen_tick_to_uart), 
+            .i_rst      (i_rst                     ),
+            .clk        (clk                       ) 
         );
     
     // FIFO TX
@@ -99,11 +110,11 @@ module uart_top
         u_uart_tx_fifo
         (
             .o_rdata (fifo_tx_rdata_to_uart_tx),
-            .o_empty (                        ), //TODO
-            .o_full  (                        ), //TODO
-            .i_rd    (                        ), //TODO
-            .i_wr    (                        ), //TODO
-            .i_wdata (                        ),
+            .o_empty (o_tx_empty              ),
+            .o_full  (o_tx_full               ),
+            .i_rd    (i_tx_start              ),
+            .i_wr    (i_wen                   ),
+            .i_wdata (i_wdata                 ),
             .i_rst   (i_rst                   ),
             .clk     (clk                     ) 
         );
