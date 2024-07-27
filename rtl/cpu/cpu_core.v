@@ -454,15 +454,15 @@ module cpu_core
     )
         u_data_memory
         (
-            .o_dout  (data_memory_out_connect            ),
-            .i_din   (ex_mem_data_out_connect            ),
-            .i_waddr (ex_mem_alu_out_connect             ),
-            .i_raddr (ex_mem_alu_out_connect             ),
-            .i_wsize (data_mem_ctrl_unit_size_out_connect),
-            .i_wen   (ex_mem_ctrl_out_connect[2]         ),
-            .i_ren   (ex_mem_ctrl_out_connect[1]         ),
-            .i_rst   (i_rst                              ),
-            .clk     (clk                                ) 
+            .o_dout  (data_memory_out_connect                        ),
+            .i_din   (ex_mem_data_out_connect                        ),
+            .i_waddr (ex_mem_alu_out_connect[DMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
+            .i_raddr (ex_mem_alu_out_connect[DMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
+            .i_wsize (data_mem_ctrl_unit_size_out_connect            ),
+            .i_wen   (ex_mem_ctrl_out_connect[2]                     ),
+            .i_ren   (ex_mem_ctrl_out_connect[1]                     ),
+            .i_rst   (i_rst                                          ),
+            .clk     (clk                                            ) 
         );
     
     // Data Memory Control Unit
