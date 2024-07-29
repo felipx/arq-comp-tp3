@@ -16,6 +16,7 @@ module uart_top
     output wire                      o_tx_empty,           //! FIFO Tx empty signal output
     output wire                      o_tx_full ,           //! FIFO Tx full output
     output wire [NB_DATA    - 1 : 0] o_rdata   ,           //! FIFO Rx data output
+    output wire                      o_rx_done ,           //! UART Rx done signal output
     output wire                      o_rx_empty,           //! FIFO Rx empty signal output
     output wire                      o_rx_full ,           //! FIFO Rx full output
                                                  
@@ -34,7 +35,7 @@ module uart_top
     wire                   baud_rate_gen_tick_to_uart   ;  //! Baud rate generator tick to uart connection
     
     wire [NB_DATA - 1 : 0] uart_rx_data_to_fifo_rx_wdata;  //! UART Rx data to FIFO Rx connection
-    wire                   uart_rx_done_to_fifo_rx_wr   ;  //! UART Rx done to FIDO Rx connection
+    //wire                   uart_rx_done_to_fifo_rx_wr   ;  //! UART Rx done to FIDO Rx connection
     
     wire [NB_DATA - 1 : 0] fifo_tx_rdata_to_uart_tx     ;  //! FIFO Tx data to UART Tx connection
     
@@ -60,7 +61,7 @@ module uart_top
         u_uart_rx
         (
             .o_data    (uart_rx_data_to_fifo_rx_wdata),
-            .o_rx_done (uart_rx_done_to_fifo_rx_wr   ),
+            .o_rx_done (o_rx_done                    ),
             .i_rx      (i_rx                         ),
             .i_stick   (baud_rate_gen_tick_to_uart   ),
             .i_rst     (i_rst                        ),
@@ -79,7 +80,7 @@ module uart_top
             .o_empty (o_rx_empty                   ),
             .o_full  (o_rx_full                    ),
             .i_rd    (i_rd                         ),
-            .i_wr    (uart_rx_done_to_fifo_rx_wr   ),
+            .i_wr    (o_rx_done                    ),
             .i_wdata (uart_rx_data_to_fifo_rx_wdata),
             .i_rst   (i_rst                        ),
             .clk     (clk                          ) 
