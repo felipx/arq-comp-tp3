@@ -61,11 +61,9 @@ module top
             .i_ren      (      ),
             .i_wen      (      ),
             .i_wdata    (      ),
-            .i_tick_cmp (      ),
+            .i_tick_cmp (9'h146),
             .i_rst      (i_rst ),
             .clk        (clk   )
         );
-
-    // Debug Unit
     
 endmodule

@@ -33,5 +33,7 @@ module cpu_subsystem
             .i_rst        (i_rst       ),
             .clk          (clk         )
         );
+
+    // Debug Unit
     
 endmodule

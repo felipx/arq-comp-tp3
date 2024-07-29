@@ -22,8 +22,8 @@ module uart_top
     // Inputs                                   
     input  wire                      i_rx      ,           //! UART Rx data input
     input  wire                      i_tx_start,           //! UART Tx start signal input
-    input  wire                      i_ren     ,           //! FIFO Rx read enable input
-    input  wire                      i_wen     ,           //! FIFO Tx write enable input           
+    input  wire                      i_rd      ,           //! FIFO Rx read enable input
+    input  wire                      i_wr      ,           //! FIFO Tx write enable input           
     input  wire [NB_DATA    - 1 : 0] i_wdata   ,           //! FIFO Tx write data input
     input  wire [NB_COUNTER - 1 : 0] i_tick_cmp,           //! Value of baud rate generator at which to generate a tick
     input  wire                      i_rst     ,           //! Reset signal input
@@ -78,7 +78,7 @@ module uart_top
             .o_rdata (o_rdata                      ),
             .o_empty (o_rx_empty                   ),
             .o_full  (o_rx_full                    ),
-            .i_rd    (i_ren                        ),
+            .i_rd    (i_rd                         ),
             .i_wr    (uart_rx_done_to_fifo_rx_wr   ),
             .i_wdata (uart_rx_data_to_fifo_rx_wdata),
             .i_rst   (i_rst                        ),
@@ -113,7 +113,7 @@ module uart_top
             .o_empty (o_tx_empty              ),
             .o_full  (o_tx_full               ),
             .i_rd    (i_tx_start              ),
-            .i_wr    (i_wen                   ),
+            .i_wr    (i_wr                    ),
             .i_wdata (i_wdata                 ),
             .i_rst   (i_rst                   ),
             .clk     (clk                     ) 
