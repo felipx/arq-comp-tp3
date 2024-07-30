@@ -14,11 +14,11 @@ module cpu_subsystem
     output wire [NB_UART_DATA - 1 : 0] o_uart_wdata   , 
 
     // Inputs
-    input wire i_uart_rx_data,
-    input wire i_uart_rx_done,
-    input wire i_en          ,
-    input wire i_rst         ,
-    input wire clk            
+    input wire [NB_UART_DATA - 1 : 0] i_uart_rx_data,
+    input wire                        i_uart_rx_done,
+    input wire                        i_en          ,
+    input wire                        i_rst         ,
+    input wire                        clk            
 );
 
     //! Localparameters
@@ -47,7 +47,7 @@ module cpu_subsystem
             .i_imem_waddr (du_imem_waddr_to_cpu    ),
             .i_mem_wsize  (du_imem_wsize_to_cpu    ),
             .i_imem_wen   (du_imem_wen_to_cpu      ),
-            .i_en         (i_en & debug_unit_cpu_en),
+            .i_en         (i_en), //(i_en & debug_unit_cpu_en),
             .i_rst        (i_rst                   ),
             .clk          (clk                     )
         );

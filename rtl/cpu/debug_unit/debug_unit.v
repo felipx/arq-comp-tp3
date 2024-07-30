@@ -121,15 +121,17 @@ module debug_unit
             end
 
             RECEIVE_FW_1: begin
-                if (counter_reg == 32'd1) begin
+                if (rx_done_reg) begin
+                    if (counter_reg == 32'd1) begin
                         // If [blk #] = [~blk #] move to next state
-                        if (i_rx_data == ~rx_data_next[7:0]) begin
+                        if (i_rx_data == ~rx_data_reg[7:0]) begin
                             next_state = RECEIVE_FW_2;
                         end
                         else begin
                             next_state = IDLE;
                         end
                     end
+                end
             end
 
             RECEIVE_FW_2: begin
@@ -219,13 +221,13 @@ module debug_unit
                         imem_write_next = 1'b0;
                     end
                 end
-                else begin
+                //else begin
                     // Data received
                     if (rx_done_reg) begin
                         o_rd = 1;
                         // If it's end of frame, cksum must be checked
-                        if (counter_reg == 32'd127) begin
-                            if (cksum_err_reg == i_rx_data) begin
+                        if (counter_reg == 32'd128) begin
+                            if (cksum_reg == i_rx_data) begin
                                 cksum_err_next = 2'b01;            // No errors
                                 cksum_next     = {NB_DATA{1'b0}};
                                 o_wr           = 1;
@@ -252,7 +254,7 @@ module debug_unit
                             cksum_next      = cksum_reg + i_rx_data;
                         end
                     end
-                end
+                //end
             end
 
             RECEIVE_FW_3: begin
@@ -286,6 +288,9 @@ module debug_unit
             end
             else if (state_reg == RECEIVE_FW_1 && next_state == IDLE) begin
                 counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_1=>IDLE transition
+            end
+            else if (state_reg == RECEIVE_FW_1 && next_state == RECEIVE_FW_2) begin
+                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_1=>RECEIVE_FW_2 transition
             end
             else if (state_reg == RECEIVE_FW_2 && next_state == RECEIVE_FW_3) begin
                 counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_2=>RECEIVE_FW_3 transition
