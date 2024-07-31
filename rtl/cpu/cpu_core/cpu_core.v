@@ -13,6 +13,9 @@ module cpu_core
     parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
 ) (
     // Outputs
+    wire  [NB_PC   - 1 : 0] o_pc          ,
+    wire  [NB_DATA - 1 : 0] o_regfile_data,
+    wire  [NB_DATA - 1 : 0] o_dmem_data   ,
 
     // Inputs
     input [NB_DATA         - 1 : 0] i_imem_data ,  //! Instruction memory input
@@ -46,8 +49,8 @@ module cpu_core
     wire [NB_PC          - 1 : 0] if_id_pc_next_out_connect    ;   //! PC+4 from IF/ID reg connection
     
     // Base Integer Register File output connections
-    wire [NB_INSTRUCTION - 1 : 0] int_regfile_data1_to_id_ex_reg;  //! Integer Refile data1 to ID/EX pipelinereg
-    wire [NB_INSTRUCTION - 1 : 0] int_regfile_data2_to_id_ex_reg;  //! Integer Refile data2 to ID/EX pipelinereg
+    wire [NB_DATA - 1 : 0] int_regfile_data1_to_id_ex_reg;         //! Integer Refile data1 to ID/EX pipelinereg
+    wire [NB_DATA - 1 : 0] int_regfile_data2_to_id_ex_reg;         //! Integer Refile data2 to ID/EX pipelinereg
     
     // Immediate Generator output connections
     wire [NB_DATA - 1 : 0] imm_out_connect;                        //! Immediate Generator output connection
@@ -126,6 +129,11 @@ module cpu_core
     // WB Mux output connections
     wire [NB_DATA - 1 : 0] wb_mux_out_connect;
 
+
+    // Outputs
+    assign o_pc           = pc_out_connect                ;
+    assign o_regfile_data = int_regfile_data1_to_id_ex_reg;
+    assign o_dmem_data    = data_memory_out_connect       ;
 
 
     //

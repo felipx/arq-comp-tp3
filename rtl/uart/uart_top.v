@@ -31,12 +31,12 @@ module uart_top
     input  wire                      clk                   //! Clock signal input
 );
     
-    // Internal Signals
+    //! Internal Signals
+    reg rx_done_reg;
+
     wire                   baud_rate_gen_tick_to_uart   ;  //! Baud rate generator tick to uart connection
-    
     wire [NB_DATA - 1 : 0] uart_rx_data_to_fifo_rx_wdata;  //! UART Rx data to FIFO Rx connection
-    //wire                   uart_rx_done_to_fifo_rx_wr   ;  //! UART Rx done to FIDO Rx connection
-    
+    wire                   uart_rx_done                 ;  //! UART Rx done to FIDO Rx connection
     wire [NB_DATA - 1 : 0] fifo_tx_rdata_to_uart_tx     ;  //! FIFO Tx data to UART Tx connection
     
     // Baud Rate Generator
@@ -61,7 +61,7 @@ module uart_top
         u_uart_rx
         (
             .o_data    (uart_rx_data_to_fifo_rx_wdata),
-            .o_rx_done (o_rx_done                    ),
+            .o_rx_done (uart_rx_done                 ),
             .i_rx      (i_rx                         ),
             .i_stick   (baud_rate_gen_tick_to_uart   ),
             .i_rst     (i_rst                        ),
@@ -80,7 +80,7 @@ module uart_top
             .o_empty (o_rx_empty                   ),
             .o_full  (o_rx_full                    ),
             .i_rd    (i_rd                         ),
-            .i_wr    (o_rx_done                    ),
+            .i_wr    (uart_rx_done                 ),
             .i_wdata (uart_rx_data_to_fifo_rx_wdata),
             .i_rst   (i_rst                        ),
             .clk     (clk                          ) 
@@ -119,5 +119,22 @@ module uart_top
             .i_rst   (i_rst                   ),
             .clk     (clk                     ) 
         );
+
+    // rx_done output Logic
+    always @(posedge clk) begin
+        if (i_rst) begin
+            rx_done_reg = 1'b0;
+        end
+        else begin
+            if (uart_rx_done) begin
+                rx_done_reg = 1'b1;
+            end
+            else begin
+                rx_done_reg = 1'b0;
+            end
+        end
+    end
+
+    assign o_rx_done = rx_done_reg;
 
 endmodule

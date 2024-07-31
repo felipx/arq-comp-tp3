@@ -34,6 +34,7 @@ module top
     #(
         .NB_PC           (NB_PC          ),
         .NB_INSTRUCTION  (NB_INSTRUCTION ),
+        .NB_DATA         (NB_DATA        ),
         .NB_REG          (NB_DATA        ),
         .IMEM_ADDR_WIDTH (IMEM_ADDR_WIDTH),
         .DMEM_ADDR_WIDTH (DMEM_ADDR_WIDTH),
