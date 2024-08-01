@@ -21,14 +21,15 @@ module uart_top
     output wire                      o_rx_full ,           //! FIFO Rx full output
                                                  
     // Inputs                                   
-    input  wire                      i_rx      ,           //! UART Rx data input
-    input  wire                      i_tx_start,           //! UART Tx start signal input
-    input  wire                      i_rd      ,           //! FIFO Rx read enable input
-    input  wire                      i_wr      ,           //! FIFO Tx write enable input           
-    input  wire [NB_DATA    - 1 : 0] i_wdata   ,           //! FIFO Tx write data input
-    input  wire [NB_COUNTER - 1 : 0] i_tick_cmp,           //! Value of baud rate generator at which to generate a tick
-    input  wire                      i_rst     ,           //! Reset signal input
-    input  wire                      clk                   //! Clock signal input
+    input  wire                        i_rx      ,         //! UART Rx data input
+    input  wire                        i_tx_start,         //! UART Tx start signal input
+    input  wire                        i_rd      ,         //! FIFO Rx read enable input
+    input  wire                        i_wr      ,         //! FIFO Tx write enable input           
+    input  wire [NB_DATA      - 1 : 0] i_wdata   ,         //! FIFO Tx write data input
+    input  wire [NB_FIFO_ADDR - 1 : 0] i_wsize   ,         //! Bytes to send input
+    input  wire [NB_COUNTER   - 1 : 0] i_tick_cmp,         //! Value of baud rate generator at which to generate a tick
+    input  wire                        i_rst     ,         //! Reset signal input
+    input  wire                        clk                 //! Clock signal input
 );
     
     //! Internal Signals

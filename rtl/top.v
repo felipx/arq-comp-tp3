@@ -9,7 +9,7 @@ module top
     // UART Parameters
     parameter NB_UART_COUNTER    = 9 ,  //! NB of baud generator counter reg
     parameter NB_UART_DATA       = 9 ,  //! NB of UART data reg
-    parameter NB_FIFO_ADDR       = 5    //! NB of fifo's regs depth
+    parameter NB_UART_ADDR       = 5    //! NB of UART fifo's regs depth
 ) (
     // Ouputs
     output wire o_RsTx,
@@ -24,6 +24,7 @@ module top
     wire cpu_rd_to_uart;
     wire cpu_wr_to_uart;
     wire [NB_UART_DATA - 1 : 0] cpu_wdata_to_uart;
+    wire [NB_UART_ADDR - 1 : 0] cpu_wsize_to_uart;
     wire                        cpu_tx_start_to_uart;
     wire [NB_UART_DATA - 1 : 0] uart_rx_data_to_cpu;
     wire                        uart_rx_done_to_cpu;
@@ -38,7 +39,8 @@ module top
         .NB_REG          (NB_DATA        ),
         .IMEM_ADDR_WIDTH (IMEM_ADDR_WIDTH),
         .DMEM_ADDR_WIDTH (DMEM_ADDR_WIDTH),
-        .NB_UART_DATA    (NB_UART_DATA   )
+        .NB_UART_DATA    (NB_UART_DATA   ),
+        .NB_UART_ADDR    (NB_UART_ADDR   )
     )
         u_cpu_subystem
         (
@@ -46,6 +48,7 @@ module top
             .o_uart_rd       (cpu_rd_to_uart      ),
             .o_uart_wr       (cpu_wr_to_uart      ),
             .o_uart_wdata    (cpu_wdata_to_uart   ),
+            .o_uart_wsize    (cpu_wsize_to_uart   ),
             .i_uart_rx_data  (uart_rx_data_to_cpu ),
             .i_uart_rx_done  (uart_rx_done_to_cpu ),
             .i_en            (1'b1                ),
@@ -58,7 +61,7 @@ module top
     #(
         .NB_COUNTER   (NB_UART_COUNTER),
         .NB_DATA      (NB_UART_DATA   ),
-        .NB_FIFO_ADDR (NB_FIFO_ADDR   )
+        .NB_FIFO_ADDR (NB_UART_ADDR   )
     )
         u_uart_0
         (
@@ -75,6 +78,7 @@ module top
             .i_rd       (cpu_rd_to_uart      ),
             .i_wr       (cpu_wr_to_uart      ),
             .i_wdata    (cpu_wdata_to_uart   ),
+            .i_wsize    (cpu_wsize_to_uart   ),
             .i_tick_cmp (9'h146              ),
             .i_rst      (i_rst               ),
             .clk        (clk                 )

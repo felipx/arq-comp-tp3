@@ -6,13 +6,15 @@ module cpu_subsystem
     parameter NB_REG             = 32,  //! Size of Integer Base registers
     parameter IMEM_ADDR_WIDTH    = 8 ,  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH    = 5 ,  //! Data Memory address width
-    parameter NB_UART_DATA       = 8 
+    parameter NB_UART_DATA       = 8 ,
+    parameter NB_UART_ADDR       = 5    //! NB of UART fifo's regs depth
 ) (
     // Outputs
     output wire                        o_uart_tx_start,
     output wire                        o_uart_rd      ,
     output wire                        o_uart_wr      ,
-    output wire [NB_UART_DATA - 1 : 0] o_uart_wdata   , 
+    output wire [NB_UART_DATA - 1 : 0] o_uart_wdata   ,
+    output wire [NB_UART_ADDR - 1 : 0] o_uart_wsize   ,
 
     // Inputs
     input wire [NB_UART_DATA - 1 : 0] i_uart_rx_data,
@@ -75,6 +77,7 @@ module cpu_subsystem
         .NB_REG          (NB_REG         ),
         .NB_DMEM_DATA    (NB_DATA        ),
         .NB_UART_DATA    (NB_BYTE        ),
+        .NB_UART_ADDR    (NB_UART_ADDR   ),
         .NB_INSTRUCTION  (NB_INSTRUCTION ),
         .IMEM_ADDR_WIDTH (IMEM_ADDR_WIDTH)
     )
@@ -85,6 +88,7 @@ module cpu_subsystem
             .o_rd           (o_uart_rd           ),
             .o_wr           (o_uart_wr           ),
             .o_wdata        (o_uart_wdata        ),
+            .o_wsize        (o_uart_wsize        ),
             .o_imem_data    (du_imem_data_to_cpu ),
             .o_imem_waddr   (du_imem_waddr_to_cpu),
             .o_imem_wsize   (du_imem_wsize_to_cpu),
