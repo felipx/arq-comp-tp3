@@ -1,38 +1,39 @@
+//! @title DEBUG UNIT INSTRUCTION MEMORY LOADER
+//! @file du_imem_loader.v
+//! @author Felipe Montero Bruni
+//! @date 8-2024
+//! @version 0.1
 
-module debug_unit
+module du_imem_loader 
 #(
-    parameter NB_PC           = 32,  //! NB of Program Counter
-    parameter NB_REG          = 32,
-    parameter NB_DMEM_DATA    = 32,
     parameter NB_UART_DATA    = 8 ,
-    parameter NB_UART_ADDR    = 5 ,  //! NB of UART fifo's regs depth
+    parameter NB_REG          = 32,
     parameter NB_INSTRUCTION  = 32,  //! Size of instruction memory data
     parameter IMEM_ADDR_WIDTH = 8    //! Instruction Memory address width
+
 ) (
     // Outputs
-    output reg                           o_cpu_en    ,
-    output reg                           o_tx_start  ,
-    output reg                           o_rd        ,  //! FIFO Rx read enable output
-    output reg                           o_wr        ,  //! FIFO Tx write enable output
-    output reg [NB_UART_DATA    - 1 : 0] o_wdata     ,  //! FIFO Tx write data
-    output reg [NB_UART_ADDR    - 1 : 0] o_wsize     ,
+    output reg                           o_done      ,
+    output reg                           o_tx_start  ,  //! UART Tx start output
+    output reg                           o_rd        ,  //! UART FIFO Rx read enable output
+    output reg                           o_wr        ,  //! UART FIFO Tx write enable output
+    output reg [NB_UART_DATA    - 1 : 0] o_wdata     ,  //! UART FIFO Tx write data
     output reg [NB_INSTRUCTION  - 1 : 0] o_imem_data ,
     output reg [IMEM_ADDR_WIDTH - 1 : 0] o_imem_waddr,
     output reg [1 : 0]                   o_imem_wsize,
     output reg                           o_imem_wen  ,
-    
+
     // Inputs
-    input wire [NB_PC        - 1 : 0] i_pc          ,  //! PC input
-    input wire [NB_REG       - 1 : 0] i_regfile_data,  //! CPU's register file input
-    input wire [NB_DMEM_DATA - 1 : 0] i_dmem_data   ,  //! CPU'd DMEM data input
-    input wire [NB_UART_DATA - 1 : 0] i_rx_data     ,  //! FIFO Rx data input
-    input wire                        i_rx_done     ,
-    input wire                        i_tx_done     ,
-    input wire                        i_rst         ,
-    input wire                        clk           
+    input wire                           i_start     ,
+    input wire                           i_rx_done   ,
+    input wire [NB_UART_DATA    - 1 : 0] i_rx_data   ,  //! UART FIFO Rx data input
+    input wire                           i_rst       ,
+    input wire                           clk            
+
 );
-    
-    localparam NB_STATE       = 9 ;
+
+    //! Local Parameters
+    localparam NB_STATE       = 4 ;
     localparam NB_COUNTER     = 32;
     localparam NB_INSTR_COUNT = 4 ;
 
@@ -41,19 +42,11 @@ module debug_unit
     localparam SOT  = 8'h01;
     localparam EOT  = 8'h04;
 
-    localparam CONT = 8'h01;
-    localparam STEP = 8'h02;
-
-    localparam [NB_STATE - 1 : 0] IDLE         = 9'b000000001;
-    localparam [NB_STATE - 1 : 0] RECEIVE_FW_1 = 9'b000000010;
-    localparam [NB_STATE - 1 : 0] RECEIVE_FW_2 = 9'b000000100;
-    localparam [NB_STATE - 1 : 0] RECEIVE_FW_3 = 9'b000001000;
-    localparam [NB_STATE - 1 : 0] MODE_SELECT  = 9'b000010000;
-    localparam [NB_STATE - 1 : 0] CONT_MODE    = 9'b000100000;
-    localparam [NB_STATE - 1 : 0] STEP_MODE    = 9'b001000000;
-    localparam [NB_STATE - 1 : 0] SEND_REGS    = 9'b010000000;
-    localparam [NB_STATE - 1 : 0] SEND_DMEM    = 9'b100000000;
-    
+    //! Internal States
+    localparam [NB_STATE - 1 : 0] IDLE         = 4'b0001;
+    localparam [NB_STATE - 1 : 0] RECEIVE_FW_1 = 4'b0010;
+    localparam [NB_STATE - 1 : 0] RECEIVE_FW_2 = 4'b0100;
+    localparam [NB_STATE - 1 : 0] RECEIVE_FW_3 = 4'b1000;
     
     //! Internal Signals
     // State Register
@@ -63,8 +56,8 @@ module debug_unit
     // Data Received Registers                         
     reg [NB_REG - 1 : 0] rx_data_reg ;
     reg [NB_REG - 1 : 0] rx_data_next;
-                                              
-    // Data Counter Registers  
+
+    // Data (Word) Counter Registers  
     reg [NB_INSTR_COUNT - 1 : 0] data_count_reg ;
     reg [NB_INSTR_COUNT - 1 : 0] data_count_next;
 
@@ -83,8 +76,6 @@ module debug_unit
     // Internal Counter Register
     reg [NB_COUNTER     - 1 : 0] counter_reg;
 
-    //assign o_tx_start = tx_start_reg;
-
 
     //! FSMD states and data registers
     always @(posedge clk) begin
@@ -95,7 +86,6 @@ module debug_unit
             imem_addr_reg  <= {IMEM_ADDR_WIDTH{1'b0}};
             cksum_reg      <= {NB_UART_DATA{1'b0}};
             imem_write_reg <= 1'b1;
-            //tx_start_reg   <= 1'b0;
         end
         else begin
             state_reg      <= next_state;
@@ -104,10 +94,8 @@ module debug_unit
             imem_addr_reg  <= imem_addr_next;
             cksum_reg      <= cksum_next;
             imem_write_reg <= imem_write_next;
-            //tx_start_reg   <= tx_start_next;
         end
-    end
-
+    end    
 
     //! Next-State Logic
     always @(*) begin
@@ -117,7 +105,7 @@ module debug_unit
         case (state_reg)
             IDLE: begin
                 // Start receiving frame
-                if (i_rx_data == SOT) begin
+                if (i_start) begin
                     next_state = RECEIVE_FW_1;
                 end
             end
@@ -154,39 +142,8 @@ module debug_unit
                 end
                 // If received byte is EOT, FW receive complete
                 if (i_rx_data == EOT) begin
-                    next_state = MODE_SELECT;
+                    next_state = IDLE;
                 end
-            end
-
-            MODE_SELECT: begin
-                if (i_rx_done) begin
-                    // If 0x01 is received go to continuous mode
-                    if (i_rx_data == CONT) begin
-                        next_state = CONT_MODE;
-                    end
-                    // If 0x02 is received go to step mode
-                    else if (i_rx_data == STEP) begin
-                        next_state = STEP_MODE;
-                    end
-                end
-            end
-
-            CONT_MODE: begin
-                if (i_pc == 32'h1A1A1A1A) begin
-                   next_state = SEND_REGS; 
-                end
-            end
-
-            STEP_MODE: begin
-                next_state = STEP_MODE;
-            end
-
-            SEND_REGS: begin
-                next_state = SEND_REGS;
-            end
-
-            SEND_DMEM: begin
-                next_state = SEND_DMEM;
             end
 
             default: next_state = IDLE;
@@ -195,8 +152,9 @@ module debug_unit
 
     //! State Logic
     always @(*) begin
-        // Default values
-        o_cpu_en        = 1'b0;
+        // Default Values
+        o_done          = 1'b0;
+        o_tx_start      = 1'b0;
         o_rd            = 1'b0;
         o_wr            = 1'b0;
         o_wdata         = 8'h00;
@@ -204,30 +162,13 @@ module debug_unit
         o_imem_waddr    = {IMEM_ADDR_WIDTH{1'b0}};
         o_imem_wsize    = 2'b00;
         o_imem_wen      = 1'b0;
-        o_tx_start      = 1'b0;
         rx_data_next    = rx_data_reg;
         data_count_next = data_count_reg;
         imem_addr_next  = imem_addr_reg;
         cksum_next      = cksum_reg;
         imem_write_next = imem_write_reg;
-        //tx_start_next   = 1'b0;
-        
+
         case (state_reg)
-            IDLE: begin
-                // Sends NAK every 4 secs
-                if (counter_reg == 32'd399_999_999) begin
-                    o_wr = 1;
-                    o_wdata = NAK;
-                    //tx_start_next = 1'b1;
-                    o_tx_start = 1'b1;
-                end
-                
-                // If a byte is received, read it
-                if (i_rx_done) begin
-                    o_rd = 1'b1;
-                end
-            end
-            
             RECEIVE_FW_1: begin
                 // First byte received
                 if (i_rx_done) begin
@@ -262,7 +203,6 @@ module debug_unit
                         if (cksum_reg == i_rx_data) begin
                             o_wr           = 1;
                             o_wdata        = ACK;
-                            //tx_start_next  = 1'b1;
                             o_tx_start = 1'b1;
                             cksum_next     = {NB_UART_DATA{1'b0}};
                             imem_addr_next = {IMEM_ADDR_WIDTH{1'b0}};
@@ -271,7 +211,6 @@ module debug_unit
                         else begin
                             o_wr           = 1;
                             o_wdata        = NAK;
-                            //tx_start_next  = 1'b1;
                             o_tx_start = 1'b1;
                             cksum_next     = {NB_UART_DATA{1'b0}};
                             imem_addr_next = {IMEM_ADDR_WIDTH{1'b0}};
@@ -291,42 +230,38 @@ module debug_unit
                 // If a byte is received, read it
                 if (i_rx_done) begin
                     o_rd = 1'b1;
-                    
                     o_wr          = 1;
                     o_wdata       = ACK;
-                    //tx_start_next = 1'b1;
                     o_tx_start = 1'b1;
+                end
+
+                // If received byte is EOT, FW receive complete
+                if (i_rx_data == EOT) begin
+                    o_done = 1'b1;
                 end
             end
 
-            MODE_SELECT: begin
-                // Sends '*' every 4 secs
-                if (counter_reg == 32'd399_999_999) begin
-                    o_wr = 1;
-                    o_wdata = 8'h2A;
-                    //tx_start_next = 1'b1;
-                    o_tx_start = 1'b1;
-                end
+            default: begin
+                o_done = 1'b0;
+                o_rd            = 1'b0;
+                o_wr            = 1'b0;
+                o_wdata         = 8'h00;
+                o_imem_data     = {NB_INSTRUCTION{1'b0}};
+                o_imem_waddr    = {IMEM_ADDR_WIDTH{1'b0}};
+                o_imem_wsize    = 2'b00;
+                o_imem_wen      = 1'b0;
+                o_tx_start      = 1'b0;
+                rx_data_next    = rx_data_reg;
+                data_count_next = data_count_reg;
+                imem_addr_next  = imem_addr_reg;
+                cksum_next      = cksum_reg;
+                imem_write_next = imem_write_reg;
             end
-
-            CONT_MODE: begin
-                o_cpu_en = 1'b1;
-            end
-
-            SEND_REGS: begin
-                
-            end
-            
-            //default: 
         endcase
     end
-    
-    
-    //////////////////////////////////////////////////////////////////
-    // Internal Counter                                             //
-    // On IDLE and MODE_SELECT is used to count 4 secs between NAKs //
-    // On RECEIVE_FW_x states is used to count received data        //
-    //////////////////////////////////////////////////////////////////
+
+
+    //TODO: REMOVE, no longer needed
     
     // Counter logic
     always @(posedge clk) begin
@@ -346,12 +281,10 @@ module debug_unit
             else if (state_reg == RECEIVE_FW_2 && next_state == RECEIVE_FW_3) begin
                 counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_2=>RECEIVE_FW_3 transition
             end
-            else if (state_reg == MODE_SELECT && next_state == CONT_MODE) begin
-                counter_reg <= 32'd0; // Reset counter on MODE_SELECT=>CONT_MODE transition
+            else if (state_reg == RECEIVE_FW_3 && next_state == IDLE) begin
+                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_3=>IDLE transition
             end
-            else if (state_reg == MODE_SELECT && next_state == STEP_MODE) begin
-                counter_reg <= 32'd0; // Reset counter on MODE_SELECT=>STEP_MODE transition
-            end
+
             else begin
                 case (state_reg)
                     IDLE: begin
@@ -370,22 +303,10 @@ module debug_unit
                             counter_reg <= counter_reg + 1;
                         end
                     end
-
-                    MODE_SELECT: begin
-                        // On MODE_SELECT, the counter is used to send '*' every 4 secs
-                        if (counter_reg == 32'd399_999_999) begin
-                            counter_reg <= 32'd0;
-                        end 
-                        else begin
-                            counter_reg <= counter_reg + 1;
-                        end
-                    end
                     
                     default: counter_reg <= 32'd0;
                 endcase
             end
         end
-    end
-
-
+    end    
 endmodule

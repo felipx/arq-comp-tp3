@@ -26,14 +26,17 @@ module uart_top
     input  wire                        i_rd      ,         //! FIFO Rx read enable input
     input  wire                        i_wr      ,         //! FIFO Tx write enable input           
     input  wire [NB_DATA      - 1 : 0] i_wdata   ,         //! FIFO Tx write data input
-    input  wire [NB_FIFO_ADDR - 1 : 0] i_wsize   ,         //! Bytes to send input
     input  wire [NB_COUNTER   - 1 : 0] i_tick_cmp,         //! Value of baud rate generator at which to generate a tick
     input  wire                        i_rst     ,         //! Reset signal input
     input  wire                        clk                 //! Clock signal input
 );
+
+    assign o_rx_done = rx_done_reg;
     
     //! Internal Signals
-    reg rx_done_reg;
+    reg rx_done_reg ;
+    reg tx_start_reg;
+    
 
     wire                   baud_rate_gen_tick_to_uart   ;  //! Baud rate generator tick to uart connection
     wire [NB_DATA - 1 : 0] uart_rx_data_to_fifo_rx_wdata;  //! UART Rx data to FIFO Rx connection
@@ -97,7 +100,7 @@ module uart_top
             .o_tx       (o_tx                      ),
             .o_tx_done  (o_tx_done                 ),
             .i_data     (fifo_tx_rdata_to_uart_tx  ),
-            .i_tx_start (i_tx_start                ),
+            .i_tx_start (tx_start_reg              ),
             .i_stick    (baud_rate_gen_tick_to_uart), 
             .i_rst      (i_rst                     ),
             .clk        (clk                       ) 
@@ -114,8 +117,8 @@ module uart_top
             .o_rdata (fifo_tx_rdata_to_uart_tx),
             .o_empty (o_tx_empty              ),
             .o_full  (o_tx_full               ),
-            .i_rd    (i_tx_start              ),
-            .i_wr    (i_wr                    ),
+            .i_rd    (tx_start_reg            ),
+            .i_wr    (i_wr | i_tx_start       ),
             .i_wdata (i_wdata                 ),
             .i_rst   (i_rst                   ),
             .clk     (clk                     ) 
@@ -136,6 +139,21 @@ module uart_top
         end
     end
 
-    assign o_rx_done = rx_done_reg;
+    // tx_start Logic
+    always @(posedge clk) begin
+        if (i_rst) begin
+            tx_start_reg <= 1'b0;
+        end
+        else begin
+            if (i_tx_start) begin
+                tx_start_reg <= 1'b1;
+            end
+            else begin
+                tx_start_reg <= 1'b0;
+            end
+        end
+    end
+
+    
 
 endmodule
