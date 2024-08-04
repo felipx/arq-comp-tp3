@@ -33,9 +33,9 @@ module du_imem_loader
 );
 
     //! Local Parameters
-    localparam NB_STATE       = 4 ;
-    localparam NB_COUNTER     = 32;
-    localparam NB_INSTR_COUNT = 4 ;
+    localparam NB_STATE       = 4;
+    localparam NB_COUNTER     = 8;
+    localparam NB_INSTR_COUNT = 4;
 
     localparam ACK  = 8'h05;
     localparam NAK  = 8'h15;
@@ -57,7 +57,7 @@ module du_imem_loader
     reg [NB_REG - 1 : 0] rx_data_reg ;
     reg [NB_REG - 1 : 0] rx_data_next;
 
-    // Data (Word) Counter Registers  
+    // Word's bytes Counter Registers  
     reg [NB_INSTR_COUNT - 1 : 0] data_count_reg ;
     reg [NB_INSTR_COUNT - 1 : 0] data_count_next;
 
@@ -73,8 +73,9 @@ module du_imem_loader
     reg imem_write_reg;
     reg imem_write_next;
 
-    // Internal Counter Register
-    reg [NB_COUNTER     - 1 : 0] counter_reg;
+    // Data Counter Registers
+    reg [NB_COUNTER - 1 : 0] counter_reg ;
+    reg [NB_COUNTER - 1 : 0] counter_next;
 
 
     //! FSMD states and data registers
@@ -86,6 +87,7 @@ module du_imem_loader
             imem_addr_reg  <= {IMEM_ADDR_WIDTH{1'b0}};
             cksum_reg      <= {NB_UART_DATA{1'b0}};
             imem_write_reg <= 1'b1;
+            counter_reg    <= {NB_COUNTER{1'b0}};
         end
         else begin
             state_reg      <= next_state;
@@ -94,6 +96,7 @@ module du_imem_loader
             imem_addr_reg  <= imem_addr_next;
             cksum_reg      <= cksum_next;
             imem_write_reg <= imem_write_next;
+            counter_reg    <= counter_next;
         end
     end    
 
@@ -112,7 +115,7 @@ module du_imem_loader
 
             RECEIVE_FW_1: begin
                 if (i_rx_done) begin
-                    if (counter_reg == 32'd1) begin
+                    if (counter_reg == 8'd1) begin
                         // If [blk #] = [~blk #] move to next state
                         if (i_rx_data == ~rx_data_reg[7:0]) begin
                             next_state = RECEIVE_FW_2;
@@ -126,10 +129,10 @@ module du_imem_loader
 
             RECEIVE_FW_2: begin
                 if (i_rx_done) begin
-                    if ((counter_reg == 32'd128) && (cksum_reg == i_rx_data)) begin
+                    if ((counter_reg == 8'd128) && (cksum_reg == i_rx_data)) begin
                         next_state = RECEIVE_FW_3;  // No Error
                     end
-                    else if ((counter_reg == 32'd128) && (cksum_reg != i_rx_data)) begin
+                    else if ((counter_reg == 8'd128) && (cksum_reg != i_rx_data)) begin
                         next_state = IDLE;  // Error, reset FSM
                     end
                 end
@@ -167,15 +170,20 @@ module du_imem_loader
         imem_addr_next  = imem_addr_reg;
         cksum_next      = cksum_reg;
         imem_write_next = imem_write_reg;
+        counter_next    = counter_reg;
 
         case (state_reg)
             RECEIVE_FW_1: begin
                 // First byte received
                 if (i_rx_done) begin
                     o_rd = 1'b1;
+                    counter_next = counter_reg + 1'b1;
 
-                    if (counter_reg == 32'd0) begin
+                    if (counter_reg == 8'd0) begin
                         rx_data_next[7:0] = i_rx_data; // store it in rx_data for future check against second byte
+                    end
+                    else if (counter_reg == 8'd1) begin
+                        counter_next = {NB_COUNTER{1'b0}};
                     end
                 end
             end
@@ -197,23 +205,27 @@ module du_imem_loader
                 // Data received
                 if (i_rx_done) begin
                     o_rd = 1;
+                    counter_next = counter_reg + 1'b1;
+
                     // If end of frame
-                    if (counter_reg == 32'd128) begin
+                    if (counter_reg == 8'd128) begin
                         // Send ACK if cksum OK
                         if (cksum_reg == i_rx_data) begin
                             o_wr           = 1;
                             o_wdata        = ACK;
-                            o_tx_start = 1'b1;
+                            o_tx_start     = 1'b1;
                             cksum_next     = {NB_UART_DATA{1'b0}};
                             imem_addr_next = {IMEM_ADDR_WIDTH{1'b0}};
+                            counter_next   = {NB_COUNTER{1'b0}};
                         end
                         // Else send NAK  
                         else begin
                             o_wr           = 1;
                             o_wdata        = NAK;
-                            o_tx_start = 1'b1;
+                            o_tx_start     = 1'b1;
                             cksum_next     = {NB_UART_DATA{1'b0}};
                             imem_addr_next = {IMEM_ADDR_WIDTH{1'b0}};
+                            counter_next   = {NB_COUNTER{1'b0}};
                         end
                     end
                     // Concatenate received data to form a 32 bit instruction
@@ -256,57 +268,9 @@ module du_imem_loader
                 imem_addr_next  = imem_addr_reg;
                 cksum_next      = cksum_reg;
                 imem_write_next = imem_write_reg;
+                counter_next    = counter_reg;
             end
         endcase
     end
-
-
-    //TODO: REMOVE, no longer needed
-    
-    // Counter logic
-    always @(posedge clk) begin
-        if (i_rst) begin
-            counter_reg <= 32'd0;
-        end 
-        else begin
-            if (state_reg == IDLE && next_state == RECEIVE_FW_1) begin
-                counter_reg <= 32'd0; // Reset counter on IDLE->RECEIVE_FW_1 transition
-            end
-            else if (state_reg == RECEIVE_FW_1 && next_state == IDLE) begin
-                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_1=>IDLE transition
-            end
-            else if (state_reg == RECEIVE_FW_1 && next_state == RECEIVE_FW_2) begin
-                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_1=>RECEIVE_FW_2 transition
-            end
-            else if (state_reg == RECEIVE_FW_2 && next_state == RECEIVE_FW_3) begin
-                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_2=>RECEIVE_FW_3 transition
-            end
-            else if (state_reg == RECEIVE_FW_3 && next_state == IDLE) begin
-                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_3=>IDLE transition
-            end
-
-            else begin
-                case (state_reg)
-                    IDLE: begin
-                        // On IDLE, the counter is used to send NAK every 4 secs
-                        if (counter_reg == 32'd399_999_999) begin
-                            counter_reg <= 32'd0;
-                        end 
-                        else begin
-                            counter_reg <= counter_reg + 1;
-                        end
-                    end
-                    
-                    RECEIVE_FW_1, RECEIVE_FW_2: begin
-                        // On RECEIVE_FW_1/2, the counter is used to count received data
-                        if (i_rx_done) begin
-                            counter_reg <= counter_reg + 1;
-                        end
-                    end
-                    
-                    default: counter_reg <= 32'd0;
-                endcase
-            end
-        end
-    end    
+   
 endmodule

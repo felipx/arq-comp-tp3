@@ -13,9 +13,10 @@ module cpu_core
     parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
 ) (
     // Outputs
-    wire  [NB_PC   - 1 : 0] o_pc          ,
-    wire  [NB_DATA - 1 : 0] o_regfile_data,
-    wire  [NB_DATA - 1 : 0] o_dmem_data   ,
+    wire  [NB_PC          - 1 : 0] o_pc          ,
+    wire  [NB_INSTRUCTION - 1 : 0] o_instr       ,
+    wire  [NB_DATA        - 1 : 0] o_regfile_data,
+    wire  [NB_DATA        - 1 : 0] o_dmem_data   ,
 
     // Inputs
     input                           i_du_rgfile_rd,  //! DU regfile read enable input
@@ -137,6 +138,7 @@ module cpu_core
 
     // Outputs
     assign o_pc           = pc_out_connect                ;
+    assign o_instr        = imem_to_if_id_reg             ;
     assign o_regfile_data = int_regfile_data1_to_id_ex_reg;
     assign o_dmem_data    = data_memory_out_connect       ;
 

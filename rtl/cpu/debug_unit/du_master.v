@@ -6,8 +6,8 @@
 
 module du_master
 #(
-    parameter NB_PC        = 32,  //! NB of Program Counter
-    parameter NB_UART_DATA = 8    //! NB of UART data
+    parameter NB_INSTRUCTION = 32,  //! NB of IMEM data
+    parameter NB_UART_DATA   = 8    //! NB of UART data
 ) (
     // Outputs
     output reg                        o_cpu_en         ,
@@ -20,15 +20,15 @@ module du_master
     output reg [NB_UART_DATA - 1 : 0] o_wdata          ,  //! UART FIFO Tx write data
     
     // Inputs
-    input wire                        i_loader_done   ,
-    input wire                        i_send_regs_done,
-    input wire                        i_send_dmem_done,
-    input wire [NB_PC        - 1 : 0] i_pc            ,  //! PC input
-    input wire [NB_UART_DATA - 1 : 0] i_rx_data       ,  //! UART FIFO Rx data input
-    input wire                        i_rx_done       ,
-    input wire                        i_tx_done       ,
-    input wire                        i_rst           ,
-    input wire                        clk             
+    input wire                          i_loader_done   ,
+    input wire                          i_send_regs_done,
+    input wire                          i_send_dmem_done,
+    input wire [NB_INSTRUCTION - 1 : 0] i_instr         ,
+    input wire [NB_UART_DATA   - 1 : 0] i_rx_data       ,  //! UART FIFO Rx data input
+    input wire                          i_rx_done       ,
+    input wire                          i_tx_done       ,
+    input wire                          i_rst           ,
+    input wire                          clk             
 );
     
     //! Local Parameters
@@ -44,14 +44,14 @@ module du_master
     localparam STEP = 8'h02;
 
     //! Internal States
-    localparam [NB_STATE - 1 : 0] IDLE         = 8'b00000001;
-    localparam [NB_STATE - 1 : 0] RECEIVE_FW   = 8'b00000010;
-    localparam [NB_STATE - 1 : 0] MODE_SELECT  = 8'b00000100;
-    localparam [NB_STATE - 1 : 0] CONT_MODE    = 8'b00001000;
-    localparam [NB_STATE - 1 : 0] STEP_MODE    = 8'b00010000;
-    localparam [NB_STATE - 1 : 0] SEND_REGS    = 8'b00100000;
-    localparam [NB_STATE - 1 : 0] SEND_DMEM    = 8'b01000000;
-    localparam [NB_STATE - 1 : 0] STOP         = 8'b10000000;
+    localparam [NB_STATE - 1 : 0] IDLE         = 8'b00000001;  // 0x01
+    localparam [NB_STATE - 1 : 0] RECEIVE_FW   = 8'b00000010;  // 0x02
+    localparam [NB_STATE - 1 : 0] MODE_SELECT  = 8'b00000100;  // 0x04
+    localparam [NB_STATE - 1 : 0] CONT_MODE    = 8'b00001000;  // 0x08
+    localparam [NB_STATE - 1 : 0] STEP_MODE    = 8'b00010000;  // 0x10
+    localparam [NB_STATE - 1 : 0] SEND_REGS    = 8'b00100000;  // 0x20
+    localparam [NB_STATE - 1 : 0] SEND_DMEM    = 8'b01000000;  // 0x40
+    localparam [NB_STATE - 1 : 0] STOP         = 8'b10000000;  // 0x80
     
     
     //! Internal Signals
@@ -59,17 +59,20 @@ module du_master
     reg [NB_STATE - 1 : 0] state_reg ;
     reg [NB_STATE - 1 : 0] next_state;
 
-    // Internal Counter Register
-    reg [NB_COUNTER     - 1 : 0] counter_reg;
+    // Internal Counter Registers
+    reg [NB_COUNTER - 1 : 0] counter_reg;
+    reg [NB_COUNTER - 1 : 0] counter_next;
 
 
     //! FSMD states and data registers
     always @(posedge clk) begin
         if (i_rst) begin
-            state_reg <= IDLE;
+            state_reg   <= IDLE;
+            counter_reg <= {NB_COUNTER{1'b0}};
         end
         else begin
-            state_reg <= next_state;
+            state_reg   <= next_state;
+            counter_reg <= counter_next;
         end
     end
     
@@ -106,7 +109,7 @@ module du_master
             end
 
             CONT_MODE: begin
-                if (i_pc == 32'h1A1A1A1A) begin
+                if (i_instr == 32'h1A1A1A1A) begin
                    next_state = SEND_REGS; 
                 end
             end
@@ -144,14 +147,18 @@ module du_master
         o_wr              = 1'b0;
         o_wdata           = 8'h00;
         o_tx_start        = 1'b0;
+        counter_next      = counter_reg;
         
         case (state_reg)
             IDLE: begin
+                counter_next = counter_reg + 1'b1;
+
                 // Sends NAK every 4 secs
                 if (counter_reg == 32'd399_999_999) begin
-                    o_wr = 1;
-                    o_wdata = NAK;
-                    o_tx_start = 1'b1;
+                    o_wr         = 1;
+                    o_wdata      = NAK;
+                    o_tx_start   = 1'b1;
+                    counter_next = {NB_COUNTER{1'b0}};
                 end
                 
                 // If a byte is received, read it
@@ -165,11 +172,14 @@ module du_master
             end
             
             MODE_SELECT: begin
+                counter_next = counter_reg + 1'b1;
+
                 // Sends '*' every 4 secs
                 if (counter_reg == 32'd399_999_999) begin
-                    o_wr = 1;
-                    o_wdata = 8'h2A;
-                    o_tx_start = 1'b1;
+                    o_wr         = 1;
+                    o_wdata      = 8'h2A;
+                    o_tx_start   = 1'b1;
+                    counter_next = {NB_COUNTER{1'b0}};
                 end
             end
             
@@ -188,56 +198,5 @@ module du_master
             //default: 
         endcase
     end
-    
-    
-    //TODO: REMOVE, no longer needed
-    
-    // Counter logic
-    always @(posedge clk) begin
-        if (i_rst) begin
-            counter_reg <= 32'd0;
-        end 
-        else begin
-            if (state_reg == IDLE && next_state == RECEIVE_FW) begin
-                counter_reg <= 32'd0; // Reset counter on IDLE->RECEIVE_FW transition
-            end
-            else if (state_reg == RECEIVE_FW && next_state == MODE_SELECT) begin
-                counter_reg <= 32'd0; // Reset counter on RECEIVE_FW_1=>IDLE transition
-            end
-            else if (state_reg == MODE_SELECT && next_state == CONT_MODE) begin
-                counter_reg <= 32'd0; // Reset counter on MODE_SELECT=>CONT_MODE transition
-            end
-            else if (state_reg == MODE_SELECT && next_state == STEP_MODE) begin
-                counter_reg <= 32'd0; // Reset counter on MODE_SELECT=>STEP_MODE transition
-            end
-            
-            else begin
-                case (state_reg)
-                    IDLE: begin
-                        // On IDLE, the counter is used to send NAK every 4 secs
-                        if (counter_reg == 32'd399_999_999) begin
-                            counter_reg <= 32'd0;
-                        end 
-                        else begin
-                            counter_reg <= counter_reg + 1;
-                        end
-                    end
-                    
-                    MODE_SELECT: begin
-                        // On MODE_SELECT, the counter is used to send '*' every 4 secs
-                        if (counter_reg == 32'd399_999_999) begin
-                            counter_reg <= 32'd0;
-                        end 
-                        else begin
-                            counter_reg <= counter_reg + 1;
-                        end
-                    end
-                    
-                    default: counter_reg <= 32'd0;
-                endcase
-            end
-        end
-    end
-
 
 endmodule

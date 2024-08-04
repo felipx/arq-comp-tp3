@@ -26,6 +26,13 @@ module du_tb ();
     reg [7 : 0]           cksum;
     reg [NB_DATA - 1 : 0] i_imem_data [19 : 0];
 
+    wire                       host_uart_tx_done;
+    wire                       host_uart_rx_done;
+    reg                        host_uart_tx_start;
+    reg                        host_uart_rd;      
+    reg                        host_uart_wr;       
+    reg [NB_UART_DATA - 1 : 0] host_uart_wdata;   
+
     //! Connections
     wire cpu_rd_to_uart;
     wire cpu_wr_to_uart;
@@ -34,6 +41,9 @@ module du_tb ();
     wire [NB_UART_DATA - 1 : 0] uart_rx_data_to_cpu;
     wire                        uart_rx_done_to_cpu;
     wire                        uart_tx_done_to_cpu;
+
+
+    
     
     
     // CPU Subsystem
@@ -88,6 +98,34 @@ module du_tb ();
             .clk        (clk                 )
         );
 
+
+    //
+    uart_top
+    #(
+        .NB_COUNTER   (NB_UART_COUNTER),
+        .NB_DATA      (NB_UART_DATA   ),
+        .NB_FIFO_ADDR (7              )
+    )
+        u_uart_host
+        (
+            .o_tx       (                    ),
+            .o_tx_done  (host_uart_tx_done   ),
+            .o_tx_empty (                    ),
+            .o_tx_full  (                    ),
+            .o_rdata    (                    ),
+            .o_rx_done  (host_uart_rx_done   ),
+            .o_rx_empty (                    ),
+            .o_rx_full  (                    ),     
+            .i_rx       (o_RsTx              ),
+            .i_tx_start (host_uart_tx_start  ),
+            .i_rd       (host_uart_rd        ),
+            .i_wr       (host_uart_wr        ),
+            .i_wdata    (cpu_wdata_to_uart   ),
+            .i_tick_cmp (9'h146              ),
+            .i_rst      (i_rst               ),
+            .clk        (clk                 )
+        );
+
     integer i, j;
     integer TBAUD = 52083;
 
@@ -97,6 +135,11 @@ module du_tb ();
         en    = 1'b0;
         i_rst = 1'b0;
         i_RsRx = 1'b1;
+
+        host_uart_tx_start = 1'b0;
+        host_uart_rd       = 1'b0;      
+        host_uart_wr       = 1'b0;      
+        host_uart_wdata    = 8'h00;   
 
         SOT     = 8'h01;
         EOT     = 8'h04;
@@ -167,6 +210,7 @@ module du_tb ();
 
         #20 i_rst = 1'b1;
         #20 i_rst = 1'b0;
+            en    = 1'b1;
 
         #10 i_RsRx = 1'b0; // start
         for (i = 0; i < 8; i = i + 1) begin
@@ -244,11 +288,15 @@ module du_tb ();
 
         #(TBAUD*8)
 
-        en = 1'b1;
+        // Send 0x01
+        #TBAUD i_RsRx = 1'b0; // start
+        for (i = 0; i < 8; i = i + 1) begin
+            #TBAUD i_RsRx = (8'h01 >> i) & 1'b1; 
+        end
+        #TBAUD i_RsRx = 1'b1; // stop
 
-        #245;
+        #(TBAUD*1536);
         
-        #10 en = 1'b0;
 
         #20 $display("DU Testbench finished");
         #20 $finish;

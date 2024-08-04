@@ -99,7 +99,7 @@ module du_regfile_tx
             end
             
             SEND_REG: begin
-                if (word_counter_reg == 3'b100) begin
+                if (word_counter_reg == 3'b100 && i_tx_done) begin
                     if (regfile_addr_reg == 5'd31) begin
                         next_state = IDLE;
                     end
@@ -128,7 +128,9 @@ module du_regfile_tx
         case (state_reg)
             SEND_PC: begin
                 if (word_counter_reg == 3'b100) begin
-                    word_counter_reg = {NB_COUNTER{1'b0}};
+                    if (i_tx_done) begin
+                        word_counter_next = {NB_COUNTER{1'b0}};
+                    end
                 end
                 else if (word_counter_reg == 3'b000) begin
                     o_wdata           = i_pc[7 : 0];
@@ -166,8 +168,10 @@ module du_regfile_tx
             
             SEND_REG: begin
                 if (word_counter_reg == 3'b100) begin
-                    word_counter_reg = {NB_COUNTER{1'b0}};
-                    
+                    if (i_tx_done) begin
+                        word_counter_next = {NB_COUNTER{1'b0}};
+                    end
+
                     if (regfile_addr_reg == 5'd31) begin
                         o_done = 1'b1;
                     end

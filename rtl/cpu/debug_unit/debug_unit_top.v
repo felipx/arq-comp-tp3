@@ -27,14 +27,15 @@ module debug_unit_top
     output wire [4 : 0]                   o_regfile_raddr,
     
     // Inputs
-    input wire [NB_PC        - 1 : 0] i_pc          ,  //! PC input
-    input wire [NB_REG       - 1 : 0] i_regfile_data,  //! CPU's register file input
-    input wire [NB_DMEM_DATA - 1 : 0] i_dmem_data   ,  //! CPU'd DMEM data input
-    input wire [NB_UART_DATA - 1 : 0] i_rx_data     ,  //! UART Rx data input
-    input wire                        i_rx_done     ,
-    input wire                        i_tx_done     ,
-    input wire                        i_rst         ,
-    input wire                        clk            
+    input wire [NB_PC          - 1 : 0] i_pc          ,  //! PC input
+    input wire [NB_INSTRUCTION - 1 : 0] i_instr       ,
+    input wire [NB_REG         - 1 : 0] i_regfile_data,  //! CPU's register file input
+    input wire [NB_DMEM_DATA   - 1 : 0] i_dmem_data   ,  //! CPU'd DMEM data input
+    input wire [NB_UART_DATA   - 1 : 0] i_rx_data     ,  //! UART Rx data input
+    input wire                          i_rx_done     ,
+    input wire                          i_tx_done     ,
+    input wire                          i_rst         ,
+    input wire                          clk            
 );
 
     //! Internal Connections
@@ -64,8 +65,8 @@ module debug_unit_top
     //! Debug Unit Master Controller
     du_master
     #(
-        .NB_PC        (NB_PC       ),
-        .NB_UART_DATA (NB_UART_DATA)
+        .NB_INSTRUCTION (NB_INSTRUCTION),
+        .NB_UART_DATA   (NB_UART_DATA  )
     )
         u_du_master
         (
@@ -80,7 +81,7 @@ module debug_unit_top
             .i_loader_done     (imem_loader_done      ),
             .i_send_regs_done  (regfile_reader_done   ),
             .i_send_dmem_done  (),
-            .i_pc              (i_pc                  ),
+            .i_instr           (i_instr               ),
             .i_rx_data         (i_rx_data             ),
             .i_rx_done         (i_rx_done             ),
             .i_tx_done         (                      ),

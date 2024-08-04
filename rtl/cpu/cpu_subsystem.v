@@ -51,6 +51,7 @@ module cpu_subsystem
     
 
     wire [NB_PC           - 1 : 0] pc_to_du;
+    wire [NB_INSTRUCTION  - 1 : 0] cpu_instr_to_du;
     wire [NB_REG          - 1 : 0] cpu_reg_to_du;
     wire [NB_DATA         - 1 : 0] cpu_dmem_data_to_du;
     
@@ -67,6 +68,7 @@ module cpu_subsystem
         u_cpu
         (
             .o_pc           (pc_to_du                ),
+            .o_instr        (cpu_instr_to_du         ),
             .o_regfile_data (cpu_reg_to_du           ),
             .o_dmem_data    (cpu_dmem_data_to_du     ),
             .i_du_rgfile_rd (du_regfile_rd_to_cpu    ),
@@ -104,6 +106,7 @@ module cpu_subsystem
             .o_regfile_rd   (du_regfile_rd_to_cpu  ),
             .o_regfile_raddr(du_regfile_addr_to_cpu),
             .i_pc           (pc_to_du              ),
+            .i_instr        (cpu_instr_to_du       ),
             .i_regfile_data (cpu_reg_to_du         ),
             .i_dmem_data    (cpu_dmem_data_to_du   ),
             .i_rx_data      (i_uart_rx_data        ),
