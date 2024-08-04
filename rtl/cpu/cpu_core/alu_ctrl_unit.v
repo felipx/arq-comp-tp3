@@ -5,7 +5,6 @@
 //! @version 0.1
 
 module alu_ctrl_unit
-#()
 (
     // Output
     output reg [4 : 0] o_alu_op,  //! ALU operation control signal

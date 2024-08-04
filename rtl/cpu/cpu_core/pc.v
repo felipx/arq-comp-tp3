@@ -26,11 +26,8 @@ module pc
         if (i_rst) begin
             pc_reg <= {NB_PC{1'b0}};
         end
-        else begin
-            if (i_en)
-                pc_reg <= i_pc;
-            else
-                pc_reg <= pc_reg;
+        else if (i_en) begin
+            pc_reg <= i_pc;
         end
     end
 

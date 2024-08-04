@@ -20,7 +20,7 @@ module if_id_reg
     input  [NB_PC    - 1 : 0] i_pc_next,  //! Program Counter + 4 input
     input                     i_flush  ,  //! Branch flush signal input
     input                     i_en     ,  //! Enable input
-    input                     i_rst    ,  //! Reset input
+    //input                     i_rst    ,  //! Reset input
     input                     clk         //! Clock input
 );
 
@@ -35,7 +35,7 @@ module if_id_reg
 
     //! IF/ID Model
     always @(posedge clk) begin
-        if (i_rst || i_flush) begin
+        if (i_flush) begin // i_rst removed
             // Reset logic: Clear all register locations
             for (index = 0; index < DATA_DEPTH; index = index + 1) begin
                 reg_array[index] <= {DATA_WIDTH{1'b0}};

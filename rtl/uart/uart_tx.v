@@ -45,6 +45,8 @@ module uart_tx
     reg                     tx_reg;
     reg                     tx_next;
 
+    //! Tx Output Logic
+    assign o_tx = tx_reg;
 
     //! FSMD state & data registers
     always @(posedge clk) begin
@@ -128,7 +130,5 @@ module uart_tx
             end
         endcase
     end
-
-    assign o_tx = tx_reg;
     
 endmodule

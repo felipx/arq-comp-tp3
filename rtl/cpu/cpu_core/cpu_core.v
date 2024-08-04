@@ -13,15 +13,21 @@ module cpu_core
     parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
 ) (
     // Outputs
+    output [NB_PC          - 1 : 0] o_pc          ,
+    output [NB_INSTRUCTION - 1 : 0] o_instr       ,
+    output [NB_DATA        - 1 : 0] o_regfile_data,
+    output [NB_DATA        - 1 : 0] o_dmem_data   ,
 
     // Inputs
-    input [NB_DATA         - 1 : 0] i_imem_data ,  //! Instruction memory input
-    input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr,  //! Instrunction memory write address input
-    input [1 : 0]                   i_mem_wsize ,  //! Instruction memory write size input
-    input                           i_imem_wen  ,  //! Instruction memory write enable input
-    input                           i_en        ,  //! Enable signal input
-    input                           i_rst       ,
-    input                           clk         
+    input                           i_du_rgfile_rd,  //! DU regfile read enable input
+    input [4 : 0]                   i_regfile_addr,  //! Register File read address input
+    input [NB_DATA         - 1 : 0] i_imem_data   ,  //! Instruction memory input
+    input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr  ,  //! Instrunction memory write address input
+    input [1 : 0]                   i_mem_wsize   ,  //! Instruction memory write size input
+    input                           i_imem_wen    ,  //! Instruction memory write enable input
+    input                           i_en          ,  //! Enable signal input
+    input                           i_rst         ,
+    input                           clk           
 );
 
     //! Local Parameters
@@ -39,6 +45,9 @@ module cpu_core
     
     // Instruction Memory output connections
     wire [NB_INSTRUCTION - 1 : 0] imem_to_if_id_reg;               //! Instruction memory to IF/ID reg connection
+
+    // Debug Unit Register File addr1 Mux output connections
+    wire [4 : 0] du_regfile_addr1_mux_out_connect;
     
     // IF/ID Register output connections
     wire [NB_INSTRUCTION - 1 : 0] if_id_instruction_out_connect;   //! Instruction from IF/ID reg connection
@@ -46,8 +55,8 @@ module cpu_core
     wire [NB_PC          - 1 : 0] if_id_pc_next_out_connect    ;   //! PC+4 from IF/ID reg connection
     
     // Base Integer Register File output connections
-    wire [NB_INSTRUCTION - 1 : 0] int_regfile_data1_to_id_ex_reg;  //! Integer Refile data1 to ID/EX pipelinereg
-    wire [NB_INSTRUCTION - 1 : 0] int_regfile_data2_to_id_ex_reg;  //! Integer Refile data2 to ID/EX pipelinereg
+    wire [NB_DATA - 1 : 0] int_regfile_data1_to_id_ex_reg;         //! Integer Refile data1 to ID/EX pipelinereg
+    wire [NB_DATA - 1 : 0] int_regfile_data2_to_id_ex_reg;         //! Integer Refile data2 to ID/EX pipelinereg
     
     // Immediate Generator output connections
     wire [NB_DATA - 1 : 0] imm_out_connect;                        //! Immediate Generator output connection
@@ -126,6 +135,12 @@ module cpu_core
     // WB Mux output connections
     wire [NB_DATA - 1 : 0] wb_mux_out_connect;
 
+
+    // Outputs
+    assign o_pc           = pc_out_connect                ;
+    assign o_instr        = imem_to_if_id_reg             ;
+    assign o_regfile_data = int_regfile_data1_to_id_ex_reg;
+    assign o_dmem_data    = data_memory_out_connect       ;
 
 
     //
@@ -206,13 +221,26 @@ module cpu_core
             .i_pc_next (pc_adder_out_connect              ),
             .i_flush   (branch_ctrl_unit_flush_out_connect),   
             .i_en      (hdu_IfIdWrite_to_IfIdReg & i_en   ),  
-            .i_rst     (i_rst                             ),  
+            //.i_rst     (i_rst                             ),  
             .clk       (clk                               ) 
         );
     
     //
     // Instruction Decode/Register File Read Stage Modules
     //
+
+    // Debug Unit Register File addr1 Mux
+    mux_2to1
+    #(
+        .NB_MUX (5)
+    )
+        u_du_regfile_mux
+        (
+            .o_mux (du_regfile_addr1_mux_out_connect      ),
+            .i_a   (if_id_instruction_out_connect[19 : 15]),
+            .i_b   (i_regfile_addr                        ),
+            .i_sel (i_du_rgfile_rd                        )
+        );
     
     // Integer Register File
     regfile
@@ -223,7 +251,7 @@ module cpu_core
         (
             .o_dout1 (int_regfile_data1_to_id_ex_reg        ),
             .o_dout2 (int_regfile_data2_to_id_ex_reg        ),
-            .i_addr1 (if_id_instruction_out_connect[19 : 15]),
+            .i_addr1 (du_regfile_addr1_mux_out_connect      ),
             .i_addr2 (if_id_instruction_out_connect[24 : 20]),
             .i_waddr (mem_wb_instruction_out_connect[11 : 7]),
             .i_wdata (wb_mux_out_connect                    ),
@@ -257,7 +285,6 @@ module cpu_core
     
     // Hazard Detection Unit
     hazard_detection_unit
-    #()
         u_hazard_detection_unit
         (
             .o_pc_write       (hdu_pcWrite_to_pc                     ),
@@ -306,7 +333,7 @@ module cpu_core
             .i_imm      (imm_out_connect                            ),
             .i_instr    (if_id_instruction_out_connect              ),
             .i_en       (i_en                                       ),
-            .i_rst      (i_rst                                      ),
+            //.i_rst      (i_rst                                      ),
             .clk        (clk                                        ) 
         );
     
@@ -397,7 +424,6 @@ module cpu_core
     
     // ALU Control Unit
     alu_ctrl_unit
-    #()
         u_alu_ctrl_unit
         (
             .o_alu_op (alu_op_out_connect                    ),     
@@ -408,7 +434,6 @@ module cpu_core
     
     // EX Forwarding Unit
     ex_forwarding_unit
-    #()
         u_ex_forwarding_unit
         (
             .o_forward_a    (fowrward_unit_a_out_connect           ),   
@@ -439,7 +464,7 @@ module cpu_core
             .i_data2   (forwarding_mux_b_out_connect                                                                                ),
             .i_instr   (id_ex_instruction_out_connect                                                                               ),
             .i_en      (i_en                                                                                                        ),
-            .i_rst     (i_rst                                                                                                       ),
+            //.i_rst     (i_rst                                                                                                       ),
             .clk       (clk                                                                                                         ) 
         );
     
@@ -480,15 +505,14 @@ module cpu_core
         );
     
     // MEM Forwarding Unit
-    mem_forwarding_unit
-    #()
-        u_mem_forwarding_unit
-        (
-            .o_forward_b   (),
-            .i_mem_rs2     (),
-            .i_wb_rd       (),
-            .i_wb_RegWrite () 
-        );
+    //mem_forwarding_unit
+    //    u_mem_forwarding_unit
+    //    (
+    //        .o_forward_b   (),
+    //        .i_mem_rs2     (),
+    //        .i_wb_rd       (),
+    //        .i_wb_RegWrite () 
+    //    );
     
     // MEM/WB Pipeline Register
     mem_wb_reg
@@ -508,7 +532,7 @@ module cpu_core
             .i_alu     (ex_mem_alu_out_connect             ),
             .i_instr   (ex_mem_instruction_out_connect     ),
             .i_en      (i_en                               ),
-            .i_rst     (i_rst                              ),
+            //.i_rst     (i_rst                              ),
             .clk       (clk                                ) 
         );
     
