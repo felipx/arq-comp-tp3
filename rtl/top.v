@@ -1,25 +1,32 @@
 module top
 #(
-    parameter NB_PC              = 32,  //! NB of Program Counter
-    parameter NB_INSTRUCTION     = 32,  //! Size of each memory location
-    parameter NB_DATA            = 32,  //! Size of Integer Base registers
-    parameter IMEM_ADDR_WIDTH    = 8 ,  //! Instruction Memory address width
-    parameter DMEM_ADDR_WIDTH    = 5 ,  //! Data Memory address width
+    parameter NB_PC           = 32,  //! NB of Program Counter
+    parameter NB_INSTRUCTION  = 32,  //! Size of each memory location
+    parameter NB_DATA         = 32,  //! Size of Integer Base registers
+    parameter IMEM_ADDR_WIDTH = 7 ,  //! Instruction Memory address width
+    parameter DMEM_ADDR_WIDTH = 7 ,  //! Data Memory address width       
 
     // UART Parameters
-    parameter NB_UART_COUNTER    = 9 ,  //! NB of baud generator counter reg
-    parameter NB_UART_DATA       = 9 ,  //! NB of UART data reg
-    parameter NB_UART_ADDR       = 5    //! NB of UART fifo's regs depth
+    parameter NB_UART_COUNTER = 9 ,  //! NB of baud generator counter reg
+    parameter NB_UART_DATA    = 9 ,  //! NB of UART data reg
+    parameter NB_UART_ADDR    = 2    //! NB of UART fifo's regs depth
+                                      
+    //parameter NB_LEDS         = 4 ,  // edu-ciaa board
+    //parameter NB_OUT          = 16   // edu-ciaa board
 ) (
     // Ouputs
-    output wire o_RsTx,
+    //output wire [NB_OUT  - 1 : 0] B1    , // edu-ciaa board
+    //output wire [NB_LEDS - 1 : 0] o_led , // edu-ciaa board
+    output wire                   o_RsTx,
 
     // Inputs
     input  wire i_RsRx,
     input  wire i_rst ,
-    input  wire clk
+    input  wire i_clk    // If ppl is used i_clk else clk
 );
     
+    wire clk; // if pll is used
+
     //! Connections
     wire cpu_rd_to_uart;
     wire cpu_wr_to_uart;
@@ -28,7 +35,16 @@ module top
     wire [NB_UART_DATA - 1 : 0] uart_rx_data_to_cpu;
     wire                        uart_rx_done_to_cpu;
     wire                        uart_tx_done_to_cpu;
-    
+
+
+    pll
+        u_pll_0
+        ( 
+            .clk_out1_0 (clk  ),
+            .locked_0   (     ),
+            .clk_in1_0  (i_clk),
+            .reset_0    (i_rst)    
+        );
     
     // CPU Subsystem
     cpu_subsystem

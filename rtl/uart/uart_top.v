@@ -31,11 +31,11 @@ module uart_top
     input  wire                        clk                 //! Clock signal input
 );
 
-    assign o_rx_done = rx_done_reg;
-    
     //! Internal Signals
     reg rx_done_reg ;
     reg tx_start_reg;
+    
+    assign o_rx_done = rx_done_reg;
     
 
     wire                   baud_rate_gen_tick_to_uart   ;  //! Baud rate generator tick to uart connection

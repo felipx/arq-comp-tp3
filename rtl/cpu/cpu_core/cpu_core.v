@@ -13,10 +13,10 @@ module cpu_core
     parameter DMEM_ADDR_WIDTH    = 5    //! Data Memory address width
 ) (
     // Outputs
-    wire  [NB_PC          - 1 : 0] o_pc          ,
-    wire  [NB_INSTRUCTION - 1 : 0] o_instr       ,
-    wire  [NB_DATA        - 1 : 0] o_regfile_data,
-    wire  [NB_DATA        - 1 : 0] o_dmem_data   ,
+    output [NB_PC          - 1 : 0] o_pc          ,
+    output [NB_INSTRUCTION - 1 : 0] o_instr       ,
+    output [NB_DATA        - 1 : 0] o_regfile_data,
+    output [NB_DATA        - 1 : 0] o_dmem_data   ,
 
     // Inputs
     input                           i_du_rgfile_rd,  //! DU regfile read enable input
@@ -221,7 +221,7 @@ module cpu_core
             .i_pc_next (pc_adder_out_connect              ),
             .i_flush   (branch_ctrl_unit_flush_out_connect),   
             .i_en      (hdu_IfIdWrite_to_IfIdReg & i_en   ),  
-            .i_rst     (i_rst                             ),  
+            //.i_rst     (i_rst                             ),  
             .clk       (clk                               ) 
         );
     
@@ -285,7 +285,6 @@ module cpu_core
     
     // Hazard Detection Unit
     hazard_detection_unit
-    #()
         u_hazard_detection_unit
         (
             .o_pc_write       (hdu_pcWrite_to_pc                     ),
@@ -334,7 +333,7 @@ module cpu_core
             .i_imm      (imm_out_connect                            ),
             .i_instr    (if_id_instruction_out_connect              ),
             .i_en       (i_en                                       ),
-            .i_rst      (i_rst                                      ),
+            //.i_rst      (i_rst                                      ),
             .clk        (clk                                        ) 
         );
     
@@ -425,7 +424,6 @@ module cpu_core
     
     // ALU Control Unit
     alu_ctrl_unit
-    #()
         u_alu_ctrl_unit
         (
             .o_alu_op (alu_op_out_connect                    ),     
@@ -436,7 +434,6 @@ module cpu_core
     
     // EX Forwarding Unit
     ex_forwarding_unit
-    #()
         u_ex_forwarding_unit
         (
             .o_forward_a    (fowrward_unit_a_out_connect           ),   
@@ -467,7 +464,7 @@ module cpu_core
             .i_data2   (forwarding_mux_b_out_connect                                                                                ),
             .i_instr   (id_ex_instruction_out_connect                                                                               ),
             .i_en      (i_en                                                                                                        ),
-            .i_rst     (i_rst                                                                                                       ),
+            //.i_rst     (i_rst                                                                                                       ),
             .clk       (clk                                                                                                         ) 
         );
     
@@ -508,15 +505,14 @@ module cpu_core
         );
     
     // MEM Forwarding Unit
-    mem_forwarding_unit
-    #()
-        u_mem_forwarding_unit
-        (
-            .o_forward_b   (),
-            .i_mem_rs2     (),
-            .i_wb_rd       (),
-            .i_wb_RegWrite () 
-        );
+    //mem_forwarding_unit
+    //    u_mem_forwarding_unit
+    //    (
+    //        .o_forward_b   (),
+    //        .i_mem_rs2     (),
+    //        .i_wb_rd       (),
+    //        .i_wb_RegWrite () 
+    //    );
     
     // MEM/WB Pipeline Register
     mem_wb_reg
@@ -536,7 +532,7 @@ module cpu_core
             .i_alu     (ex_mem_alu_out_connect             ),
             .i_instr   (ex_mem_instruction_out_connect     ),
             .i_en      (i_en                               ),
-            .i_rst     (i_rst                              ),
+            //.i_rst     (i_rst                              ),
             .clk       (clk                                ) 
         );
     

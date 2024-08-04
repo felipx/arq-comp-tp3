@@ -22,7 +22,7 @@ module ex_mem_reg
     input  [DATA_WIDTH - 1 : 0] i_data2  ,  //! Data for store instructions input
     input  [DATA_WIDTH - 1 : 0] i_instr  ,  //! Instruction input
     input                       i_en     ,  //! Enable signal input
-    input                       i_rst    ,  //! Reset signal
+    //input                       i_rst    ,  //! Reset signal
     input                       clk         //! Clock signal    
 );
 
@@ -36,13 +36,14 @@ module ex_mem_reg
 
     // IF/EX Register Model
     always @(posedge clk) begin
-        if (i_rst) begin
-            // Reset logic: Clear all register locations
-            for (index = 0; index < DATA_DEPTH; index = index + 1) begin
-                reg_array[index] <= {DATA_WIDTH{1'b0}};
-            end
-        end
-        else if (i_en) begin
+        //if (i_rst) begin
+        //    // Reset logic: Clear all register locations
+        //    for (index = 0; index < DATA_DEPTH; index = index + 1) begin
+        //        reg_array[index] <= {DATA_WIDTH{1'b0}};
+        //    end
+        //end
+        //else
+        if (i_en) begin
             reg_array[0] <= i_ctrl   ;
             reg_array[1] <= i_pc_next;
             reg_array[2] <= i_alu    ;
