@@ -5,7 +5,6 @@
 //! @version 0.1
 
 module ex_forwarding_unit
-#()
 (
     // Outputs
     output reg [1 : 0] o_forward_a,     //! Forwarding control for source A
