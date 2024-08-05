@@ -25,7 +25,7 @@ module id_ex_reg
     input  [DATA_WIDTH - 1 : 0] i_rs2_data,  //! Register 2 input
     input  [DATA_WIDTH - 1 : 0] i_imm     ,  //! Immediate input
     input  [DATA_WIDTH - 1 : 0] i_instr   ,  //! Instruction input
-    input                       i_en      ,  //! Enable signal input
+    (* direct_enable = "true" *) input                       i_en      ,  //! Enable signal input
     //input                       i_rst     ,  //! Reset signal
     input                       clk          //! Clock signal    
 );

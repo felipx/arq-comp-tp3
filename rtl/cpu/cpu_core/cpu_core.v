@@ -23,7 +23,7 @@ module cpu_core
     input [4 : 0]                   i_regfile_addr,  //! Register File read address input
     input [NB_DATA         - 1 : 0] i_imem_data   ,  //! Instruction memory input
     input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr  ,  //! Instrunction memory write address input
-    input [1 : 0]                   i_mem_wsize   ,  //! Instruction memory write size input
+    input [1 : 0]                   i_mem_size    ,  //! Instruction memory write size input
     input                           i_imem_wen    ,  //! Instruction memory write enable input
     input                           i_en          ,  //! Enable signal input
     input                           i_rst         ,
@@ -198,7 +198,7 @@ module cpu_core
             .i_din   (i_imem_data                            ),
             .i_waddr (i_imem_waddr                           ),
             .i_raddr (pc_out_connect[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_wsize (i_mem_wsize                            ),
+            .i_size  (i_mem_size                             ),
             .i_wen   (i_imem_wen                             ),
             .i_ren   (~i_imem_wen & i_en                     ),
             .i_rst   (i_rst                                  ),
@@ -221,7 +221,7 @@ module cpu_core
             .i_pc_next (pc_adder_out_connect              ),
             .i_flush   (branch_ctrl_unit_flush_out_connect),   
             .i_en      (hdu_IfIdWrite_to_IfIdReg & i_en   ),  
-            //.i_rst     (i_rst                             ),  
+            .i_rst     (i_rst                             ),  
             .clk       (clk                               ) 
         );
     
@@ -483,7 +483,7 @@ module cpu_core
             .i_din   (ex_mem_data_out_connect                        ),
             .i_waddr (ex_mem_alu_out_connect[DMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
             .i_raddr (ex_mem_alu_out_connect[DMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_wsize (data_mem_ctrl_unit_size_out_connect            ),
+            .i_size  (data_mem_ctrl_unit_size_out_connect            ),
             .i_wen   (ex_mem_ctrl_out_connect[2]                     ),
             .i_ren   (ex_mem_ctrl_out_connect[1]                     ),
             .i_rst   (i_rst                                          ),

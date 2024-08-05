@@ -21,7 +21,7 @@ module debug_unit_top
     output wire [NB_UART_DATA    - 1 : 0] o_wdata        ,  //! UART Tx write data
     output wire [NB_INSTRUCTION  - 1 : 0] o_imem_data    ,
     output wire [IMEM_ADDR_WIDTH - 1 : 0] o_imem_waddr   ,
-    output wire [1 : 0]                   o_imem_wsize   ,
+    output wire [1 : 0]                   o_imem_size    ,
     output wire                           o_imem_wen     ,
     output wire                           o_regfile_rd   ,
     output wire [4 : 0]                   o_regfile_raddr,
@@ -41,10 +41,13 @@ module debug_unit_top
     //! Internal Connections
     wire                        master_load_fw_start     ;
     wire                        master_send_regs_start   ;
+    wire                        master_send_dmem_start   ;
+    wire [1 : 0]                master_imem_rsize        ;
     wire                        master_tx_start          ;
     wire                        master_uart_rd           ;
     wire                        master_uart_wr           ;
     wire [NB_UART_DATA - 1 : 0] master_uart_wdata        ;
+    wire [1 : 0]                imem_loader_imem_wsize   ;
     wire                        imem_loader_done         ;
     wire                        imem_loader_tx_start     ;
     wire                        imem_loader_uart_rd      ;
@@ -54,10 +57,14 @@ module debug_unit_top
     wire                        regfile_reader_tx_start  ;
     wire                        regfile_reader_uart_wr   ;
     wire [NB_UART_DATA - 1 : 0] regfile_reader_uart_wdata;
+    wire                        dmem_tx_done             ;
+    wire                        dmem_tx_uart_rd          ;
 
     // Output Logic
+    assign o_imem_size = master_imem_rsize | imem_loader_imem_wsize;
+
     assign o_tx_start = master_tx_start   | imem_loader_tx_start   | regfile_reader_tx_start  ;
-    assign o_rd       = master_uart_rd    | imem_loader_uart_rd                               ;
+    assign o_rd       = master_uart_rd    | imem_loader_uart_rd    | dmem_tx_uart_rd          ;
     assign o_wr       = master_uart_wr    | imem_loader_uart_wr    | regfile_reader_uart_wr   ;
     assign o_wdata    = master_uart_wdata | imem_loader_uart_wdata | regfile_reader_uart_wdata;
     
@@ -73,18 +80,19 @@ module debug_unit_top
             .o_cpu_en          (o_cpu_en              ),
             .o_load_start      (master_load_fw_start  ),
             .o_send_regs_start (master_send_regs_start),
-            .o_send_dmem_start (),
+            .o_send_dmem_start (master_send_dmem_start),
+            .o_imem_rsize      (master_imem_rsize     ),
             .o_tx_start        (master_tx_start       ),
             .o_rd              (master_uart_rd        ),
             .o_wr              (master_uart_wr        ),
             .o_wdata           (master_uart_wdata     ),
             .i_loader_done     (imem_loader_done      ),
             .i_send_regs_done  (regfile_reader_done   ),
-            .i_send_dmem_done  (),
+            .i_send_dmem_done  (dmem_tx_done          ),
             .i_instr           (i_instr               ),
             .i_rx_data         (i_rx_data             ),
             .i_rx_done         (i_rx_done             ),
-            .i_tx_done         (                      ),
+            //.i_tx_done         (                      ),
             .i_rst             (i_rst                 ),
             .clk               (clk                   )
         );
@@ -107,7 +115,7 @@ module debug_unit_top
             .o_wdata      (imem_loader_uart_wdata),
             .o_imem_data  (o_imem_data           ),
             .o_imem_waddr (o_imem_waddr          ),
-            .o_imem_wsize (o_imem_wsize          ),
+            .o_imem_wsize (imem_loader_imem_wsize),
             .o_imem_wen   (o_imem_wen            ),
             .i_start      (master_load_fw_start  ),
             .i_rx_done    (i_rx_done             ),
@@ -139,5 +147,22 @@ module debug_unit_top
             .i_rst           (i_rst                    ),
             .clk             (clk                      )
         );
+    
+    
+    //! Debug Unit Data Memory Read/Send Unit
+    //du_dmem_tx
+    //#(
+    //    .NB_DATA      (NB_DMEM_DATA),     
+    //    .NB_UART_DATA (NB_UART_DATA)
+    //)
+    //    u_du_dmem_tx
+    //    (
+    //        .o_done   (dmem_tx_done          ),
+    //        .o_rd     (dmem_tx_uart_rd       ),
+    //        .i_start  (master_send_dmem_start),
+    //        .i_rx_done(i_rx_done             ),
+    //        .i_rst    (i_rst                 ),
+    //        .clk      (clk                   )
+    //    );
     
 endmodule

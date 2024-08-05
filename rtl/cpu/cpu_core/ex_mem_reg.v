@@ -21,7 +21,7 @@ module ex_mem_reg
     input  [DATA_WIDTH - 1 : 0] i_alu    ,  //! ALU result input
     input  [DATA_WIDTH - 1 : 0] i_data2  ,  //! Data for store instructions input
     input  [DATA_WIDTH - 1 : 0] i_instr  ,  //! Instruction input
-    input                       i_en     ,  //! Enable signal input
+    (* direct_enable = "true" *) input                       i_en     ,  //! Enable signal input
     //input                       i_rst    ,  //! Reset signal
     input                       clk         //! Clock signal    
 );
