@@ -10,47 +10,50 @@ module if_id_reg
     parameter NB_PC    = 32               //! Program Counter width
 ) (
     // Outputs
-    output [NB_INSTR - 1 : 0] o_instr  ,  //! Instruction output
-    output [NB_PC    - 1 : 0] o_pc     ,  //! Program Counter output
-    output [NB_PC    - 1 : 0] o_pc_next,  //! Program Counter + 4 output
+    output reg [NB_PC    - 1 : 0] o_pc      ,  //! Program Counter output
+    output reg [NB_PC    - 1 : 0] o_pc_next ,  //! Program Counter + 4 output
+    output reg [NB_INSTR - 1 : 0] o_instr   ,  //! Instruction output
+    output reg [6 : 0]            o_opcode  ,
+    output reg [4 : 0]            o_rd_add  ,
+    output reg [2 : 0]            o_func3   ,
+    output reg [4 : 0]            o_rs1_addr,
+    output reg [4 : 0]            o_rs2_addr,
+    output reg [6 : 0]            o_func7   ,
     
     // Inputs
-    input  [NB_INSTR - 1 : 0] i_instr  ,  //! Instruction input
-    input  [NB_PC    - 1 : 0] i_pc     ,  //! Program Counter input
-    input  [NB_PC    - 1 : 0] i_pc_next,  //! Program Counter + 4 input
-    input                     i_flush  ,  //! Branch flush signal input
-    input                     i_en     ,  //! Enable input
-    //input                     i_rst    ,  //! Reset input
-    input                     clk         //! Clock input
+    input wire [NB_INSTR - 1 : 0] i_instr  ,  //! Instruction input
+    input wire [NB_PC    - 1 : 0] i_pc     ,  //! Program Counter input
+    input wire [NB_PC    - 1 : 0] i_pc_next,  //! Program Counter + 4 input
+    input wire                    i_flush  ,  //! Branch flush signal input
+    input wire                    i_en     ,  //! Enable input
+    input wire                    i_rst    ,  //! Reset input
+    input wire                    clk         //! Clock input
 );
-
-    //! Local Parameters
-    localparam DATA_WIDTH = 32;
-    localparam DATA_DEPTH = 3 ;           // Depth of the register array
-
-    //! Internal Signals
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0]; // Register array
-
-    integer index;
 
     //! IF/ID Model
     always @(posedge clk) begin
-        if (i_flush) begin // i_rst removed
-            // Reset logic: Clear all register locations
-            for (index = 0; index < DATA_DEPTH; index = index + 1) begin
-                reg_array[index] <= {DATA_WIDTH{1'b0}};
-            end
+        if (i_rst || i_flush) begin
+            o_pc      <= {NB_PC{1'b0}};
+            o_pc_next <= {NB_PC{1'b0}};
+            o_instr   <= {NB_INSTR{1'b0}};
+            o_opcode  <= {7{1'b0}};
+            o_rd_add  <= {5{1'b0}};
+            o_func3   <= {3{1'b0}};
+            o_rs1_addr<= {5{1'b0}};
+            o_rs2_addr<= {5{1'b0}};
+            o_func7   <= {7{1'b0}};
         end
         else if (i_en) begin
-            reg_array[0] <= i_instr  ;
-            reg_array[1] <= i_pc     ;
-            reg_array[2] <= i_pc_next;
+            o_pc      <= i_pc            ;
+            o_pc_next <= i_pc_next       ;
+            o_instr   <= i_instr         ;
+            o_opcode  <= i_instr[6  :  0];
+            o_rd_add  <= i_instr[11 :  7];
+            o_func3   <= i_instr[14 : 12];
+            o_rs1_addr<= i_instr[19 : 15];
+            o_rs2_addr<= i_instr[24 : 20];
+            o_func7   <= i_instr[31 : 25];
         end
     end
-
-    // Output Logic
-    assign o_instr   = reg_array[0];
-    assign o_pc      = reg_array[1];
-    assign o_pc_next = reg_array[2];
 
 endmodule

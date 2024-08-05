@@ -38,7 +38,7 @@ module cpu_subsystem
     wire                           debug_unit_cpu_en;
     wire [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu;
     wire [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu;
-    wire [1 : 0]                   du_imem_wsize_to_cpu;
+    wire [1 : 0]                   du_imem_size_to_cpu;
     wire                           du_imem_wen_to_cpu;
 
     wire                           du_regfile_rd_to_cpu;
@@ -75,7 +75,7 @@ module cpu_subsystem
             .i_regfile_addr (du_regfile_addr_to_cpu  ),
             .i_imem_data    (du_imem_data_to_cpu     ),
             .i_imem_waddr   (du_imem_waddr_to_cpu    ),
-            .i_mem_wsize    (du_imem_wsize_to_cpu    ),
+            .i_mem_size     (du_imem_size_to_cpu     ),
             .i_imem_wen     (du_imem_wen_to_cpu      ),
             .i_en           (i_en & debug_unit_cpu_en),
             .i_rst          (i_rst                   ),
@@ -101,7 +101,7 @@ module cpu_subsystem
             .o_wdata        (o_uart_wdata          ),
             .o_imem_data    (du_imem_data_to_cpu   ),
             .o_imem_waddr   (du_imem_waddr_to_cpu  ),
-            .o_imem_wsize   (du_imem_wsize_to_cpu  ),
+            .o_imem_size    (du_imem_size_to_cpu   ),
             .o_imem_wen     (du_imem_wen_to_cpu    ),
             .o_regfile_rd   (du_regfile_rd_to_cpu  ),
             .o_regfile_raddr(du_regfile_addr_to_cpu),

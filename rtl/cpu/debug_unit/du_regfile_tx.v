@@ -50,7 +50,7 @@ module du_regfile_tx
     reg [4 : 0] regfile_addr_reg ;
     reg [4 : 0] regfile_addr_next;
     
-    // Word bytes counter registers
+    // Word's bytes counter registers
     reg [NB_COUNTER - 1 : 0] word_counter_reg ;
     reg [NB_COUNTER - 1 : 0] word_counter_next;
     

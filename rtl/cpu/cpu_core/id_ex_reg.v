@@ -6,65 +6,73 @@
 
 module id_ex_reg
 #(
-    parameter DATA_WIDTH = 32                //! NB of Data
+    parameter NB_PC      = 32,               //! NB of PC
+    parameter DATA_WIDTH = 32,               //! NB of Data
+    parameter NB_CTRL    = 11                //! NB of control signals 
 ) (
     // Outputs
-    output [DATA_WIDTH - 1 : 0] o_ctrl    ,  //! Control signals output
-    output [DATA_WIDTH - 1 : 0] o_pc      ,  //! Program Counter output
-    output [DATA_WIDTH - 1 : 0] o_pc_next ,  //! Program Counter + 4 output
-    output [DATA_WIDTH - 1 : 0] o_rs1_data,  //! Register 1 output
-    output [DATA_WIDTH - 1 : 0] o_rs2_data,  //! Register 2 output
-    output [DATA_WIDTH - 1 : 0] o_imm     ,  //! Immediate output
-    output [DATA_WIDTH - 1 : 0] o_instr   ,  //! Instruction output
+    output reg                      o_regWrite,
+    output reg                      o_memRead ,
+    output reg                      o_memWrite,
+    output reg                      o_ALUSrc  ,
+    output reg                      o_memToReg,
+    //output reg                    o_branch  ,
+    output reg                      o_jump    ,
+    output reg [1 : 0]              o_ALUOp   ,
+    output reg [1 : 0]              o_dataSize,
+    output reg [NB_PC      - 1 : 0] o_pc      ,  //! Program Counter output
+    output reg [NB_PC      - 1 : 0] o_pc_next ,  //! Program Counter + 4 output
+    output reg [DATA_WIDTH - 1 : 0] o_rs1_data,  //! Register 1 output
+    output reg [DATA_WIDTH - 1 : 0] o_rs2_data,  //! Register 2 output
+    output reg [DATA_WIDTH - 1 : 0] o_imm     ,  //! Immediate output
+    output reg [6 : 0]              o_opcode  ,  //! Opcode output
+    output reg [4 : 0]              o_rd_addr ,
+    output reg [2 : 0]              o_func3   ,
+    output reg [4 : 0]              o_rs1_addr,
+    output reg [4 : 0]              o_rs2_addr,
+    output reg [6 : 0]              o_func7   ,
                                                      
     // Inputs                           
-    input  [DATA_WIDTH - 1 : 0] i_ctrl    ,  //! Control signals input
-    input  [DATA_WIDTH - 1 : 0] i_pc      ,  //! Program Counter input
-    input  [DATA_WIDTH - 1 : 0] i_pc_next ,  //! Program Counter + 4 input
-    input  [DATA_WIDTH - 1 : 0] i_rs1_data,  //! Register 1 input
-    input  [DATA_WIDTH - 1 : 0] i_rs2_data,  //! Register 2 input
-    input  [DATA_WIDTH - 1 : 0] i_imm     ,  //! Immediate input
-    input  [DATA_WIDTH - 1 : 0] i_instr   ,  //! Instruction input
-    input                       i_en      ,  //! Enable signal input
-    //input                       i_rst     ,  //! Reset signal
-    input                       clk          //! Clock signal    
+    input wire [NB_CTRL    - 1 : 0] i_ctrl    ,  //! Control signals input
+    input wire [NB_PC      - 1 : 0] i_pc      ,  //! Program Counter input
+    input wire [NB_PC      - 1 : 0] i_pc_next ,  //! Program Counter + 4 input
+    input wire [DATA_WIDTH - 1 : 0] i_rs1_data,  //! Register 1 input
+    input wire [DATA_WIDTH - 1 : 0] i_rs2_data,  //! Register 2 input
+    input wire [DATA_WIDTH - 1 : 0] i_imm     ,  //! Immediate input
+    input wire [6 : 0]              i_opcode  ,
+    input wire [4 : 0]              i_rd_addr ,
+    input wire [2 : 0]              i_func3   ,
+    input wire [4 : 0]              i_rs1_addr,
+    input wire [4 : 0]              i_rs2_addr,
+    input wire [6 : 0]              i_func7   ,
+    input wire                      i_en      ,  //! Enable signal input
+    input wire                      clk          //! Clock signal    
 );
 
-    //! Local Parameters
-    localparam DATA_DEPTH = 7;               // Depth of the register array
-
-    //! Internal Signals
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0]; // Register array
-
-    integer index;
-
-    // IF/EX Register Model
+    //! IF/EX Register Model
     always @(posedge clk) begin
-        //if (i_rst) begin
-        //    // Reset logic: Clear all register locations
-        //    for (index = 0; index < DATA_DEPTH; index = index + 1) begin
-        //        reg_array[index] <= {DATA_WIDTH{1'b0}};
-        //    end
-        //end
-        //else 
         if (i_en) begin
-            reg_array[0] <= i_ctrl    ;
-            reg_array[1] <= i_pc      ;
-            reg_array[2] <= i_pc_next ;
-            reg_array[3] <= i_rs1_data;
-            reg_array[4] <= i_rs2_data;
-            reg_array[5] <= i_imm     ;
-            reg_array[6] <= i_instr   ;
+            o_regWrite <= i_ctrl[0]   ;
+            o_memRead  <= i_ctrl[1]   ;
+            o_memWrite <= i_ctrl[2]   ;
+            o_ALUSrc   <= i_ctrl[3]   ;
+            o_memToReg <= i_ctrl[4]   ;
+          //o_branch   <= i_ctrl[5]   ;
+            o_jump     <= i_ctrl[6]   ;
+            o_ALUOp    <= i_ctrl[8 :7];
+            o_dataSize <= i_ctrl[10:9];
+            o_pc       <= i_pc        ;
+            o_pc_next  <= i_pc_next   ;
+            o_rs1_data <= i_rs1_data  ;
+            o_rs2_data <= i_rs2_data  ;
+            o_imm      <= i_imm       ;
+            o_opcode   <= i_opcode    ;
+            o_rd_addr  <= i_rd_addr   ;
+            o_func3    <= i_func3     ;
+            o_rs1_addr <= i_rs1_addr  ;
+            o_rs2_addr <= i_rs2_addr  ;
+            o_func7    <= i_func7     ;
         end
     end
-
-    // Output Logic
-    assign o_ctrl     = reg_array[0];
-    assign o_pc       = reg_array[1];
-    assign o_pc_next  = reg_array[2];
-    assign o_rs1_data = reg_array[3];
-    assign o_rs2_data = reg_array[4];
-    assign o_imm      = reg_array[5];
-    assign o_instr    = reg_array[6];
 
 endmodule

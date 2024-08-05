@@ -27,7 +27,7 @@ module regfile
     localparam DATA_DEPTH = 2**ADDR_WIDTH;    //! Regfile depth
 
     //! Register array
-    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0];
+    (* ram_style = "register" *) reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0];
    
     integer i;
 
@@ -43,6 +43,9 @@ module regfile
             if (i_wen) begin
                 if (i_waddr != {ADDR_WIDTH{1'b0}}) begin  // Check if writing to x0 register
                     reg_array[i_waddr] <= i_wdata;
+                end
+                else begin
+                    reg_array[i_waddr] <= {DATA_WIDTH{1'b0}};
                 end
             end
         end

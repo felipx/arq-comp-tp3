@@ -13,7 +13,7 @@ module pc
     
     // Inputs
     input  wire [NB_PC - 1 : 0] i_pc ,  //! Program Counter input
-    input  wire                 i_en ,  //! Enable input
+    (* direct_enable = "true" *) input  wire                 i_en ,  //! Enable input
     input  wire                 i_rst,  //! Reset
     input  wire                 clk     //! Clock
 );

@@ -15,7 +15,7 @@ module memory
     input  wire [31 : 0]             i_din  ,  //! Data input
     input  wire [ADDR_WIDTH - 1 : 0] i_waddr,  //! Write address input
     input  wire [ADDR_WIDTH - 1 : 0] i_raddr,  //! Read address input
-    input  wire [1 : 0]              i_wsize,  //! Write size (byte, half, word) input
+    input  wire [1 : 0]              i_size ,  //! Write/Read size (byte, half, word) input
     input  wire                      i_wen  ,  //! Write enable input
     input  wire                      i_ren  ,  //! Read enable input
     input  wire                      i_rst  ,  //! Reset
@@ -238,7 +238,7 @@ module memory
         waddr_3     = {RAM_ADDR_WIDTH{1'b0}};
 
         if (i_wen) begin
-            case (i_wsize)
+            case (i_size)
                 // SB
                 2'b01: begin
                     ram_wen_sel[1:0] = i_waddr[1:0];
@@ -355,7 +355,7 @@ module memory
         raddr_3 = {RAM_ADDR_WIDTH{1'b0}};
 
         if (i_ren) begin
-            case (i_wsize)
+            case (i_size)
                 2'b01: begin
                     case (i_raddr[1:0])
                         2'b00: begin
