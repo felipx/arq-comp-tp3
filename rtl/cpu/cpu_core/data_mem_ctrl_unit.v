@@ -10,7 +10,7 @@ module data_mem_ctrl_unit
 ) (
     // Outputs
     output reg [DATA_WIDTH - 1 : 0] o_data,
-    output reg [1 : 0]              o_size,
+    //output reg [1 : 0]              o_size,
 
     // Inputs
     input wire [DATA_WIDTH - 1 : 0] i_data  ,
@@ -19,19 +19,19 @@ module data_mem_ctrl_unit
 );
     
     //! Size Output Logic
-    always @(*) begin
-        // Default size output
-        o_size = 2'b00;
-
-        case (i_func3)
-            3'b000:  o_size = 2'b01;  // LB, SB
-            3'b001:  o_size = 2'b10;  // LH, SH
-            3'b010:  o_size = 2'b11;  // LW, SW
-            3'b100:  o_size = 2'b01;  // LBU
-            3'b101:  o_size = 2'b10;  // LHU
-            default: o_size = 2'b00;
-        endcase
-    end
+    //always @(*) begin
+    //    // Default size output
+    //    o_size = 2'b00;
+//
+    //    case (i_func3)
+    //        3'b000:  o_size = 2'b01;  // LB, SB
+    //        3'b001:  o_size = 2'b10;  // LH, SH
+    //        3'b010:  o_size = 2'b11;  // LW, SW
+    //        3'b100:  o_size = 2'b01;  // LBU
+    //        3'b101:  o_size = 2'b10;  // LHU
+    //        default: o_size = 2'b00;
+    //    endcase
+    //end
 
     //! Data Output Logic
     always @(*) begin

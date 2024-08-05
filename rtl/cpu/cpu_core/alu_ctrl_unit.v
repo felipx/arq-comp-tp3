@@ -25,14 +25,6 @@ module alu_ctrl_unit
     localparam ALU_SRA    = 5'b00111;
     localparam ALU_OR     = 5'b01000;
     localparam ALU_AND    = 5'b01001;
-    localparam ALU_MUL    = 5'b01010;
-    localparam ALU_MULH   = 5'b01011;
-    localparam ALU_MULHSU = 5'b01100;
-    localparam ALU_MULHU  = 5'b01101;
-    localparam ALU_DIV    = 5'b01110;
-    localparam ALU_DIVU   = 5'b01111;
-    localparam ALU_REM    = 5'b10000;
-    localparam ALU_REMU   = 5'b10001;
 
     //! ALU Control Unit Model
     always @(*) begin
@@ -83,14 +75,6 @@ module alu_ctrl_unit
                     10'b0100000101 : o_alu_op = ALU_SRA   ;
                     10'b0000000010 : o_alu_op = ALU_SLT   ;
                     10'b0000000011 : o_alu_op = ALU_SLTU  ;
-                    10'b0000001000 : o_alu_op = ALU_MUL   ;
-                    10'b0000001001 : o_alu_op = ALU_MULH  ;
-                    10'b0000001010 : o_alu_op = ALU_MULHSU;
-                    10'b0000001011 : o_alu_op = ALU_MULHU ;
-                    10'b0000001100 : o_alu_op = ALU_DIV   ;
-                    10'b0000001101 : o_alu_op = ALU_DIVU  ;
-                    10'b0000001110 : o_alu_op = ALU_REM   ;
-                    10'b0000001111 : o_alu_op = ALU_REMU  ;
                     default        : o_alu_op = ALU_ADD   ;
                 endcase
             end
