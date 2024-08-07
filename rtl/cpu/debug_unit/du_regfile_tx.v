@@ -134,12 +134,14 @@ module du_regfile_tx
                 end
                 else if (word_counter_reg == 3'b000) begin
                     o_wdata           = i_pc[7 : 0];
+                    o_wr              = 1'b1;
                     o_tx_start        = 1'b1;
                     word_counter_next = word_counter_reg + 1'b1;
                 end
                 else if (word_counter_reg == 3'b001) begin
                     if (i_tx_done) begin
                         o_wdata           = i_pc[15 : 8];
+                        o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
                         word_counter_next = word_counter_reg + 1'b1;
                     end
@@ -147,6 +149,7 @@ module du_regfile_tx
                 else if (word_counter_reg == 3'b010) begin
                     if (i_tx_done) begin
                         o_wdata           = i_pc[23 : 16];
+                        o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
                         word_counter_next = word_counter_reg + 1'b1;
                     end
@@ -154,6 +157,7 @@ module du_regfile_tx
                 else if (word_counter_reg == 3'b011) begin
                     if (i_tx_done) begin
                         o_wdata           = i_pc[31 : 24];
+                        o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
                         word_counter_next = word_counter_reg + 1'b1;
                     end
@@ -178,12 +182,14 @@ module du_regfile_tx
                 end
                 else if (word_counter_reg == 3'b000) begin
                     o_wdata           = rx_data_reg[7 : 0];
+                    o_wr              = 1'b1;
                     o_tx_start        = 1'b1;
                     word_counter_next = word_counter_reg + 1'b1;
                 end
                 else if (word_counter_reg == 3'b001) begin
                     if (i_tx_done) begin
                         o_wdata           = rx_data_reg[15 : 8];
+                        o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
                         word_counter_next = word_counter_reg + 1'b1;
                     end
@@ -191,6 +197,7 @@ module du_regfile_tx
                 else if (word_counter_reg == 3'b010) begin
                     if (i_tx_done) begin
                         o_wdata           = rx_data_reg[23 : 16];
+                        o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
                         word_counter_next = word_counter_reg + 1'b1;
                     end
@@ -198,6 +205,7 @@ module du_regfile_tx
                 else if (word_counter_reg == 3'b011) begin
                     if (i_tx_done) begin
                         o_wdata           = rx_data_reg[31 : 24];
+                        o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
                         word_counter_next = word_counter_reg + 1'b1;
                     end

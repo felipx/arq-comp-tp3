@@ -11,7 +11,7 @@ module du_tb ();
     // UART Parameters
     parameter NB_UART_COUNTER    = 9;  //! NB of baud generator counter reg
     parameter NB_UART_DATA       = 8;  //! NB of UART data reg
-    parameter NB_UART_ADDR       = 5;  //! NB of UART fifo's regs depth
+    parameter NB_UART_ADDR       = 4;  //! NB of UART fifo's regs depth
 
     wire o_RsTx;
     reg  i_RsRx;
@@ -204,8 +204,8 @@ module du_tb ();
         // add x14, x2, x2
         i_imem_data[18] = 32'b0000000_00010_00010_000_01110_0110011;
         
-        // sw x15, 10(x2)
-        i_imem_data[19] = 32'b0000000_01111_00010_010_01010_0100011;
+        // sw x1, 10(x2)
+        i_imem_data[19] = 32'b0000000_00001_00010_010_01010_0100011;
         
 
         #20 i_rst = 1'b1;
@@ -232,6 +232,8 @@ module du_tb ();
 
 
         for (j = 0; j < 20 ; j = j + 1) begin
+            
+            //$display("Sending %h", i_imem_data[j][7:0]);
             
             #TBAUD i_RsRx = 1'b0; // start
             for (i = 0; i < 8; i = i + 1) begin
@@ -295,6 +297,36 @@ module du_tb ();
         end
         #TBAUD i_RsRx = 1'b1; // stop
 
+        #(TBAUD*1536);
+        
+        // Send 0x0B
+        #TBAUD i_RsRx = 1'b0; // start
+        for (i = 0; i < 8; i = i + 1) begin
+            #TBAUD i_RsRx = (8'h0B >> i) & 1'b1; 
+        end
+        #TBAUD i_RsRx = 1'b1; // stop
+        
+        // Send 0x00
+        #TBAUD i_RsRx = 1'b0; // start
+        for (i = 0; i < 8; i = i + 1) begin
+            #TBAUD i_RsRx = (8'h00 >> i) & 1'b1; 
+        end
+        #TBAUD i_RsRx = 1'b1; // stop
+        
+        // Send 0x00
+        #TBAUD i_RsRx = 1'b0; // start
+        for (i = 0; i < 8; i = i + 1) begin
+            #TBAUD i_RsRx = (8'h00 >> i) & 1'b1; 
+        end
+        #TBAUD i_RsRx = 1'b1; // stop
+        
+        // Send 0x00
+        #TBAUD i_RsRx = 1'b0; // start
+        for (i = 0; i < 8; i = i + 1) begin
+            #TBAUD i_RsRx = (8'h00 >> i) & 1'b1; 
+        end
+        #TBAUD i_RsRx = 1'b1; // stop
+        
         #(TBAUD*1536);
         
 

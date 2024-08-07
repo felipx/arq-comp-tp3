@@ -9,7 +9,7 @@ module memory
     parameter ADDR_WIDTH = 5  //! Address width
 ) (
     // Output
-    output reg  [31 : 0] o_dout,               //! Data output
+    output reg [31 : 0] o_dout,               //! Data output
     
     // Inputs
     input  wire [31 : 0]             i_din  ,  //! Data input
@@ -222,10 +222,10 @@ module memory
             .clk     (clk       )
         );
 
-    assign ram_0_wen   = decoder_0_wen_out[0] | decoder_1_wen_out[1] | decoder_2_wen_out[2] | decoder_3_wen_out[3]; 
-    assign ram_1_wen   = decoder_0_wen_out[0] | decoder_1_wen_out[1] | decoder_2_wen_out[2] | decoder_3_wen_out[3]; 
-    assign ram_2_wen   = decoder_0_wen_out[0] | decoder_1_wen_out[1] | decoder_2_wen_out[2] | decoder_3_wen_out[3]; 
-    assign ram_3_wen   = decoder_0_wen_out[0] | decoder_1_wen_out[1] | decoder_2_wen_out[2] | decoder_3_wen_out[3]; 
+    assign ram_0_wen   = decoder_0_wen_out[0] | decoder_1_wen_out[0] | decoder_2_wen_out[0] | decoder_3_wen_out[0]; 
+    assign ram_1_wen   = decoder_0_wen_out[1] | decoder_1_wen_out[1] | decoder_2_wen_out[1] | decoder_3_wen_out[1]; 
+    assign ram_2_wen   = decoder_0_wen_out[2] | decoder_1_wen_out[2] | decoder_2_wen_out[2] | decoder_3_wen_out[2]; 
+    assign ram_3_wen   = decoder_0_wen_out[3] | decoder_1_wen_out[3] | decoder_2_wen_out[3] | decoder_3_wen_out[3]; 
 
     // Write Logic
     always @(*) begin
@@ -286,7 +286,7 @@ module memory
                     ram_wen_sel[1:0] = i_waddr[1:0];
                     ram_wen_sel[3:2] = (i_waddr[1:0] + 1'b1);
                     ram_wen_sel[5:4] = (i_waddr[1:0] + 2'b10);
-                    ram_wen_sel[5:4] = (i_waddr[1:0] + 2'b11);
+                    ram_wen_sel[7:6] = (i_waddr[1:0] + 2'b11);
                     decoder_en[3:0]  = 4'b1111;
     
                     case (i_waddr[1:0])
@@ -345,16 +345,17 @@ module memory
         end
     end
 
+
     // Read Logic
     always @(*) begin
         // Defaul values
-        o_dout  = {32{1'b0}};
+        //o_dout  = {32{1'b0}};
         raddr_0 = {RAM_ADDR_WIDTH{1'b0}};
         raddr_1 = {RAM_ADDR_WIDTH{1'b0}};
         raddr_2 = {RAM_ADDR_WIDTH{1'b0}};
         raddr_3 = {RAM_ADDR_WIDTH{1'b0}};
 
-        if (i_ren) begin
+        //if (i_ren) begin
             case (i_size)
                 2'b01: begin
                     case (i_raddr[1:0])
@@ -441,10 +442,7 @@ module memory
                             raddr_0       = (i_raddr >> 2) + 1'b1;
                             raddr_1       = (i_raddr >> 2) + 1'b1;
                             raddr_2       = (i_raddr >> 2) + 1'b1;
-                            o_dout[7:0]   = ram_3_dout;
-                            o_dout[15:8]  = ram_0_dout;
-                            o_dout[23:16] = ram_1_dout;
-                            o_dout[31:24] = ram_2_dout;
+                            o_dout = {ram_2_dout, ram_1_dout, ram_0_dout, ram_3_dout};
                         end 
                     endcase
                 end
@@ -456,7 +454,7 @@ module memory
                     raddr_3 = {RAM_ADDR_WIDTH{1'b0}};
                 end
             endcase
-        end
+        //end
     end
 
 endmodule

@@ -25,13 +25,16 @@ module cpu_core
     input [IMEM_ADDR_WIDTH - 1 : 0] i_imem_waddr  ,  //! Instrunction memory write address input
     input [1 : 0]                   i_mem_size    ,  //! Instruction memory write size input
     input                           i_imem_wen    ,  //! Instruction memory write enable input
+    input [NB_DATA         - 1 : 0] i_dmem_raddr  ,  //! Data memory read address input
+    input [1 : 0]                   i_dmem_rsize  ,  //! Data memory read size input
+    input                           i_dmem_ren    ,  //! Data memory read enable input
     input                           i_en          ,  //! Enable signal input
     input                           i_rst         ,
     input                           clk           
 );
 
     //! Local Parameters
-    localparam NB_CTRL = 11;                                       //! NB of control
+    localparam NB_CTRL = 11;                               //! NB of control
     
     //! Internal Signals
     // PC output connections
@@ -41,10 +44,10 @@ module cpu_core
     wire [NB_PC - 1 : 0] pc_adder_out;                     //! Program Counter's adder to mux connection
     
     // PC's mux output connections
-    wire [NB_PC - 1 : 0] mux2to1_to_pc;                            //! Mux to Program Counter connection
+    wire [NB_PC - 1 : 0] mux2to1_to_pc;                    //! Mux to Program Counter connection
     
     // Instruction Memory output connections
-    wire [NB_INSTRUCTION - 1 : 0] imem_to_if_id_reg;               //! Instruction memory to IF/ID reg connection
+    wire [NB_INSTRUCTION - 1 : 0] imem_to_if_id_reg;       //! Instruction memory to IF/ID reg connection
 
     // Debug Unit Register File addr1 Mux output connections
     wire [4 : 0] du_regfile_addr1_mux_out;
@@ -62,11 +65,11 @@ module cpu_core
     
     
     // Base Integer Register File output connections
-    wire [NB_DATA - 1 : 0] int_regfile_data1_to_id_ex_reg;         //! Integer Refile data1 to ID/EX pipelinereg
-    wire [NB_DATA - 1 : 0] int_regfile_data2_to_id_ex_reg;         //! Integer Refile data2 to ID/EX pipelinereg
+    wire [NB_DATA - 1 : 0] int_regfile_data1_to_id_ex_reg;  //! Integer Refile data1 to ID/EX pipelinereg
+    wire [NB_DATA - 1 : 0] int_regfile_data2_to_id_ex_reg;  //! Integer Refile data2 to ID/EX pipelinereg
     
     // Immediate Generator output connections
-    wire [NB_DATA - 1 : 0] imm_out;                        //! Immediate Generator output connection
+    wire [NB_DATA - 1 : 0] imm_out;                         //! Immediate Generator output connection
     
     // Control Unit output connections
     wire [NB_CTRL - 1 : 0] ctrl_unit_out;
@@ -142,6 +145,9 @@ module cpu_core
     wire [4 : 0]                  ex_mem_rd_addr_out    ;
     wire [2 : 0]                  ex_mem_func3_out      ;
 
+    // Debug Unit's Data Memory Read Mux
+    wire [NB_DATA - 1 : 0] dmem_addr_mux_out;
+
     // Data Memory output conenctions
     wire [NB_DATA - 1 : 0] data_memory_out;
 
@@ -158,14 +164,11 @@ module cpu_core
     wire [NB_DATA        - 1 : 0] mem_wb_data_out    ;  //! Data memory output from MEM/WB reg connection
     wire [NB_DATA        - 1 : 0] mem_wb_alu_out     ;  //! ALU result output from MEM/WB reg connection
 
-
-
-
     // WB Mux output connections
     wire [NB_DATA - 1 : 0] wb_mux_out;
 
 
-    // Outputs
+    // Outputs Logic
     assign o_pc           = pc_out                        ;
     assign o_instr        = imem_to_if_id_reg             ;
     assign o_regfile_data = int_regfile_data1_to_id_ex_reg;
@@ -173,7 +176,7 @@ module cpu_core
 
 
     //
-    // Instruction Fetch Stage Modules Start
+    // Instruction Fetch Stage Modules
     //
     
     // PC's Adder
@@ -539,6 +542,19 @@ module cpu_core
     //
     // Memory Access Stage Modules
     //
+
+    // Debug Unit's Data Memory Read Mux
+    mux_2to1
+    #(
+        .NB_MUX (NB_DATA)
+    )
+        u_du_dmem_mux
+        (
+            .o_mux (dmem_addr_mux_out),
+            .i_a   (ex_mem_alu_out   ),
+            .i_b   (i_dmem_raddr     ),
+            .i_sel (i_dmem_ren       )
+        );
     
     // Data Memory
     memory
@@ -547,15 +563,15 @@ module cpu_core
     )
         u_data_memory
         (
-            .o_dout  (data_memory_out                        ),
-            .i_din   (ex_mem_data_out                        ),
-            .i_waddr (ex_mem_alu_out[DMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_raddr (ex_mem_alu_out[DMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_size  (ex_mem_dataSize_out                    ),
-            .i_wen   (ex_mem_memWrite_out                    ),
-            .i_ren   (ex_mem_memRead_out                     ),
-            .i_rst   (i_rst                                  ),
-            .clk     (clk                                    ) 
+            .o_dout  (data_memory_out                           ),
+            .i_din   (ex_mem_data_out                           ),
+            .i_waddr (ex_mem_alu_out[DMEM_ADDR_WIDTH - 1 : 0]   ),  // Truncate the address to fit the memory's address width
+            .i_raddr (dmem_addr_mux_out[DMEM_ADDR_WIDTH - 1 : 0]),  
+            .i_size  (ex_mem_dataSize_out | i_dmem_rsize        ),
+            .i_wen   (ex_mem_memWrite_out                       ),
+            .i_ren   (ex_mem_memRead_out | i_dmem_ren           ),
+            .i_rst   (i_rst                                     ),
+            .clk     (clk                                       ) 
         );
     
     // Data Memory Control Unit

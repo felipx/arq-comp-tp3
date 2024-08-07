@@ -64,16 +64,25 @@ module du_master
     reg [NB_COUNTER - 1 : 0] counter_reg;
     reg [NB_COUNTER - 1 : 0] counter_next;
 
+    reg         stop_flag_reg    ;
+    reg         stop_flag_next   ;
+    reg [2 : 0] stop_counter_reg ;
+    reg [2 : 0] stop_counter_next;
+
 
     //! FSMD states and data registers
     always @(posedge clk) begin
         if (i_rst) begin
-            state_reg   <= IDLE;
-            counter_reg <= {NB_COUNTER{1'b0}};
+            state_reg        <= IDLE;
+            counter_reg      <= {NB_COUNTER{1'b0}};
+            stop_flag_reg    <= 1'b0;
+            stop_counter_reg <= {3{1'b0}};
         end
         else begin
-            state_reg   <= next_state;
-            counter_reg <= counter_next;
+            state_reg        <= next_state;
+            counter_reg      <= counter_next;
+            stop_flag_reg    <= stop_flag_next;   
+            stop_counter_reg <= stop_counter_next;
         end
     end
     
@@ -110,7 +119,7 @@ module du_master
             end
 
             CONT_MODE: begin
-                if (i_instr == 32'h1A1A1A1A) begin
+                if (stop_counter_reg == 2'b11) begin
                    next_state = SEND_REGS; 
                 end
             end
@@ -131,7 +140,12 @@ module du_master
                 end
             end
 
-            STOP: next_state = STOP;
+            STOP: begin
+                // If 0x01 is received go to IDLE
+                if (i_rx_data == CONT) begin
+                    next_state = IDLE;
+                end
+            end
 
             default: next_state = IDLE;
         endcase
@@ -150,13 +164,15 @@ module du_master
         o_wdata           = 8'h00;
         o_tx_start        = 1'b0;
         counter_next      = counter_reg;
+        stop_flag_next    = stop_flag_reg;
+        stop_counter_next = stop_counter_reg;
         
         case (state_reg)
             IDLE: begin
                 counter_next = counter_reg + 1'b1;
 
                 // Sends NAK every 4 secs
-                if (counter_reg == 32'd399_999_999) begin
+                if (counter_reg == 32'd099_999_999) begin
                     o_wr         = 1;
                     o_wdata      = NAK;
                     o_tx_start   = 1'b1;
@@ -177,17 +193,29 @@ module du_master
                 counter_next = counter_reg + 1'b1;
 
                 // Sends '*' every 4 secs
-                if (counter_reg == 32'd399_999_999) begin
+                if (counter_reg == 32'd099_999_999) begin
                     o_wr         = 1;
                     o_wdata      = 8'h2A;
                     o_tx_start   = 1'b1;
                     counter_next = {NB_COUNTER{1'b0}};
+                end
+
+                if (i_rx_done) begin
+                    o_rd = 1'b1;
                 end
             end
             
             CONT_MODE: begin
                 o_cpu_en     = 1'b1;
                 o_imem_rsize = 2'b11;
+
+                if (i_instr == 32'h1A1A1A1A) begin
+                   stop_flag_next = 1'b1; 
+                end
+
+                if (stop_flag_reg) begin
+                    stop_counter_next = stop_counter_reg + 1'b1;
+                end
             end
             
             SEND_REGS: begin
