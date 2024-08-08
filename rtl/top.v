@@ -3,8 +3,8 @@ module top
     parameter NB_PC           = 32,  //! NB of Program Counter
     parameter NB_INSTRUCTION  = 32,  //! Size of each memory location
     parameter NB_DATA         = 32,  //! Size of Integer Base registers
-    parameter IMEM_ADDR_WIDTH = 7  ,  //! Instruction Memory address width
-    parameter DMEM_ADDR_WIDTH = 7 ,  //! Data Memory address width       
+    parameter IMEM_ADDR_WIDTH = 10,  //! Instruction Memory address width
+    parameter DMEM_ADDR_WIDTH = 10,  //! Data Memory address width       
 
     // UART Parameters
     parameter NB_UART_COUNTER = 9 ,  //! NB of baud generator counter reg
@@ -21,7 +21,8 @@ module top
     input  wire i_clk    // i_clk if pll is used else clk
 );
     
-    wire clk; // if pll is used
+    wire clk       ; // if pll is used
+    wire pll_locked;
 
     //! Connections
     wire                        cpu_rd_to_uart;
@@ -35,10 +36,10 @@ module top
     pll
         u_ppl_0
         (
-            .clk_out1_0 (clk  ),
-            .locked_0   (     ),
-            .clk_in1_0  (i_clk),
-            .reset_0    (i_rst)
+            .clk_out1_0 (clk       ),
+            .locked_0   (pll_locked),
+            .clk_in1_0  (i_clk     ),
+            .reset_0    (i_rst     )
         );
     
     // CPU Subsystem
@@ -61,7 +62,7 @@ module top
             .i_uart_rx_data  (uart_rx_data_to_cpu ),
             .i_uart_rx_done  (uart_rx_done_to_cpu ),
             .i_uart_tx_done  (uart_tx_done_to_cpu ),
-            .i_en            (1'b1                ),
+            .i_en            (pll_locked          ),
             .i_rst           (i_rst               ),
             .clk             (clk                 )
         );

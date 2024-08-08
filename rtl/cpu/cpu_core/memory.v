@@ -225,7 +225,11 @@ module memory
     assign ram_0_wen   = decoder_0_wen_out[0] | decoder_1_wen_out[0] | decoder_2_wen_out[0] | decoder_3_wen_out[0]; 
     assign ram_1_wen   = decoder_0_wen_out[1] | decoder_1_wen_out[1] | decoder_2_wen_out[1] | decoder_3_wen_out[1]; 
     assign ram_2_wen   = decoder_0_wen_out[2] | decoder_1_wen_out[2] | decoder_2_wen_out[2] | decoder_3_wen_out[2]; 
-    assign ram_3_wen   = decoder_0_wen_out[3] | decoder_1_wen_out[3] | decoder_2_wen_out[3] | decoder_3_wen_out[3]; 
+    assign ram_3_wen   = decoder_0_wen_out[3] | decoder_1_wen_out[3] | decoder_2_wen_out[3] | decoder_3_wen_out[3];
+
+    function [1 : 0] trunc_3to2(input [2 : 0] val);
+        trunc_3to2 = val[1 : 0];
+    endfunction
 
     // Write Logic
     always @(*) begin
@@ -251,7 +255,7 @@ module memory
                 // SH
                 2'b10: begin
                     ram_wen_sel[1:0] = i_waddr[1:0];
-                    ram_wen_sel[3:2] = (i_waddr[1:0] + 1'b1);
+                    ram_wen_sel[3:2] = trunc_3to2(i_waddr[1:0] + 1'b1);
                     decoder_en[1:0]  = 2'b11;
     
                     case (i_waddr[1:0])
@@ -284,9 +288,9 @@ module memory
                 // SW
                 2'b11: begin
                     ram_wen_sel[1:0] = i_waddr[1:0];
-                    ram_wen_sel[3:2] = (i_waddr[1:0] + 1'b1);
-                    ram_wen_sel[5:4] = (i_waddr[1:0] + 2'b10);
-                    ram_wen_sel[7:6] = (i_waddr[1:0] + 2'b11);
+                    ram_wen_sel[3:2] = trunc_3to2(i_waddr[1:0] + 1'b1);
+                    ram_wen_sel[5:4] = trunc_3to2(i_waddr[1:0] + 2'b10);
+                    ram_wen_sel[7:6] = trunc_3to2(i_waddr[1:0] + 2'b11);
                     decoder_en[3:0]  = 4'b1111;
     
                     case (i_waddr[1:0])
@@ -349,7 +353,7 @@ module memory
     // Read Logic
     always @(*) begin
         // Defaul values
-        //o_dout  = {32{1'b0}};
+        o_dout  = {32{1'b0}};
         raddr_0 = {RAM_ADDR_WIDTH{1'b0}};
         raddr_1 = {RAM_ADDR_WIDTH{1'b0}};
         raddr_2 = {RAM_ADDR_WIDTH{1'b0}};

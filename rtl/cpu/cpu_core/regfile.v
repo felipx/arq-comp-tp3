@@ -27,7 +27,7 @@ module regfile
     localparam DATA_DEPTH = 2**ADDR_WIDTH;    //! Regfile depth
 
     //! Register array
-    (* ram_style = "register" *) reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0];
+    reg [DATA_WIDTH - 1 : 0] reg_array [DATA_DEPTH - 1 : 0];
    
     integer i;
 

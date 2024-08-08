@@ -37,6 +37,8 @@ module cpu_core
     localparam NB_CTRL = 11;                               //! NB of control
     
     //! Internal Signals
+    reg en_reg;                                            //! IMEM enable reg
+
     // PC output connections
     wire [NB_PC - 1 : 0] pc_out;                           //! Program Counter output connection
     
@@ -218,6 +220,7 @@ module cpu_core
             .i_rst (i_rst                   ),
             .clk   (clk                     )
         );
+
     
     // Instruction Memory
     memory
@@ -232,7 +235,7 @@ module cpu_core
             .i_raddr (pc_out[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
             .i_size  (i_mem_size                     ),  // FIXME
             .i_wen   (i_imem_wen                     ),
-            .i_ren   (~i_imem_wen & i_en             ),
+            .i_ren   (~i_imem_wen & en_reg           ),
             .i_rst   (i_rst                          ),
             .clk     (clk                            ) 
         );
@@ -642,6 +645,15 @@ module cpu_core
             .i_data3 ({NB_DATA{1'b0}}                       ),
             .i_sel   ({mem_wb_jump_out, mem_wb_memToReg_out}) 
         );
-
+    
+    // IMEM Enable Register Logic
+    always @(posedge clk) begin
+        if (i_rst) begin
+            en_reg <= 1'b0;
+        end
+        else begin
+            en_reg <= i_en;
+        end
+    end
 
 endmodule
