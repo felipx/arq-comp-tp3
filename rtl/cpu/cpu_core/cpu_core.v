@@ -230,7 +230,7 @@ module cpu_core
             .i_din   (i_imem_data                    ),
             .i_waddr (i_imem_waddr                   ),
             .i_raddr (pc_out[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_size  (i_mem_size                     ),
+            .i_size  (i_mem_size                     ),  // FIXME
             .i_wen   (i_imem_wen                     ),
             .i_ren   (~i_imem_wen & i_en             ),
             .i_rst   (i_rst                          ),

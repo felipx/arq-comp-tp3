@@ -81,7 +81,7 @@ module du_dmem_tx
             end
             RECEIVE: begin
                 if (word_counter_reg == 3'b100) begin
-                    if (rx_data_reg == 32'hFFFF_FFFF) begin
+                    if (dmem_addr_reg == 32'hFFFF_FFFF) begin
                         next_state = IDLE;
                     end
                     else begin
@@ -131,7 +131,7 @@ module du_dmem_tx
 
                 if (word_counter_reg == 3'b100) begin
                     word_counter_next = {NB_COUNTER{1'b0}};
-                    if (rx_data_reg == 32'hFFFF_FFFF) begin
+                    if (dmem_addr_reg == 32'hFFFF_FFFF) begin
                         o_done = 1'b1;
                     end
                 end

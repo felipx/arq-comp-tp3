@@ -64,6 +64,10 @@ module du_master
     reg [NB_COUNTER - 1 : 0] counter_reg;
     reg [NB_COUNTER - 1 : 0] counter_next;
 
+    reg         step_mode_reg    ;
+    reg         step_mode_next   ;
+    reg         step_counter_reg ;
+    reg         step_counter_next;
     reg         stop_flag_reg    ;
     reg         stop_flag_next   ;
     reg [2 : 0] stop_counter_reg ;
@@ -75,12 +79,16 @@ module du_master
         if (i_rst) begin
             state_reg        <= IDLE;
             counter_reg      <= {NB_COUNTER{1'b0}};
+            step_mode_reg    <= 1'b0;
+            step_counter_reg <= 1'b0;
             stop_flag_reg    <= 1'b0;
             stop_counter_reg <= {3{1'b0}};
         end
         else begin
             state_reg        <= next_state;
             counter_reg      <= counter_next;
+            step_mode_reg    <= step_mode_next;
+            step_counter_reg <= step_counter_next;
             stop_flag_reg    <= stop_flag_next;   
             stop_counter_reg <= stop_counter_next;
         end
@@ -125,7 +133,9 @@ module du_master
             end
 
             STEP_MODE: begin
-                next_state = STEP_MODE;
+                if (step_counter_reg) begin
+                    next_state = SEND_REGS;
+                end
             end
 
             SEND_REGS: begin
@@ -135,7 +145,13 @@ module du_master
             end
 
             SEND_DMEM: begin
-                if (i_send_dmem_done) begin
+                if (i_send_dmem_done && ~step_mode_reg) begin
+                    next_state = STOP;
+                end
+                else if (i_send_dmem_done && step_mode_reg && stop_counter_reg != 2'b11) begin
+                    next_state = STEP_MODE;
+                end
+                else if (i_send_dmem_done && step_mode_reg && stop_counter_reg == 2'b11) begin
                     next_state = STOP;
                 end
             end
@@ -164,6 +180,8 @@ module du_master
         o_wdata           = 8'h00;
         o_tx_start        = 1'b0;
         counter_next      = counter_reg;
+        step_mode_next    = step_mode_reg;
+        step_counter_next = step_counter_reg;
         stop_flag_next    = stop_flag_reg;
         stop_counter_next = stop_counter_reg;
         
@@ -203,11 +221,35 @@ module du_master
                 if (i_rx_done) begin
                     o_rd = 1'b1;
                 end
+
+                if (i_rx_data == STEP) begin
+                    step_mode_next = 1'b1;
+                end
             end
             
             CONT_MODE: begin
                 o_cpu_en     = 1'b1;
                 o_imem_rsize = 2'b11;
+
+                if (i_instr == 32'h1A1A1A1A) begin
+                   stop_flag_next = 1'b1; 
+                end
+
+                if (stop_flag_reg) begin
+                    stop_counter_next = stop_counter_reg + 1'b1;
+                end
+            end
+
+            STEP_MODE: begin
+                o_imem_rsize = 2'b11;
+                if (~step_counter_reg) begin
+                    o_cpu_en = 1'b1;
+                    step_counter_next = 1'b1;
+                end
+                else if (step_counter_reg) begin
+                    o_cpu_en = 1'b0;
+                    step_counter_next = 1'b0;
+                end
 
                 if (i_instr == 32'h1A1A1A1A) begin
                    stop_flag_next = 1'b1; 
@@ -225,8 +267,29 @@ module du_master
             SEND_DMEM: begin
                 o_send_dmem_start = 1'b1;
             end
+
+            STOP: begin // need to send rst
+                if (i_rx_done) begin
+                    o_rd = 1'b1;
+                end
+            end
             
-            //default: 
+            default: begin
+                o_cpu_en          = 1'b0;
+                o_load_start      = 1'b0;
+                o_send_regs_start = 1'b0;
+                o_send_dmem_start = 1'b0;
+                o_imem_rsize      = 2'b00;
+                o_rd              = 1'b0;
+                o_wr              = 1'b0;
+                o_wdata           = 8'h00;
+                o_tx_start        = 1'b0;
+                counter_next      = counter_reg;
+                step_mode_next    = step_mode_reg;
+                step_counter_next = step_counter_reg;
+                stop_flag_next    = stop_flag_reg;
+                stop_counter_next = stop_counter_reg;
+            end 
         endcase
     end
 

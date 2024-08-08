@@ -11,12 +11,8 @@ module top
     parameter NB_UART_DATA    = 8 ,  //! NB of UART data reg
     parameter NB_UART_ADDR    = 7    //! NB of UART fifo's regs depth
                                       
-    //parameter NB_LEDS         = 4 ,  // edu-ciaa board
-    //parameter NB_OUT          = 16   // edu-ciaa board
 ) (
     // Ouputs
-    //output wire [NB_OUT  - 1 : 0] B1    , // edu-ciaa board
-    //output wire [NB_LEDS - 1 : 0] o_led , // edu-ciaa board
     output wire                   o_RsTx,
 
     // Inputs
