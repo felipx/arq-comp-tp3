@@ -44,9 +44,9 @@ module cpu_subsystem
     wire                           du_regfile_rd_to_cpu;
     wire [NB_REGFILE_ADDR - 1 : 0] du_regfile_addr_to_cpu;
 
-    wire [IMEM_ADDR_WIDTH - 1 : 0] du_dmem_waddr_to_cpu;
-    wire [1 : 0]                   du_dmem_wsize_to_cpu;
-    wire                           du_dmem_wen_to_cpu;
+    wire [NB_DATA         - 1 : 0] du_dmem_raddr_to_cpu;
+    wire [1 : 0]                   du_dmem_rsize_to_cpu;
+    wire                           du_dmem_ren_to_cpu;
 
     
 
@@ -77,6 +77,9 @@ module cpu_subsystem
             .i_imem_waddr   (du_imem_waddr_to_cpu    ),
             .i_mem_size     (du_imem_size_to_cpu     ),
             .i_imem_wen     (du_imem_wen_to_cpu      ),
+            .i_dmem_raddr   (du_dmem_raddr_to_cpu    ),
+            .i_dmem_rsize   (du_dmem_rsize_to_cpu    ),
+            .i_dmem_ren     (du_dmem_ren_to_cpu      ),
             .i_en           (i_en & debug_unit_cpu_en),
             .i_rst          (i_rst                   ),
             .clk            (clk                     )
@@ -90,7 +93,8 @@ module cpu_subsystem
         .NB_DMEM_DATA    (NB_DATA        ),
         .NB_UART_DATA    (NB_BYTE        ),
         .NB_INSTRUCTION  (NB_INSTRUCTION ),
-        .IMEM_ADDR_WIDTH (IMEM_ADDR_WIDTH)
+        .IMEM_ADDR_WIDTH (IMEM_ADDR_WIDTH),
+        .NB_DATA         (NB_DATA        )
     )
         u_debug_unit
         (
@@ -105,6 +109,9 @@ module cpu_subsystem
             .o_imem_wen     (du_imem_wen_to_cpu    ),
             .o_regfile_rd   (du_regfile_rd_to_cpu  ),
             .o_regfile_raddr(du_regfile_addr_to_cpu),
+            .o_dmem_rd      (du_dmem_ren_to_cpu    ),
+            .o_dmem_rsize   (du_dmem_rsize_to_cpu  ),
+            .o_dmem_raddr   (du_dmem_raddr_to_cpu  ),
             .i_pc           (pc_to_du              ),
             .i_instr        (cpu_instr_to_du       ),
             .i_regfile_data (cpu_reg_to_du         ),

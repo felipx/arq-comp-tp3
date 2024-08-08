@@ -9,7 +9,7 @@ module mux_2to1
     parameter NB_MUX = 32                //! NB of data
 ) (
     // Output
-    output wire [NB_MUX - 1 : 0] o_mux,  //! Mux output
+    output reg [NB_MUX - 1 : 0] o_mux,  //! Mux output
                                        
     // Inputs                          
     input  wire [NB_MUX - 1 : 0] i_a  ,  //! First input
@@ -18,6 +18,11 @@ module mux_2to1
 );
 
     //! Output Logic
-    assign o_mux = i_sel ? i_b : i_a;
+    always @(*) begin
+        case (i_sel)
+            1'b0: o_mux = i_a; 
+            1'b1: o_mux = i_b; 
+        endcase
+    end
     
 endmodule
