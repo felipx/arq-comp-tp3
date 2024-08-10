@@ -247,43 +247,12 @@ module memory
                 2'b01: begin
                     ram_wen_sel[1:0] = i_waddr[1:0];
                     decoder_en[0]    = 1'b1;
-                    waddr_0          = i_waddr >> 2;
-                    waddr_1          = i_waddr >> 2;
-                    waddr_2          = i_waddr >> 2;
-                    waddr_3          = i_waddr >> 2;
                 end
                 // SH
                 2'b10: begin
                     ram_wen_sel[1:0] = i_waddr[1:0];
                     ram_wen_sel[3:2] = trunc_3to2(i_waddr[1:0] + 1'b1);
                     decoder_en[1:0]  = 2'b11;
-    
-                    case (i_waddr[1:0])
-                        2'b00: begin
-                            ram_din_sel[1:0] = 2'b00;
-                            ram_din_sel[3:2] = 2'b01;
-                            waddr_0          = i_waddr >> 2;
-                            waddr_1          = i_waddr >> 2;
-                        end
-                        2'b01: begin
-                            ram_din_sel[3:2] = 2'b00;
-                            ram_din_sel[5:4] = 2'b01;
-                            waddr_1          = i_waddr >> 2;
-                            waddr_2          = i_waddr >> 2;
-                        end
-                        2'b10: begin
-                            ram_din_sel[5:4] = 2'b00;
-                            ram_din_sel[7:6] = 2'b01;
-                            waddr_2          = i_waddr >> 2;
-                            waddr_3          = i_waddr >> 2;
-                        end
-                        2'b11: begin
-                            ram_din_sel[7:6] = 2'b00;
-                            ram_din_sel[1:0] = 2'b01;
-                            waddr_3          = i_waddr >> 2;
-                            waddr_0          = (i_waddr >> 2) + 1'b1;
-                        end 
-                    endcase
                 end
                 // SW
                 2'b11: begin
@@ -292,173 +261,116 @@ module memory
                     ram_wen_sel[5:4] = trunc_3to2(i_waddr[1:0] + 2'b10);
                     ram_wen_sel[7:6] = trunc_3to2(i_waddr[1:0] + 2'b11);
                     decoder_en[3:0]  = 4'b1111;
-    
-                    case (i_waddr[1:0])
-                        2'b00: begin
-                            ram_din_sel[1:0] = 2'b00;
-                            ram_din_sel[3:2] = 2'b01;
-                            ram_din_sel[5:4] = 2'b10;
-                            ram_din_sel[7:6] = 2'b11;
-                            waddr_0          = i_waddr >> 2;
-                            waddr_1          = i_waddr >> 2;
-                            waddr_2          = i_waddr >> 2;
-                            waddr_3          = i_waddr >> 2;
-                        end
-                        2'b01: begin
-                            ram_din_sel[3:2] = 2'b00;
-                            ram_din_sel[5:4] = 2'b01;
-                            ram_din_sel[7:6] = 2'b10;
-                            ram_din_sel[1:0] = 2'b11;
-                            waddr_1          = i_waddr >> 2;
-                            waddr_2          = i_waddr >> 2;
-                            waddr_3          = i_waddr >> 2;
-                            waddr_0          = (i_waddr >> 2) + 1'b1;
-                        end
-                        2'b10: begin
-                            ram_din_sel[5:4] = 2'b00;
-                            ram_din_sel[7:6] = 2'b01;
-                            ram_din_sel[1:0] = 2'b10;
-                            ram_din_sel[3:2] = 2'b11;
-                            waddr_2          = i_waddr >> 2;
-                            waddr_3          = i_waddr >> 2;
-                            waddr_0          = (i_waddr >> 2) + 1'b1;
-                            waddr_1          = (i_waddr >> 2) + 1'b1;
-                        end
-                        2'b11: begin
-                            ram_din_sel[7:6] = 2'b00;
-                            ram_din_sel[1:0] = 2'b01;
-                            ram_din_sel[3:2] = 2'b10;
-                            ram_din_sel[5:4] = 2'b11;
-                            waddr_3          = i_waddr >> 2;
-                            waddr_0          = (i_waddr >> 2) + 1'b1;
-                            waddr_1          = (i_waddr >> 2) + 1'b1;
-                            waddr_2          = (i_waddr >> 2) + 1'b1;
-                        end
-                    endcase
                 end
                 default: begin
                     ram_wen_sel = 8'h00;
                     ram_din_sel = 8'h00;
                     decoder_en  = 4'h0;
-                    waddr_0     = {RAM_ADDR_WIDTH{1'b0}};
-                    waddr_1     = {RAM_ADDR_WIDTH{1'b0}};
-                    waddr_2     = {RAM_ADDR_WIDTH{1'b0}};
-                    waddr_3     = {RAM_ADDR_WIDTH{1'b0}};
                 end
             endcase
+
+            case (i_waddr[1:0])
+                2'b00: begin
+                    ram_din_sel[1:0] = 2'b00;
+                    ram_din_sel[3:2] = 2'b01;
+                    ram_din_sel[5:4] = 2'b10;
+                    ram_din_sel[7:6] = 2'b11;
+                    waddr_0          = i_waddr >> 2;
+                    waddr_1          = i_waddr >> 2;
+                    waddr_2          = i_waddr >> 2;
+                    waddr_3          = i_waddr >> 2;
+                end
+                2'b01: begin
+                    ram_din_sel[3:2] = 2'b00;
+                    ram_din_sel[5:4] = 2'b01;
+                    ram_din_sel[7:6] = 2'b10;
+                    ram_din_sel[1:0] = 2'b11;
+                    waddr_1          = i_waddr >> 2;
+                    waddr_2          = i_waddr >> 2;
+                    waddr_3          = i_waddr >> 2;
+                    waddr_0          = (i_waddr >> 2) + 1'b1;
+                end
+                2'b10: begin
+                    ram_din_sel[5:4] = 2'b00;
+                    ram_din_sel[7:6] = 2'b01;
+                    ram_din_sel[1:0] = 2'b10;
+                    ram_din_sel[3:2] = 2'b11;
+                    waddr_2          = i_waddr >> 2;
+                    waddr_3          = i_waddr >> 2;
+                    waddr_0          = (i_waddr >> 2) + 1'b1;
+                    waddr_1          = (i_waddr >> 2) + 1'b1;
+                end
+                2'b11: begin
+                    ram_din_sel[7:6] = 2'b00;
+                    ram_din_sel[1:0] = 2'b01;
+                    ram_din_sel[3:2] = 2'b10;
+                    ram_din_sel[5:4] = 2'b11;
+                    waddr_3          = i_waddr >> 2;
+                    waddr_0          = (i_waddr >> 2) + 1'b1;
+                    waddr_1          = (i_waddr >> 2) + 1'b1;
+                    waddr_2          = (i_waddr >> 2) + 1'b1;
+                end
+            endcase
+        end
+    end
+
+    reg rd_reg;
+
+    always @(posedge clk) begin
+        if (i_rst) begin
+            rd_reg <= 1'b0;
+        end
+        else begin
+            rd_reg <= i_ren;
         end
     end
 
 
     // Read Logic
     always @(*) begin
-        // Defaul values
-        o_dout  = {32{1'b0}};
-        raddr_0 = {RAM_ADDR_WIDTH{1'b0}};
-        raddr_1 = {RAM_ADDR_WIDTH{1'b0}};
-        raddr_2 = {RAM_ADDR_WIDTH{1'b0}};
-        raddr_3 = {RAM_ADDR_WIDTH{1'b0}};
+        case (i_raddr[1:0])
+            2'b00: begin
+                raddr_0       = i_raddr >> 2;
+                raddr_1       = i_raddr >> 2;
+                raddr_2       = i_raddr >> 2;
+                raddr_3       = i_raddr >> 2;
+                o_dout[7:0]   = ram_0_dout;
+                o_dout[15:8]  = ram_1_dout;
+                o_dout[23:16] = ram_2_dout;
+                o_dout[31:24] = ram_3_dout;
+            end 
+            2'b01: begin
+                raddr_1       = i_raddr >> 2;
+                raddr_2       = i_raddr >> 2;
+                raddr_3       = i_raddr >> 2;
+                raddr_0       = (i_raddr >> 2) + 1'b1;
+                o_dout[7:0]   = ram_1_dout;
+                o_dout[15:8]  = ram_2_dout;
+                o_dout[23:16] = ram_3_dout;
+                o_dout[31:24] = ram_0_dout;
+            end
+           2'b10: begin
+                raddr_2       = i_raddr >> 2;
+                raddr_3       = i_raddr >> 2;
+                raddr_0       = (i_raddr >> 2) + 1'b1;
+                raddr_1       = (i_raddr >> 2) + 1'b1;
+                o_dout[7:0]   = ram_2_dout;
+                o_dout[15:8]  = ram_3_dout;
+                o_dout[23:16] = ram_0_dout;
+                o_dout[31:24] = ram_1_dout;
+            end
+            2'b11: begin
+                raddr_3       = i_raddr >> 2;
+                raddr_0       = (i_raddr >> 2) + 1'b1;
+                raddr_1       = (i_raddr >> 2) + 1'b1;
+                raddr_2       = (i_raddr >> 2) + 1'b1;
+                o_dout = {ram_2_dout, ram_1_dout, ram_0_dout, ram_3_dout};
+            end 
+        endcase
 
-        //if (i_ren) begin
-            case (i_size)
-                2'b01: begin
-                    case (i_raddr[1:0])
-                        2'b00: begin
-                            raddr_0     = i_raddr >> 2;
-                            o_dout[7:0] = ram_0_dout; 
-                        end 
-                        2'b01: begin
-                            raddr_1     = i_raddr >> 2;
-                            o_dout[7:0] = ram_1_dout;
-                        end
-                       2'b10: begin
-                            raddr_2     = i_raddr >> 2;
-                            o_dout[7:0] = ram_2_dout;
-                        end
-                        2'b11: begin
-                            raddr_3     = i_raddr >> 2;
-                            o_dout[7:0] = ram_3_dout;
-                        end 
-                    endcase
-                end
-                2'b10: begin
-                    case (i_raddr[1:0])
-                        2'b00: begin
-                            raddr_0      = i_raddr >> 2;
-                            raddr_1      = i_raddr >> 2;
-                            o_dout[7:0]  = ram_0_dout;
-                            o_dout[15:8] = ram_1_dout; 
-                        end 
-                        2'b01: begin
-                            raddr_1      = i_raddr >> 2;
-                            raddr_2      = i_raddr >> 2;
-                            o_dout[7:0]  = ram_1_dout;
-                            o_dout[15:8] = ram_2_dout;
-                        end
-                       2'b10: begin
-                            raddr_2      = i_raddr >> 2;
-                            raddr_3      = i_raddr >> 2;
-                            o_dout[7:0]  = ram_2_dout;
-                            o_dout[15:8] = ram_3_dout;
-                        end
-                        2'b11: begin
-                            raddr_3      = i_raddr >> 2;
-                            raddr_0      = (i_raddr >> 2) + 1'b1;
-                            o_dout[7:0]  = ram_3_dout;
-                            o_dout[15:8] = ram_0_dout;
-                        end 
-                    endcase
-                end
-                2'b11: begin
-                    case (i_raddr[1:0])
-                        2'b00: begin
-                            raddr_0       = i_raddr >> 2;
-                            raddr_1       = i_raddr >> 2;
-                            raddr_2       = i_raddr >> 2;
-                            raddr_3       = i_raddr >> 2;
-                            o_dout[7:0]   = ram_0_dout;
-                            o_dout[15:8]  = ram_1_dout;
-                            o_dout[23:16] = ram_2_dout;
-                            o_dout[31:24] = ram_3_dout;
-                        end 
-                        2'b01: begin
-                            raddr_1       = i_raddr >> 2;
-                            raddr_2       = i_raddr >> 2;
-                            raddr_3       = i_raddr >> 2;
-                            raddr_0       = (i_raddr >> 2) + 1'b1;
-                            o_dout[7:0]   = ram_1_dout;
-                            o_dout[15:8]  = ram_2_dout;
-                            o_dout[23:16] = ram_3_dout;
-                            o_dout[31:24] = ram_0_dout;
-                        end
-                       2'b10: begin
-                            raddr_2       = i_raddr >> 2;
-                            raddr_3       = i_raddr >> 2;
-                            raddr_0       = (i_raddr >> 2) + 1'b1;
-                            raddr_1       = (i_raddr >> 2) + 1'b1;
-                            o_dout[7:0]   = ram_2_dout;
-                            o_dout[15:8]  = ram_3_dout;
-                            o_dout[23:16] = ram_0_dout;
-                            o_dout[31:24] = ram_1_dout;
-                        end
-                        2'b11: begin
-                            raddr_3       = i_raddr >> 2;
-                            raddr_0       = (i_raddr >> 2) + 1'b1;
-                            raddr_1       = (i_raddr >> 2) + 1'b1;
-                            raddr_2       = (i_raddr >> 2) + 1'b1;
-                            o_dout = {ram_2_dout, ram_1_dout, ram_0_dout, ram_3_dout};
-                        end 
-                    endcase
-                end
-                default: begin
-                    o_dout  = {32{1'b0}};
-                    raddr_0 = {RAM_ADDR_WIDTH{1'b0}};
-                    raddr_1 = {RAM_ADDR_WIDTH{1'b0}};
-                    raddr_2 = {RAM_ADDR_WIDTH{1'b0}};
-                    raddr_3 = {RAM_ADDR_WIDTH{1'b0}};
-                end
-            endcase
-        //end
+        if (~rd_reg) begin
+            o_dout = {32{1'b0}};
+        end
     end
 
 endmodule

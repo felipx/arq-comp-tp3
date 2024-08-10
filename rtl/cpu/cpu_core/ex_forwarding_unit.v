@@ -15,6 +15,7 @@ module ex_forwarding_unit
     input wire [4 : 0] i_ex_rs2      ,  //! Source register 2 ID from EX stage
     input wire [4 : 0] i_mem_rd      ,  //! Destination register ID from MEM stage
     input wire [4 : 0] i_wb_rd       ,  //! Destination register ID from WB stage
+    input wire [4 : 0] i_wb_rd_reg,
     input wire         i_mem_RegWrite,  //! Register write signal from MEM stage
     input wire         i_wb_RegWrite    //! Register write signal from WB stage
 );
@@ -27,7 +28,11 @@ module ex_forwarding_unit
         // Forwarding logic for source A
         if (i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) begin
             o_forward_a = 2'b10; // Forward from MEM stage
-        end else if (i_wb_RegWrite && (i_wb_rd != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) && (i_wb_rd == i_ex_rs1)) begin
+        end 
+        else if (i_wb_RegWrite && (i_wb_rd != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) && (i_wb_rd == i_ex_rs1)) begin
+            o_forward_a = 2'b01; // Forward from WB stage
+        end
+        else if (i_wb_RegWrite && (i_wb_rd_reg != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) && (i_wb_rd_reg == i_ex_rs1)) begin
             o_forward_a = 2'b01; // Forward from WB stage
         end
 
@@ -35,6 +40,9 @@ module ex_forwarding_unit
         if (i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs2)) begin
             o_forward_b = 2'b10; // Forward from MEM stage
         end else if (i_wb_RegWrite && (i_wb_rd != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs2)) && (i_wb_rd == i_ex_rs2)) begin
+            o_forward_b = 2'b01; // Forward from WB stage
+        end
+        else if (i_wb_RegWrite && (i_wb_rd_reg != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs2)) && (i_wb_rd_reg == i_ex_rs2)) begin
             o_forward_b = 2'b01; // Forward from WB stage
         end
     end

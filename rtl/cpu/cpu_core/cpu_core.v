@@ -37,7 +37,10 @@ module cpu_core
     localparam NB_CTRL = 11;                               //! NB of control
     
     //! Internal Signals
-    reg en_reg;                                            //! IMEM enable reg
+    reg          en_reg        ;                           //! IMEM enable reg
+    reg  [4 : 0] wb_rd_addr_reg;
+    
+    
 
     // PC output connections
     wire [NB_PC - 1 : 0] pc_out;                           //! Program Counter output connection
@@ -169,6 +172,10 @@ module cpu_core
     // WB Mux output connections
     wire [NB_DATA - 1 : 0] wb_mux_out;
 
+    // WB rd_addr_reg connections
+    wire [4 : 0] wb_rd_addr_reg_out           ;
+    assign wb_rd_addr_reg_out = wb_rd_addr_reg;
+
 
     // Outputs Logic
     assign o_pc           = pc_out                        ;
@@ -221,6 +228,19 @@ module cpu_core
             .clk   (clk                     )
         );
 
+    wire [NB_PC - 1 : 0] imem_addr_mux_out;
+    mux_2to1
+    #(
+        .NB_MUX (NB_PC)
+    )
+        u_imem_addr_mux
+        (
+            .o_mux (imem_addr_mux_out),
+            .i_a   (pc_out),
+            .i_b   (mux2to1_to_pc),
+            .i_sel (en_reg)
+        );
+
     
     // Instruction Memory
     memory
@@ -232,10 +252,10 @@ module cpu_core
             .o_dout  (imem_to_if_id_reg              ),
             .i_din   (i_imem_data                    ),
             .i_waddr (i_imem_waddr                   ),
-            .i_raddr (pc_out[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
+            .i_raddr (imem_addr_mux_out[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
             .i_size  (i_mem_size                     ),  // FIXME
             .i_wen   (i_imem_wen                     ),
-            .i_ren   (~i_imem_wen & en_reg           ),
+            .i_ren   (~i_imem_wen & i_en),
             .i_rst   (i_rst                          ),
             .clk     (clk                            ) 
         );
@@ -497,11 +517,12 @@ module cpu_core
         u_ex_forwarding_unit
         (
             .o_forward_a    (fowrward_unit_a_out),   
-            .o_forward_b    (fowrward_unit_b_out),              
+            .o_forward_b    (fowrward_unit_b_out),             
             .i_ex_rs1       (id_ex_rs1_addr_out ),
             .i_ex_rs2       (id_ex_rs2_addr_out ),
             .i_mem_rd       (ex_mem_rd_addr_out ),
             .i_wb_rd        (mem_wb_rd_addr_out ),
+            .i_wb_rd_reg    (wb_rd_addr_reg_out ),
             .i_mem_RegWrite (ex_mem_regWrite_out),
             .i_wb_RegWrite  (mem_wb_regWrite_out) 
         );
@@ -630,7 +651,7 @@ module cpu_core
     //
     // Write Back Stage Modules
     //
-    
+
     // WB Mux
     mux_4to1
     #(
@@ -650,9 +671,13 @@ module cpu_core
     always @(posedge clk) begin
         if (i_rst) begin
             en_reg <= 1'b0;
+            wb_rd_addr_reg <= {5{1'b0}};
+            //flush_reg <= 1'b0;
         end
         else begin
             en_reg <= i_en;
+            wb_rd_addr_reg <= mem_wb_rd_addr_out;
+            //flush_reg <= branch_ctrl_unit_flush_out;
         end
     end
 
