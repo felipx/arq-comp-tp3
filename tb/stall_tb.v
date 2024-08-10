@@ -1,12 +1,12 @@
 `timescale 1ns/100ps
 
-module forwarding_tb ();
+module stall_tb ();
 
     parameter NB_PC              = 32;  //! NB of Program Counter
     parameter NB_INSTRUCTION     = 32;  //! Size of each memory location
     parameter NB_DATA            = 32;  //! Size of Integer Base registers
-    parameter IMEM_ADDR_WIDTH    = 7 ;  //! Instruction Memory address width
-    parameter DMEM_ADDR_WIDTH    = 9 ;  //! Data Memory address width
+    parameter IMEM_ADDR_WIDTH    = 6 ;  //! Instruction Memory address width
+    parameter DMEM_ADDR_WIDTH    = 5 ;  //! Data Memory address width
     
     // UART Parameters
     parameter NB_UART_COUNTER    = 9;  //! NB of baud generator counter reg
@@ -14,7 +14,7 @@ module forwarding_tb ();
     parameter NB_UART_ADDR       = 4;  //! NB of UART fifo's regs depth
 
     wire o_RsTx;
-    wire i_RsRx;
+    wire  i_RsRx;
     reg  en;
     reg  i_rst;
     reg  clk;
@@ -26,11 +26,11 @@ module forwarding_tb ();
     reg [7 : 0]           cksum;
     reg [NB_DATA - 1 : 0] i_imem_data [19 : 0];
 
-    wire                        host_uart_tx_done;
-    wire                        host_uart_rx_done;
-    reg                         host_uart_tx_start;
-    reg                         host_uart_rd;      
-    reg                         host_uart_wr;       
+    wire                       host_uart_tx_done;
+    wire                       host_uart_rx_done;
+    reg                        host_uart_tx_start;
+    reg                        host_uart_rd;      
+    reg                        host_uart_wr;       
     reg  [NB_UART_DATA - 1 : 0] host_uart_wdata;   
     wire [NB_UART_DATA - 1 : 0] host_uart_rdata;
 
@@ -147,35 +147,38 @@ module forwarding_tb ();
         blk_not = 8'hFE;
         cksum   = 8'h00;
 
-        // addi x1, x0, 0xFFF
-        i_imem_data[0] = 32'b111111111111_00000_000_00001_0010011;
+        // addi x1, x0, 0xC
+        i_imem_data[0] = 32'b000000001100_00000_000_00001_0010011;
 
         // addi x2, x0, 0xFFF
         i_imem_data[1] = 32'b111111111111_00000_000_00010_0010011;
 
-        // addi x3, x0, 0xEFF
-        i_imem_data[2] = 32'b111011111111_00000_000_00011_0010011;
+        // sw x2, 0x1C(x0)
+        i_imem_data[2] = 32'b0000000_00010_00000_010_11100_0100011;
 
-        // addi x4, x0, 0x544
-        i_imem_data[3] = 32'b010101000100_00000_000_00100_0010011;
+        // addi x3, x0, 0xEFF
+        i_imem_data[3] = 32'b111011111111_00000_000_00011_0010011;
+
+        // addi x4, x0, 0x444
+        i_imem_data[4] = 32'b010001000100_00000_000_00100_0010011;
         
-        // addi x5, x4, 0xFFF
-        i_imem_data[4] = 32'b111111111111_00110_000_00101_0010011;
+        // addi x5, x5, 0xFE5
+        i_imem_data[5] = 32'b111111100101_00101_000_00101_0010011;
+
+        // lw x6, 0x10(x1)
+        i_imem_data[6] = 32'b000000010000_00001_010_00110_0000011;
         
-        // sub x2, x1, x3
-        i_imem_data[5] = 32'b0100000_00011_00001_000_00010_0110011;
+        // and x4, x6, x5
+        i_imem_data[7] = 32'b0000000_00101_00110_111_00100_0110011;
         
-        // and x12, x2, x4
-        i_imem_data[6] = 32'b0000000_00100_00010_111_01100_0110011;
+        // or x8, x2, x6
+        i_imem_data[8] = 32'b0000000_00110_00010_110_01000_0110011;
         
-        // or x13, x5, x2
-        i_imem_data[7] = 32'b0000000_00010_00101_110_01101_0110011;
+        // add x14, x6, x4
+        i_imem_data[9] = 32'b0000000_00100_00110_000_01110_0110011;
         
-        // add x14, x2, x2
-        i_imem_data[8] = 32'b0000000_00010_00010_000_01110_0110011;
-        
-        // sw x1, 10(x2)
-        i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;
+        // sub x2, x6, x3
+        i_imem_data[10] = 32'b0100000_00011_00110_000_00010_0110011;
         
 
         #20 i_rst = 1'b1;
@@ -207,7 +210,7 @@ module forwarding_tb ();
         end
 
 
-        for (j = 0; j < 10 ; j = j + 1) begin
+        for (j = 0; j < 11 ; j = j + 1) begin
         
             #10 host_uart_wdata    = i_imem_data[j][7:0];
             #10 host_uart_tx_start = 1'b1;
@@ -242,7 +245,7 @@ module forwarding_tb ();
         end
 
         // Send padding
-        for (j = 0; j < 88 ; j = j + 1) begin
+        for (j = 0; j < 84 ; j = j + 1) begin
             #10 host_uart_wdata = 8'h1A;
         #10 host_uart_tx_start = 1'b1;
         #10 host_uart_tx_start = 1'b0;
@@ -282,7 +285,7 @@ module forwarding_tb ();
         #TBAUD;
         
 
-        #20 $display("Branch Testbench finished");
+        #20 $display("Stall Testbench finished");
         #20 $finish;
         
     end

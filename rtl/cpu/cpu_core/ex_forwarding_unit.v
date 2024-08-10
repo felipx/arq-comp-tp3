@@ -27,7 +27,8 @@ module ex_forwarding_unit
         // Forwarding logic for source A
         if (i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) begin
             o_forward_a = 2'b10; // Forward from MEM stage
-        end else if (i_wb_RegWrite && (i_wb_rd != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) && (i_wb_rd == i_ex_rs1)) begin
+        end 
+        else if (i_wb_RegWrite && (i_wb_rd != 0) && !(i_mem_RegWrite && (i_mem_rd != 0) && (i_mem_rd == i_ex_rs1)) && (i_wb_rd == i_ex_rs1)) begin
             o_forward_a = 2'b01; // Forward from WB stage
         end
 

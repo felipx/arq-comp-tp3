@@ -10,36 +10,31 @@ module data_mem_ctrl_unit
 ) (
     // Outputs
     output reg [DATA_WIDTH - 1 : 0] o_data,
-    //output reg [1 : 0]              o_size,
 
     // Inputs
     input wire [DATA_WIDTH - 1 : 0] i_data  ,
     input wire [6 : 0]              i_opcode,
-    input wire [2 : 0]              i_func3 
+    input wire [2 : 0]              i_func3 ,
+    input wire                      clk     
 );
     
-    //! Size Output Logic
-    //always @(*) begin
-    //    // Default size output
-    //    o_size = 2'b00;
-//
-    //    case (i_func3)
-    //        3'b000:  o_size = 2'b01;  // LB, SB
-    //        3'b001:  o_size = 2'b10;  // LH, SH
-    //        3'b010:  o_size = 2'b11;  // LW, SW
-    //        3'b100:  o_size = 2'b01;  // LBU
-    //        3'b101:  o_size = 2'b10;  // LHU
-    //        default: o_size = 2'b00;
-    //    endcase
-    //end
+    reg [6 : 0] opcode_reg;
+    reg [2 : 0] func3_reg ;
+
+    always @(negedge clk) begin
+        begin
+            opcode_reg <= i_opcode;
+            func3_reg  <= i_func3 ;
+        end
+    end
 
     //! Data Output Logic
     always @(*) begin
         // Default data output
         o_data = {DATA_WIDTH{1'b0}};
 
-        if (i_opcode ==7'b0000011) begin  // Load instructions
-            case (i_func3)
+        if (opcode_reg ==7'b0000011) begin  // Load instructions
+            case (func3_reg)
                 3'b000:  o_data = {{24{i_data[7]}}, i_data[7:0]};    // LB
                 3'b001:  o_data = {{16{i_data[15]}}, i_data[15:0]};  // LH
                 3'b010:  o_data = i_data;                            // LW

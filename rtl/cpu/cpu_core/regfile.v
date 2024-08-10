@@ -32,7 +32,7 @@ module regfile
     integer i;
 
     //! Write Operation
-    always @(posedge clk) begin
+    always @(negedge clk) begin
         // Initialize registers to zero on reset
         if (i_rst) begin
             for (i = 0; i < DATA_DEPTH; i = i + 1) begin
