@@ -33,7 +33,7 @@ module bram
             ram[i_waddr] <= i_di;
     end
 
-    always @(posedge clk) begin
+    always @(negedge clk) begin
         if (i_rst)
             o_dout <= 0;
         else if (i_re)

@@ -25,8 +25,7 @@ module hazard_detection_unit
         o_control_mux = 1'b0;
 
         // Load-use hazard detection
-        if (i_id_ex_mem_read && 
-           ((i_id_ex_rd == i_if_id_rs1) || (i_id_ex_rd == i_if_id_rs2))) begin
+        if (i_id_ex_mem_read && ((i_id_ex_rd == i_if_id_rs1) || (i_id_ex_rd == i_if_id_rs2))) begin
             o_pc_write = 1'b0;    // Stall PC
             o_if_id_write = 1'b0; // Stall IF/ID
             o_control_mux = 1'b1; // Insert NOP

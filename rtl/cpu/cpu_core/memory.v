@@ -316,7 +316,7 @@ module memory
 
     reg rd_reg;
 
-    always @(posedge clk) begin
+    always @(negedge clk) begin
         if (i_rst) begin
             rd_reg <= 1'b0;
         end

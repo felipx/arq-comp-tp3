@@ -14,7 +14,7 @@ module forwarding_tb ();
     parameter NB_UART_ADDR       = 4;  //! NB of UART fifo's regs depth
 
     wire o_RsTx;
-    wire  i_RsRx;
+    wire i_RsRx;
     reg  en;
     reg  i_rst;
     reg  clk;
@@ -26,11 +26,11 @@ module forwarding_tb ();
     reg [7 : 0]           cksum;
     reg [NB_DATA - 1 : 0] i_imem_data [19 : 0];
 
-    wire                       host_uart_tx_done;
-    wire                       host_uart_rx_done;
-    reg                        host_uart_tx_start;
-    reg                        host_uart_rd;      
-    reg                        host_uart_wr;       
+    wire                        host_uart_tx_done;
+    wire                        host_uart_rx_done;
+    reg                         host_uart_tx_start;
+    reg                         host_uart_rd;      
+    reg                         host_uart_wr;       
     reg  [NB_UART_DATA - 1 : 0] host_uart_wdata;   
     wire [NB_UART_DATA - 1 : 0] host_uart_rdata;
 
@@ -156,35 +156,26 @@ module forwarding_tb ();
         // addi x3, x0, 0xEFF
         i_imem_data[2] = 32'b111011111111_00000_000_00011_0010011;
 
-        // addi x4, x0, 0x444
-        i_imem_data[3] = 32'b010001000100_00000_000_00100_0010011;
+        // addi x4, x0, 0x544
+        i_imem_data[3] = 32'b010101000100_00000_000_00100_0010011;
         
-        // addi x5, x5, 0xFE5
-        i_imem_data[4] = 32'b111111100101_00101_000_00101_0010011;
-        
-        // addi x6, x1, 0xFFF
-        i_imem_data[5] = 32'b111111111111_00001_000_00110_0010011;
-        
-        // addi x7, x0, 0x777
-        i_imem_data[6] = 32'b011101110111_00000_000_00111_0010011;
-        
-        // addi x8, x3, 0xFFF
-        i_imem_data[7] = 32'b111111111111_00001_000_01000_0010011;
+        // addi x5, x4, 0xFFF
+        i_imem_data[4] = 32'b111111111111_00110_000_00101_0010011;
         
         // sub x2, x1, x3
-        i_imem_data[8] = 32'b0100000_00011_00001_000_00010_0110011;
+        i_imem_data[5] = 32'b0100000_00011_00001_000_00010_0110011;
         
-        // and x12, x2, x5
-        i_imem_data[9] = 32'b0000000_00101_00010_111_01100_0110011;
+        // and x12, x2, x4
+        i_imem_data[6] = 32'b0000000_00100_00010_111_01100_0110011;
         
-        // or x13, x6, x2
-        i_imem_data[10] = 32'b0000000_00010_00110_110_01101_0110011;
+        // or x13, x5, x2
+        i_imem_data[7] = 32'b0000000_00010_00101_110_01101_0110011;
         
         // add x14, x2, x2
-        i_imem_data[11] = 32'b0000000_00010_00010_000_01110_0110011;
+        i_imem_data[8] = 32'b0000000_00010_00010_000_01110_0110011;
         
         // sw x1, 10(x2)
-        i_imem_data[12] = 32'b0000000_00001_00010_010_01010_0100011;
+        i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;
         
 
         #20 i_rst = 1'b1;
@@ -216,7 +207,7 @@ module forwarding_tb ();
         end
 
 
-        for (j = 0; j < 13 ; j = j + 1) begin
+        for (j = 0; j < 10 ; j = j + 1) begin
         
             #10 host_uart_wdata    = i_imem_data[j][7:0];
             #10 host_uart_tx_start = 1'b1;
@@ -251,7 +242,7 @@ module forwarding_tb ();
         end
 
         // Send padding
-        for (j = 0; j < 76 ; j = j + 1) begin
+        for (j = 0; j < 88 ; j = j + 1) begin
             #10 host_uart_wdata = 8'h1A;
         #10 host_uart_tx_start = 1'b1;
         #10 host_uart_tx_start = 1'b0;

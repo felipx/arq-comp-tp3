@@ -38,10 +38,8 @@ module cpu_core
     
     //! Internal Signals
     reg          en_reg        ;                           //! IMEM enable reg
-    reg  [4 : 0] wb_rd_addr_reg;
-    
-    
 
+    
     // PC output connections
     wire [NB_PC - 1 : 0] pc_out;                           //! Program Counter output connection
     
@@ -93,7 +91,6 @@ module cpu_core
     wire                          id_ex_memWrite_out;
     wire                          id_ex_ALUSrc_out  ;
     wire                          id_ex_memToReg_out;
-    //wire                          id_ex_branch_out  ;
     wire                          id_ex_jump_out    ;
     wire [1 : 0]                  id_ex_ALUOp_out   ;
     wire [1 : 0]                  id_ex_dataSize_out;
@@ -172,11 +169,6 @@ module cpu_core
     // WB Mux output connections
     wire [NB_DATA - 1 : 0] wb_mux_out;
 
-    // WB rd_addr_reg connections
-    wire [4 : 0] wb_rd_addr_reg_out           ;
-    assign wb_rd_addr_reg_out = wb_rd_addr_reg;
-
-
     // Outputs Logic
     assign o_pc           = pc_out                        ;
     assign o_instr        = imem_to_if_id_reg             ;
@@ -227,7 +219,8 @@ module cpu_core
             .i_rst (i_rst                   ),
             .clk   (clk                     )
         );
-
+    
+    //
     wire [NB_PC - 1 : 0] imem_addr_mux_out;
     mux_2to1
     #(
@@ -240,7 +233,6 @@ module cpu_core
             .i_b   (mux2to1_to_pc),
             .i_sel (en_reg)
         );
-
     
     // Instruction Memory
     memory
@@ -249,15 +241,15 @@ module cpu_core
     )
         u_instruction_memory
         (
-            .o_dout  (imem_to_if_id_reg              ),
-            .i_din   (i_imem_data                    ),
-            .i_waddr (i_imem_waddr                   ),
+            .o_dout  (imem_to_if_id_reg                         ),
+            .i_din   (i_imem_data                               ),
+            .i_waddr (i_imem_waddr                              ),
             .i_raddr (imem_addr_mux_out[IMEM_ADDR_WIDTH - 1 : 0]),  // Truncate the address to fit the memory's address width
-            .i_size  (i_mem_size                     ),  // FIXME
-            .i_wen   (i_imem_wen                     ),
-            .i_ren   (~i_imem_wen & i_en),
-            .i_rst   (i_rst                          ),
-            .clk     (clk                            ) 
+            .i_size  (i_mem_size                                ),  // FIXME
+            .i_wen   (i_imem_wen                                ),
+            .i_ren   (~i_imem_wen & i_en                        ),
+            .i_rst   (i_rst                                     ),
+            .clk     (clk                                       ) 
         );
     
     // IF/ID Pipeline Register
@@ -352,7 +344,7 @@ module cpu_core
             .o_if_id_write    (hdu_IfIdWrite_to_IfIdReg),
             .o_control_mux    (hdu_to_nop_mux          ),
             .i_id_ex_mem_read (id_ex_memRead_out       ),
-            .i_id_ex_rd       (id_ex_rs1_addr_out      ),
+            .i_id_ex_rd       (id_ex_rd_addr_out       ),
             .i_if_id_rs1      (if_id_rs1_addr_out      ),
             .i_if_id_rs2      (if_id_rs2_addr_out      )
         );
@@ -522,7 +514,6 @@ module cpu_core
             .i_ex_rs2       (id_ex_rs2_addr_out ),
             .i_mem_rd       (ex_mem_rd_addr_out ),
             .i_wb_rd        (mem_wb_rd_addr_out ),
-            .i_wb_rd_reg    (wb_rd_addr_reg_out ),
             .i_mem_RegWrite (ex_mem_regWrite_out),
             .i_wb_RegWrite  (mem_wb_regWrite_out) 
         );
@@ -606,10 +597,10 @@ module cpu_core
         u_data_mem_ctrl_unit
         (
             .o_data   (data_mem_ctrl_unit_data_out),
-            //.o_size   (data_mem_ctrl_unit_size_out),
             .i_data   (data_memory_out            ),
             .i_opcode (ex_mem_opcode_out          ),
-            .i_func3  (ex_mem_func3_out           )
+            .i_func3  (ex_mem_func3_out           ),
+            .clk      (clk                        )
         );
     
     // MEM Forwarding Unit
@@ -667,17 +658,13 @@ module cpu_core
             .i_sel   ({mem_wb_jump_out, mem_wb_memToReg_out}) 
         );
     
-    // IMEM Enable Register Logic
+    // IMEM Enable Reg Logic
     always @(posedge clk) begin
         if (i_rst) begin
             en_reg <= 1'b0;
-            wb_rd_addr_reg <= {5{1'b0}};
-            //flush_reg <= 1'b0;
         end
         else begin
             en_reg <= i_en;
-            wb_rd_addr_reg <= mem_wb_rd_addr_out;
-            //flush_reg <= branch_ctrl_unit_flush_out;
         end
     end
 
