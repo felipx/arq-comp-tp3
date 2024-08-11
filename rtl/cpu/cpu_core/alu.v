@@ -16,20 +16,20 @@ module alu
     // Inputs                             
     input      [NB_DATA - 1 : 0] i_data1 ,  //! First operand
     input      [NB_DATA - 1 : 0] i_data2 ,  //! Second operand
-    input      [4           : 0] i_alu_op   //! ALU operation control signal
+    input      [3           : 0] i_alu_op   //! ALU operation control signal
     
 );
     // ALU Operation Encoding
-    localparam ALU_ADD     = 5'b00000;
-    localparam ALU_SUB     = 5'b00001;
-    localparam ALU_SLL     = 5'b00010;
-    localparam ALU_SLT     = 5'b00011;
-    localparam ALU_SLTU    = 5'b00100;
-    localparam ALU_XOR     = 5'b00101;
-    localparam ALU_SRL     = 5'b00110;
-    localparam ALU_SRA     = 5'b00111;
-    localparam ALU_OR      = 5'b01000;
-    localparam ALU_AND     = 5'b01001;
+    localparam ALU_ADD     = 4'b0000;
+    localparam ALU_SUB     = 4'b0001;
+    localparam ALU_SLL     = 4'b0010;
+    localparam ALU_SLT     = 4'b0011;
+    localparam ALU_SLTU    = 4'b0100;
+    localparam ALU_XOR     = 4'b0101;
+    localparam ALU_SRL     = 4'b0110;
+    localparam ALU_SRA     = 4'b0111;
+    localparam ALU_OR      = 4'b1000;
+    localparam ALU_AND     = 4'b1001;
 
 
     // ALU Logic

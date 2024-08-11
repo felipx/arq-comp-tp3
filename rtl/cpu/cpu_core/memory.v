@@ -95,7 +95,7 @@ module memory
         waddr[2] = base_waddr + (write_shift >= 2'd3);
         waddr[3] = base_waddr;
 
-        din_shifted = {i_din[31:24], i_din[23:16], i_din[15:8], i_din[7:0]} >> (write_shift * 8);
+        din_shifted = ({i_din, i_din} >> (write_shift * 8));
     end
 
     // Read Enable Reg Logic
@@ -115,7 +115,7 @@ module memory
         raddr[2] = base_raddr + (read_shift >= 2'd3);
         raddr[3] = base_raddr;
 
-        dout_shifted = {ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0]} >> (read_shift * 8);
+        dout_shifted = ({ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0], ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0]} >> (read_shift * 8));
 
         if (rd_reg) begin
             o_dout = dout_shifted;
