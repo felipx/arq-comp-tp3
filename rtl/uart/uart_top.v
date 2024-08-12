@@ -34,6 +34,7 @@ module uart_top
     //! Internal Signals
     reg rx_done_reg ;
     reg tx_start_reg;
+    reg tick_buffer ;
     
     assign o_rx_done = rx_done_reg;
     
@@ -67,7 +68,7 @@ module uart_top
             .o_data    (uart_rx_data_to_fifo_rx_wdata),
             .o_rx_done (uart_rx_done                 ),
             .i_rx      (i_rx                         ),
-            .i_stick   (baud_rate_gen_tick_to_uart   ),
+            .i_stick   (tick_buffer                  ),
             .i_rst     (i_rst                        ),
             .clk       (clk                          )
         );
@@ -101,7 +102,7 @@ module uart_top
             .o_tx_done  (o_tx_done                 ),
             .i_data     (fifo_tx_rdata_to_uart_tx  ),
             .i_tx_start (tx_start_reg              ),
-            .i_stick    (baud_rate_gen_tick_to_uart), 
+            .i_stick    (tick_buffer               ), 
             .i_rst      (i_rst                     ),
             .clk        (clk                       ) 
         );
@@ -123,6 +124,11 @@ module uart_top
             .i_rst   (i_rst                   ),
             .clk     (clk                     ) 
         );
+
+    // Baud Rate Gen Tick Buffer Logic
+    always @(posedge clk) begin
+        tick_buffer <= baud_rate_gen_tick_to_uart;
+    end
 
     // rx_done output Logic
     always @(posedge clk) begin

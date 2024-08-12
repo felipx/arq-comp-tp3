@@ -32,10 +32,12 @@ module branch_ctrl_unit
 
     reg alu_result;
     reg alu_zero;
+    reg branch;
 
-    always @(negedge clk) begin
+    always @(posedge clk) begin
         alu_result <= i_alu_result;
         alu_zero   <= i_alu_zero;
+        branch     <= i_branch;
     end
 
     always @(*) begin
@@ -43,7 +45,7 @@ module branch_ctrl_unit
         o_pcSrc = 2'b00;  // Default to PC + 4
         o_flush = 1'b0;   // Default to no flush
 
-        if (i_branch) begin
+        if (branch) begin
             case (i_func3)
                 FUNC3_BEQ : if ( alu_zero  ) o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
                 FUNC3_BNE : if (!alu_zero  ) o_pcSrc = 2'b01;  // BNE taken if zero flag is not set
