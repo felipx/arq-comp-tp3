@@ -159,27 +159,27 @@ module cpu_subsystem
 
     //! Debug Unit buffers Logic
     always @(posedge clk) begin
-        pc_to_du               <= pc_to_du_out            ;
-        cpu_instr_to_du        <= cpu_instr_to_du_out     ;
-        cpu_reg_to_du          <= cpu_reg_to_du_out       ;
-        cpu_dmem_data_to_du    <= cpu_dmem_data_to_du_out ;
-        debug_unit_cpu_en      <= debug_unit_cpu_en_out   ;
-        du_imem_data_to_cpu    <= du_imem_data_to_cpu_out ;
-        du_imem_waddr_to_cpu   <= du_imem_waddr_to_cpu_out;
-        du_imem_size_to_cpu    <= du_imem_size_to_cpu_out ;
-        du_imem_wen_to_cpu     <= du_imem_wen_to_cpu_out  ;
-        du_regfile_rd_to_cpu   <= du_regfile_rd_to_cpu_out;
-        du_regfile_addr_to_cpu <= du_regfile_addr_to_cpu  ;
+        pc_to_du               <= pc_to_du_out                                     ;
+        cpu_instr_to_du        <= cpu_instr_to_du_out                              ;
+        cpu_reg_to_du          <= cpu_reg_to_du_out                                ;
+        cpu_dmem_data_to_du    <= cpu_dmem_data_to_du_out                          ;
+        debug_unit_cpu_en      <= debug_unit_cpu_en_out                            ;
+        du_imem_data_to_cpu    <= du_imem_data_to_cpu_out                          ;
+        du_imem_waddr_to_cpu   <= du_imem_waddr_to_cpu_out                         ;
+        du_imem_size_to_cpu    <= du_imem_size_to_cpu_out                          ;
+        du_imem_wen_to_cpu     <= du_imem_wen_to_cpu_out                           ;
+        du_regfile_rd_to_cpu   <= du_regfile_rd_to_cpu_out                         ;
+        du_regfile_addr_to_cpu <= du_regfile_addr_to_cpu_out                       ;
         du_dmem_raddr_to_cpu   <= du_dmem_raddr_to_cpu_out[DMEM_ADDR_WIDTH - 1 : 0];
-        du_dmem_rsize_to_cpu   <= du_dmem_rsize_to_cpu_out;
-        du_dmem_ren_to_cpu     <= du_dmem_ren_to_cpu_out  ;    
-        uart_tx_start          <= uart_tx_start_out;
-        uart_rd                <= uart_rd_out      ;
-        uart_wr                <= uart_wr_out      ;
-        uart_wdata             <= uart_wdata_out   ;
-        uart_rx_data           <= i_uart_rx_data;
-        uart_rx_done           <= i_uart_rx_done;
-        uart_tx_done           <= i_uart_tx_done; 
+        du_dmem_rsize_to_cpu   <= du_dmem_rsize_to_cpu_out                         ;
+        du_dmem_ren_to_cpu     <= du_dmem_ren_to_cpu_out                           ;    
+        uart_tx_start          <= uart_tx_start_out                                ;
+        uart_rd                <= uart_rd_out                                      ;
+        uart_wr                <= uart_wr_out                                      ;
+        uart_wdata             <= uart_wdata_out                                   ;
+        uart_rx_data           <= i_uart_rx_data                                   ;
+        uart_rx_done           <= i_uart_rx_done                                   ;
+        uart_tx_done           <= i_uart_tx_done                                   ; 
     end
     
 endmodule

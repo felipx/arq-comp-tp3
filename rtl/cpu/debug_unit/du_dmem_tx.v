@@ -48,23 +48,23 @@ module du_dmem_tx
     reg [NB_DATA - 1 : 0] dmem_addr_next;
 
     // Word's bytes counter registers
-    reg [NB_COUNTER - 1 : 0] word_counter_reg ;
-    reg [NB_COUNTER - 1 : 0] word_counter_next;
+    reg [NB_COUNTER - 1 : 0] counter_reg ;
+    reg [NB_COUNTER - 1 : 0] counter_next;
 
 
     //! FSMD states and data registers
     always @(posedge clk) begin
         if (i_rst) begin
-            state_reg        <= IDLE;
-            rx_data_reg      <= {NB_DATA{1'b0}};
-            dmem_addr_reg    <= {NB_DATA{1'b0}};
-            word_counter_reg <= {NB_COUNTER{1'b0}};
+            state_reg     <= IDLE;
+            rx_data_reg   <= {NB_DATA{1'b0}};
+            dmem_addr_reg <= {NB_DATA{1'b0}};
+            counter_reg   <= {NB_COUNTER{1'b0}};
         end
         else begin
-            state_reg        <= next_state;
-            rx_data_reg      <= rx_data_next;
-            dmem_addr_reg    <= dmem_addr_next;
-            word_counter_reg <= word_counter_next;
+            state_reg     <= next_state;
+            rx_data_reg   <= rx_data_next;
+            dmem_addr_reg <= dmem_addr_next;
+            counter_reg   <= counter_next;
         end
     end
 
@@ -80,7 +80,7 @@ module du_dmem_tx
                 end
             end
             RECEIVE: begin
-                if (word_counter_reg == 3'b100) begin
+                if (counter_reg == 3'b100) begin
                     if (dmem_addr_reg == 32'hFFFF_FFFF) begin
                         next_state = IDLE;
                     end
@@ -90,13 +90,12 @@ module du_dmem_tx
                 end
             end
             READ: begin
-                //if (o_dmem_rd) begin
-                if (word_counter_reg == 1'b1) begin
+                if (counter_reg == 3'b101) begin
                     next_state = SEND;
                 end
             end
             SEND: begin
-                if (word_counter_reg == 3'b100 && i_tx_done) begin
+                if (counter_reg == 3'b100 && i_tx_done) begin
                     next_state = RECEIVE;
                 end
             end
@@ -118,7 +117,7 @@ module du_dmem_tx
         o_dmem_raddr    = {NB_DATA{1'b0}};
         rx_data_next    = rx_data_reg;
         dmem_addr_next  = dmem_addr_reg;
-        word_counter_next = word_counter_reg;
+        counter_next = counter_reg;
 
         case (state_reg)
             RECEIVE: begin
@@ -126,62 +125,64 @@ module du_dmem_tx
                 if (i_rx_done) begin
                     o_rd           = 1'b1;
                     dmem_addr_next = {i_rx_data, dmem_addr_reg[NB_DATA - 1 : NB_UART_DATA]};
-                    word_counter_next = word_counter_reg + 1'b1;
+                    counter_next = counter_reg + 1'b1;
                 end
 
-                if (word_counter_reg == 3'b100) begin
-                    word_counter_next = {NB_COUNTER{1'b0}};
+                if (counter_reg == 3'b100) begin
+                    counter_next = {NB_COUNTER{1'b0}};
                     if (dmem_addr_reg == 32'hFFFF_FFFF) begin
                         o_done = 1'b1;
                     end
                 end
             end
             READ: begin
-                o_dmem_rd    = 1'b1;
-                o_dmem_rsize = 2'b11;
-                o_dmem_raddr = dmem_addr_reg;
-                
-                word_counter_next = word_counter_reg + 1'b1;
+                if (counter_reg == 3'b000) begin
+                    o_dmem_rd    = 1'b1;
+                    o_dmem_rsize = 2'b11;
+                    o_dmem_raddr = dmem_addr_reg;
+                end
 
-                if (word_counter_reg == 1'b1) begin
-                    word_counter_next = {NB_COUNTER{1'b0}};
+                counter_next = counter_reg + 1'b1;
+
+                if (counter_reg == 3'b101) begin
+                    counter_next = {NB_COUNTER{1'b0}};
                     rx_data_next = i_dmem_data;
                 end
             end
             SEND: begin
-                if (word_counter_reg == 3'b100) begin
+                if (counter_reg == 3'b100) begin
                     if (i_tx_done) begin
-                        word_counter_next = {NB_COUNTER{1'b0}};
+                        counter_next = {NB_COUNTER{1'b0}};
                     end
                 end
-                else if (word_counter_reg == 3'b000) begin
+                else if (counter_reg == 3'b000) begin
                     o_wdata           = rx_data_reg[7 : 0];
                     o_wr              = 1'b1;
                     o_tx_start        = 1'b1;
-                    word_counter_next = word_counter_reg + 1'b1;
+                    counter_next = counter_reg + 1'b1;
                 end
-                else if (word_counter_reg == 3'b001) begin
+                else if (counter_reg == 3'b001) begin
                     if (i_tx_done) begin
                         o_wdata           = rx_data_reg[15 : 8];
                         o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b010) begin
+                else if (counter_reg == 3'b010) begin
                     if (i_tx_done) begin
                         o_wdata           = rx_data_reg[23 : 16];
                         o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b011) begin
+                else if (counter_reg == 3'b011) begin
                     if (i_tx_done) begin
                         o_wdata           = rx_data_reg[31 : 24];
                         o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
             end
@@ -196,7 +197,7 @@ module du_dmem_tx
                 o_dmem_raddr    = {NB_DATA{1'b0}};
                 rx_data_next    = rx_data_reg;
                 dmem_addr_next  = dmem_addr_reg;
-                word_counter_next = word_counter_reg;
+                counter_next = counter_reg;
             end
         endcase
     end

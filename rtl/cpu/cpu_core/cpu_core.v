@@ -165,14 +165,8 @@ module cpu_core
     // WB Mux output connections
     wire [NB_DATA - 1 : 0] wb_mux_out;
     
-    // Outputs Logic
-    //assign o_pc           = pc_out                        ;
-    //assign o_instr        = imem_to_if_id_reg             ;
-    //assign o_regfile_data = int_regfile_data1_to_id_ex_reg;
-    //assign o_dmem_data    = data_memory_out               ;
-
     reg                           en             ;
-    reg                           if_id_en       ;
+    reg [2 : 0]                   if_id_en       ;
     reg                           du_rgfile_rd_in;
     reg [4 : 0]                   regfile_addr_in;
     reg [NB_DATA         - 1 : 0] imem_data_in   ;
@@ -184,21 +178,32 @@ module cpu_core
     reg                           dmem_ren_in    ;
 
     always @(posedge clk) begin
-        en <= i_en;
-        if_id_en <= en;
+        if (i_rst) begin
+            en          <= 1'b0;
+            if_id_en[0] <= 1'b0;
+            if_id_en[1] <= 1'b0;
+            if_id_en[2] <= 1'b0;
+        end
+        else begin
+        en              <= i_en       ;
+        if_id_en[0]     <= en         ;
+        if_id_en[1]     <= if_id_en[0];
+        if_id_en[2]     <= if_id_en[1];  
+        end
+        
         o_pc            <= pc_out                        ;
         o_instr         <= imem_to_if_id_reg             ;
         o_regfile_data  <= int_regfile_data1_to_id_ex_reg;
         o_dmem_data     <= data_memory_out               ;
-        du_rgfile_rd_in <= i_du_rgfile_rd;
-        regfile_addr_in <= i_regfile_addr;
-        imem_data_in    <= i_imem_data   ;
-        imem_waddr_in   <= i_imem_waddr  ;
-        imem_size_in    <= i_imem_size   ;
-        imem_wen_in     <= i_imem_wen    ;
-        dmem_raddr_in   <= i_dmem_raddr  ;
-        dmem_rsize_in   <= i_dmem_rsize  ;
-        dmem_ren_in     <= i_dmem_ren    ;
+        du_rgfile_rd_in <= i_du_rgfile_rd                ;
+        regfile_addr_in <= i_regfile_addr                ;
+        imem_data_in    <= i_imem_data                   ;
+        imem_waddr_in   <= i_imem_waddr                  ;
+        imem_size_in    <= i_imem_size                   ;
+        imem_wen_in     <= i_imem_wen                    ;
+        dmem_raddr_in   <= i_dmem_raddr                  ;
+        dmem_rsize_in   <= i_dmem_rsize                  ;
+        dmem_ren_in     <= i_dmem_ren                    ;
     end
     
     
@@ -285,7 +290,7 @@ module cpu_core
             .i_pc       (pc_out                         ),
             .i_pc_next  (pc_adder_out                   ),
             .i_flush    (branch_ctrl_unit_flush_out     ),   
-            .i_en       (hdu_IfIdWrite_to_IfIdReg & if_id_en),  
+            .i_en       (hdu_IfIdWrite_to_IfIdReg & if_id_en[0]),  
             .i_rst      (i_rst                          ),  
             .clk        (clk                            ) 
         );
@@ -361,19 +366,6 @@ module cpu_core
             .i_if_id_rs2      (if_id_rs2_addr_out      )
         );
     
-    // NOP Instruction Mux
-    //mux_2to1
-    //#(
-    //    .NB_MUX (NB_CTRL)
-    //)
-    //    u_nop_insertion_mux
-    //    (
-    //        .o_mux (id_nop_insert_mux_out),
-    //        .i_a   (ctrl_unit_out        ),
-    //        .i_b   ({NB_CTRL{1'b0}}      ),
-    //        .i_sel (hdu_to_nop_mux) 
-    //    );
-
     //// NOP Instruction Mux
     mux_4to1
     #(
@@ -438,23 +430,6 @@ module cpu_core
     //
     // Execution/Address Calculation Stage Modules
     //
-
-    //branch_ctrl_unit
-    //#(
-    //    .NB_DATA (NB_DATA)
-    //)
-    //    u_branch_ctrl_unit
-    //    (
-    //        .o_pcSrc      (branch_ctrl_unit_pc_out   ),
-    //        .o_flush      (branch_ctrl_unit_flush_out),
-    //        .i_alu_result (alu_result[0]             ),
-    //        .i_alu_zero   (alu_zero                  ),
-    //        .i_branch     (id_ex_branch_out          ),
-    //        .i_jump       (id_ex_jump_out            ),
-    //        .i_linkReg    (id_ex_linkReg_out         ),
-    //        .i_func3      (id_ex_func3_out           ),
-    //        .clk (clk)
-    //    );
     
     // Forwarding Mux 1
     mux_3to1
@@ -500,16 +475,6 @@ module cpu_core
             .i_sel   ({fowrward_unit_b_out[1] | id_ex_ALUSrc_out, fowrward_unit_b_out[0] | id_ex_ALUSrc_out}) 
         );
     
-    //reg [NB_DATA - 1 : 0] forwarding_mux_a_reg;
-    //reg [NB_DATA - 1 : 0] forwarding_mux_b_reg;
-    ////reg [NB_DATA - 1 : 0] alu_out_reg;
-//
-    //always @(negedge clk) begin
-    //    forwarding_mux_a_reg <= forwarding_mux_a_out;
-    //    forwarding_mux_b_reg <= forwarding_mux_b_out;
-    //    //alu_out_reg <= alu_result;
-    //end
-    
     // ALU
     alu
     #(
@@ -547,13 +512,6 @@ module cpu_core
             .i_mem_RegWrite (ex_mem_regWrite_out),
             .i_wb_RegWrite  (mem_wb_regWrite_out)
         );
-
-    //reg [NB_PC   - 1 : 0] id_ex_pc_out_buf ;
-    //reg [NB_DATA - 1 : 0] id_ex_imm_out_buf;
-    //always @(posedge clk) begin
-    //    id_ex_pc_out_buf  <= id_ex_pc_out ;
-    //    id_ex_imm_out_buf <= id_ex_imm_out;
-    //end
     
     // Branch target Address Calculator Adder
     adder

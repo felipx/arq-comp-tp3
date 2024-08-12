@@ -204,8 +204,8 @@ module du_tb ();
         // add x14, x2, x2
         i_imem_data[18] = 32'b0000000_00010_00010_000_01110_0110011;
         
-        // sw x1, 10(x2)
-        i_imem_data[19] = 32'b0000000_00001_00010_010_01010_0100011;
+        // sw x1, 10(x0)
+        i_imem_data[19] = 32'b0000000_00001_00000_010_01010_0100011;
         
 
         #20 i_rst = 1'b1;
@@ -303,10 +303,10 @@ module du_tb ();
         
         //#10 en = 1'b1;
         
-        // Send 0x0B
+        // Send 0x0A
         #TBAUD i_RsRx = 1'b0; // start
         for (i = 0; i < 8; i = i + 1) begin
-            #TBAUD i_RsRx = (8'h0B >> i) & 1'b1; 
+            #TBAUD i_RsRx = (8'h0A >> i) & 1'b1; 
         end
         #TBAUD i_RsRx = 1'b1; // stop
         
