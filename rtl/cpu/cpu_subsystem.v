@@ -50,6 +50,15 @@ module cpu_subsystem
     reg [1 : 0]                   du_dmem_rsize_to_cpu  ;
     reg                           du_dmem_ren_to_cpu    ;
 
+    reg                           uart_tx_start;
+    reg                           uart_rd      ;
+    reg                           uart_wr      ;
+    reg [NB_UART_DATA - 1 : 0]    uart_wdata   ;
+
+    reg [NB_UART_DATA - 1 : 0]    uart_rx_data;
+    reg                           uart_rx_done;
+    reg                           uart_tx_done;
+
     //! Connections
     // CPU to DU
     wire [NB_PC           - 1 : 0] pc_to_du_out           ;
@@ -68,6 +77,17 @@ module cpu_subsystem
     wire [NB_DATA         - 1 : 0] du_dmem_raddr_to_cpu_out  ;
     wire [1 : 0]                   du_dmem_rsize_to_cpu_out  ;
     wire                           du_dmem_ren_to_cpu_out    ;
+
+    wire                        uart_tx_start_out;
+    wire                        uart_rd_out      ;
+    wire                        uart_wr_out      ;
+    wire [NB_UART_DATA - 1 : 0] uart_wdata_out   ;
+
+    //! Output Logic
+    assign o_uart_tx_start = uart_tx_start;
+    assign o_uart_rd       = uart_rd      ;
+    assign o_uart_wr       = uart_wr      ;
+    assign o_uart_wdata    = uart_wdata   ;
     
     
     //! CPU Core
@@ -113,10 +133,10 @@ module cpu_subsystem
         u_debug_unit
         (
             .o_cpu_en       (debug_unit_cpu_en_out     ),
-            .o_tx_start     (o_uart_tx_start           ),
-            .o_rd           (o_uart_rd                 ),
-            .o_wr           (o_uart_wr                 ),
-            .o_wdata        (o_uart_wdata              ),
+            .o_tx_start     (uart_tx_start_out         ),
+            .o_rd           (uart_rd_out               ),
+            .o_wr           (uart_wr_out               ),
+            .o_wdata        (uart_wdata_out            ),
             .o_imem_data    (du_imem_data_to_cpu_out   ),
             .o_imem_waddr   (du_imem_waddr_to_cpu_out  ),
             .o_imem_size    (du_imem_size_to_cpu_out   ),
@@ -130,9 +150,9 @@ module cpu_subsystem
             .i_instr        (cpu_instr_to_du           ),
             .i_regfile_data (cpu_reg_to_du             ),
             .i_dmem_data    (cpu_dmem_data_to_du       ),
-            .i_rx_data      (i_uart_rx_data            ),
-            .i_rx_done      (i_uart_rx_done            ),
-            .i_tx_done      (i_uart_tx_done            ),
+            .i_rx_data      (uart_rx_data              ),
+            .i_rx_done      (uart_rx_done              ),
+            .i_tx_done      (uart_tx_done              ),
             .i_rst          (i_rst                     ),
             .clk            (clk                       )
         );
@@ -152,7 +172,14 @@ module cpu_subsystem
         du_regfile_addr_to_cpu <= du_regfile_addr_to_cpu  ;
         du_dmem_raddr_to_cpu   <= du_dmem_raddr_to_cpu_out[DMEM_ADDR_WIDTH - 1 : 0];
         du_dmem_rsize_to_cpu   <= du_dmem_rsize_to_cpu_out;
-        du_dmem_ren_to_cpu     <= du_dmem_ren_to_cpu_out  ;        
+        du_dmem_ren_to_cpu     <= du_dmem_ren_to_cpu_out  ;    
+        uart_tx_start          <= uart_tx_start_out;
+        uart_rd                <= uart_rd_out      ;
+        uart_wr                <= uart_wr_out      ;
+        uart_wdata             <= uart_wdata_out   ;
+        uart_rx_data           <= i_uart_rx_data;
+        uart_rx_done           <= i_uart_rx_done;
+        uart_tx_done           <= i_uart_tx_done; 
     end
     
 endmodule

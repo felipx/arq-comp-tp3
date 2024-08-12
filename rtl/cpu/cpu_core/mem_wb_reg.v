@@ -17,6 +17,7 @@ module mem_wb_reg
     output reg [DATA_WIDTH - 1 : 0] o_data    ,  //! Data from memory output
     output reg [DATA_WIDTH - 1 : 0] o_alu     ,  //! ALU result output
     output reg [4 : 0]              o_rd_addr ,
+    output reg [2 : 0]              o_func3   ,
                                        
     // Inputs                          
     input wire                      i_regWrite,
@@ -26,6 +27,7 @@ module mem_wb_reg
     input wire [DATA_WIDTH - 1 : 0] i_data    ,  //! Data from memory input
     input wire [DATA_WIDTH - 1 : 0] i_alu     ,  //! ALU result input
     input wire [4 : 0]              i_rd_addr ,
+    input wire [2 : 0]              i_func3   ,
     input wire                      i_en      ,  //! Enable signal input
     input wire                      clk          //! Clock signal    
 );
@@ -40,6 +42,7 @@ module mem_wb_reg
             o_data     <= i_data    ;
             o_alu      <= i_alu     ;
             o_rd_addr  <= i_rd_addr ;
+            o_func3    <= i_func3   ;
         end
     end
 

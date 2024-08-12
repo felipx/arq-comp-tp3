@@ -89,7 +89,7 @@ module top
             .i_rd       (cpu_rd_to_uart      ),
             .i_wr       (cpu_wr_to_uart      ),
             .i_wdata    (cpu_wdata_to_uart   ),
-            .i_tick_cmp (9'd163              ), // 163 -> fBaud = 19200, clk = 50 Mhz
+            .i_tick_cmp (9'd326              ), // 163 -> fBaud = 19200, clk = 50 Mhz // 326 -> fbaud = 19200, clk = 100 MHz
             .i_rst      (i_rst               ),
             .clk        (clk                 )
         );

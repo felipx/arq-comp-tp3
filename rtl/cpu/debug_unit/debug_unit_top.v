@@ -42,6 +42,12 @@ module debug_unit_top
     input wire                          clk            
 );
 
+    //! Internal Buffers
+    reg                        tx_start;
+    reg                        rd      ;
+    reg                        wr      ;
+    reg [NB_UART_DATA - 1 : 0] wdata   ;
+
     //! Internal Connections
     wire                        master_load_fw_start     ;
     wire                        master_send_regs_start   ;
@@ -70,10 +76,10 @@ module debug_unit_top
     // Output Logic
     assign o_imem_size = master_imem_rsize | imem_loader_imem_wsize;
 
-    assign o_tx_start = master_tx_start   | imem_loader_tx_start   | regfile_reader_tx_start   | dmem_tx_uart_start;
-    assign o_rd       = master_uart_rd    | imem_loader_uart_rd    | dmem_tx_uart_rd                               ;
-    assign o_wr       = master_uart_wr    | imem_loader_uart_wr    | regfile_reader_uart_wr    | dmem_tx_uart_wr   ;
-    assign o_wdata    = master_uart_wdata | imem_loader_uart_wdata | regfile_reader_uart_wdata | dmem_tx_uart_wdata;
+    assign o_tx_start = tx_start;
+    assign o_rd       = rd      ;
+    assign o_wr       = wr      ;
+    assign o_wdata    = wdata   ;
     
 
     //! Debug Unit Master Controller
@@ -180,5 +186,12 @@ module debug_unit_top
             .i_rst        (i_rst                 ),
             .clk          (clk                   )
         );
+
+    always @(posedge clk) begin
+        tx_start <= master_tx_start   | imem_loader_tx_start   | regfile_reader_tx_start   | dmem_tx_uart_start;
+        rd       <= master_uart_rd    | imem_loader_uart_rd    | dmem_tx_uart_rd                               ;
+        wr       <= master_uart_wr    | imem_loader_uart_wr    | regfile_reader_uart_wr    | dmem_tx_uart_wr   ;
+        wdata    <= master_uart_wdata | imem_loader_uart_wdata | regfile_reader_uart_wdata | dmem_tx_uart_wdata;
+    end
     
 endmodule
