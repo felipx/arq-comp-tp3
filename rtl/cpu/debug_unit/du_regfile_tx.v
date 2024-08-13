@@ -51,8 +51,8 @@ module du_regfile_tx
     reg [4 : 0] regfile_addr_next;
     
     // Word's bytes counter registers
-    reg [NB_COUNTER - 1 : 0] word_counter_reg ;
-    reg [NB_COUNTER - 1 : 0] word_counter_next;
+    reg [NB_COUNTER - 1 : 0] counter_reg ;
+    reg [NB_COUNTER - 1 : 0] counter_next;
     
     //! Read Address Output Logic
     assign o_regfile_raddr = regfile_addr_reg;
@@ -64,13 +64,13 @@ module du_regfile_tx
             state_reg        <= IDLE;
             rx_data_reg      <= {NB_REG{1'b0}};
             regfile_addr_reg <= {4{1'b0}};
-            word_counter_reg <= {NB_COUNTER{1'b0}};
+            counter_reg      <= {NB_COUNTER{1'b0}};
         end
         else begin
             state_reg        <= next_state;
             rx_data_reg      <= rx_data_next;
             regfile_addr_reg <= regfile_addr_next;
-            word_counter_reg <= word_counter_next;
+            counter_reg      <= counter_next;
         end
     end
     
@@ -87,19 +87,19 @@ module du_regfile_tx
             end
             
             SEND_PC: begin
-                if (word_counter_reg == 3'b100 && i_tx_done) begin
+                if (counter_reg == 3'b100 && i_tx_done) begin
                     next_state = READ_REG;
                 end
             end
             
             READ_REG: begin
-                if (o_regfile_rd) begin
+                if (counter_reg == 3'b100) begin
                     next_state = SEND_REG;
                 end
             end
             
             SEND_REG: begin
-                if (word_counter_reg == 3'b100 && i_tx_done) begin
+                if (counter_reg == 3'b100 && i_tx_done) begin
                     if (regfile_addr_reg == 5'd31) begin
                         next_state = IDLE;
                     end
@@ -123,91 +123,99 @@ module du_regfile_tx
         o_wdata           = 8'h00;
         rx_data_next      = rx_data_reg;
         regfile_addr_next = regfile_addr_reg;
-        word_counter_next = word_counter_reg;
+        counter_next = counter_reg;
         
         case (state_reg)
             SEND_PC: begin
-                if (word_counter_reg == 3'b100) begin
+                if (counter_reg == 3'b100) begin
                     if (i_tx_done) begin
-                        word_counter_next = {NB_COUNTER{1'b0}};
+                        counter_next = {NB_COUNTER{1'b0}};
                     end
                 end
-                else if (word_counter_reg == 3'b000) begin
-                    o_wdata           = i_pc[7 : 0];
-                    o_wr              = 1'b1;
-                    o_tx_start        = 1'b1;
-                    word_counter_next = word_counter_reg + 1'b1;
+                else if (counter_reg == 3'b000) begin
+                    o_wdata      = i_pc[7 : 0];
+                    o_wr         = 1'b1;
+                    o_tx_start   = 1'b1;
+                    counter_next = counter_reg + 1'b1;
                 end
-                else if (word_counter_reg == 3'b001) begin
+                else if (counter_reg == 3'b001) begin
                     if (i_tx_done) begin
                         o_wdata           = i_pc[15 : 8];
                         o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b010) begin
+                else if (counter_reg == 3'b010) begin
                     if (i_tx_done) begin
                         o_wdata           = i_pc[23 : 16];
                         o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b011) begin
+                else if (counter_reg == 3'b011) begin
                     if (i_tx_done) begin
                         o_wdata           = i_pc[31 : 24];
                         o_wr              = 1'b1;
                         o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
             end
             
             READ_REG: begin
-                o_regfile_rd      = 1'b1;
-                regfile_addr_next = regfile_addr_reg + 1'b1;
-                rx_data_next      = i_regfile_data;
+                if (counter_reg == 3'b000) begin
+                    o_regfile_rd      = 1'b1;
+                    regfile_addr_next = regfile_addr_reg + 1'b1;
+                end
+                
+                counter_next = counter_reg + 1'b1;
+
+                if (counter_reg == 3'b100) begin
+                    rx_data_next = i_regfile_data;
+                    counter_next = {NB_COUNTER{1'b0}};
+                end
             end
             
             SEND_REG: begin
-                if (word_counter_reg == 3'b100) begin
+                if (counter_reg == 3'b100) begin
                     if (i_tx_done) begin
-                        word_counter_next = {NB_COUNTER{1'b0}};
+                        counter_next = {NB_COUNTER{1'b0}};
                     end
 
                     if (regfile_addr_reg == 5'd31) begin
                         o_done = 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b000) begin
-                    o_wdata           = rx_data_reg[7 : 0];
-                    o_wr              = 1'b1;
-                    o_tx_start        = 1'b1;
-                    word_counter_next = word_counter_reg + 1'b1;
+                else if (counter_reg == 3'b000) begin
+                    o_wdata      = rx_data_reg[7 : 0];
+                    o_wr         = 1'b1;
+                    o_tx_start   = 1'b1;
+                    counter_next = counter_reg + 1'b1;
                 end
-                else if (word_counter_reg == 3'b001) begin
+                else if (counter_reg == 3'b001) begin
                     if (i_tx_done) begin
-                        o_wdata           = rx_data_reg[15 : 8];
-                        o_wr              = 1'b1;
-                        o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        o_wdata      = rx_data_reg[15 : 8];
+                        o_wr         = 1'b1;
+                        o_tx_start   = 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b010) begin
+                else if (counter_reg == 3'b010) begin
                     if (i_tx_done) begin
-                        o_wdata           = rx_data_reg[23 : 16];
-                        o_wr              = 1'b1;
-                        o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        o_wdata      = rx_data_reg[23 : 16];
+                        o_wr         = 1'b1;
+                        o_tx_start   = 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
-                else if (word_counter_reg == 3'b011) begin
+                else if (counter_reg == 3'b011) begin
                     if (i_tx_done) begin
-                        o_wdata           = rx_data_reg[31 : 24];
-                        o_wr              = 1'b1;
-                        o_tx_start        = 1'b1;
-                        word_counter_next = word_counter_reg + 1'b1;
+                        o_wdata      = rx_data_reg[31 : 24];
+                        o_wr         = 1'b1;
+                        o_tx_start   = 1'b1;
+                        counter_next = counter_reg + 1'b1;
                     end
                 end
             end 
@@ -220,7 +228,7 @@ module du_regfile_tx
                 o_wdata           = 8'h00;
                 rx_data_next      = rx_data_reg;
                 regfile_addr_next = regfile_addr_reg;
-                word_counter_next = word_counter_reg;
+                counter_next      = counter_reg;
             end
             
         endcase

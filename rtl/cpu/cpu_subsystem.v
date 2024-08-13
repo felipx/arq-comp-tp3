@@ -33,30 +33,64 @@ module cpu_subsystem
     localparam NB_BYTE         = 8;
     localparam NB_REGFILE_ADDR = 5;
 
+    //! Internal Buffers
+    reg [NB_PC           - 1 : 0] pc_to_du           ;
+    reg [NB_INSTRUCTION  - 1 : 0] cpu_instr_to_du    ;
+    reg [NB_REG          - 1 : 0] cpu_reg_to_du      ;
+    reg [NB_DATA         - 1 : 0] cpu_dmem_data_to_du;
+
+    reg                           debug_unit_cpu_en     ;
+    reg [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu   ;
+    reg [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu  ;
+    reg [1 : 0]                   du_imem_size_to_cpu   ;
+    reg                           du_imem_wen_to_cpu    ;
+    reg                           du_regfile_rd_to_cpu  ;
+    reg [NB_REGFILE_ADDR - 1 : 0] du_regfile_addr_to_cpu;
+    reg [DMEM_ADDR_WIDTH - 1 : 0] du_dmem_raddr_to_cpu  ;
+    reg [1 : 0]                   du_dmem_rsize_to_cpu  ;
+    reg                           du_dmem_ren_to_cpu    ;
+
+    reg                           uart_tx_start;
+    reg                           uart_rd      ;
+    reg                           uart_wr      ;
+    reg [NB_UART_DATA - 1 : 0]    uart_wdata   ;
+
+    reg [NB_UART_DATA - 1 : 0]    uart_rx_data;
+    reg                           uart_rx_done;
+    reg                           uart_tx_done;
 
     //! Connections
-    wire                           debug_unit_cpu_en;
-    wire [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu;
-    wire [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu;
-    wire [1 : 0]                   du_imem_size_to_cpu;
-    wire                           du_imem_wen_to_cpu;
+    // CPU to DU
+    wire [NB_PC           - 1 : 0] pc_to_du_out           ;
+    wire [NB_INSTRUCTION  - 1 : 0] cpu_instr_to_du_out    ;
+    wire [NB_REG          - 1 : 0] cpu_reg_to_du_out      ;
+    wire [NB_DATA         - 1 : 0] cpu_dmem_data_to_du_out;
 
-    wire                           du_regfile_rd_to_cpu;
-    wire [NB_REGFILE_ADDR - 1 : 0] du_regfile_addr_to_cpu;
+    // DU to CPU
+    wire                           debug_unit_cpu_en_out     ;
+    wire [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu_out   ;
+    wire [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu_out  ;
+    wire [1 : 0]                   du_imem_size_to_cpu_out   ;
+    wire                           du_imem_wen_to_cpu_out    ;
+    wire                           du_regfile_rd_to_cpu_out  ;
+    wire [NB_REGFILE_ADDR - 1 : 0] du_regfile_addr_to_cpu_out;
+    wire [NB_DATA         - 1 : 0] du_dmem_raddr_to_cpu_out  ;
+    wire [1 : 0]                   du_dmem_rsize_to_cpu_out  ;
+    wire                           du_dmem_ren_to_cpu_out    ;
 
-    wire [NB_DATA         - 1 : 0] du_dmem_raddr_to_cpu;
-    wire [1 : 0]                   du_dmem_rsize_to_cpu;
-    wire                           du_dmem_ren_to_cpu;
+    wire                        uart_tx_start_out;
+    wire                        uart_rd_out      ;
+    wire                        uart_wr_out      ;
+    wire [NB_UART_DATA - 1 : 0] uart_wdata_out   ;
 
+    //! Output Logic
+    assign o_uart_tx_start = uart_tx_start;
+    assign o_uart_rd       = uart_rd      ;
+    assign o_uart_wr       = uart_wr      ;
+    assign o_uart_wdata    = uart_wdata   ;
     
-
-    wire [NB_PC           - 1 : 0] pc_to_du;
-    wire [NB_INSTRUCTION  - 1 : 0] cpu_instr_to_du;
-    wire [NB_REG          - 1 : 0] cpu_reg_to_du;
-    wire [NB_DATA         - 1 : 0] cpu_dmem_data_to_du;
     
-
-    // CPU Core
+    //! CPU Core
     cpu_core
     #(
         .NB_PC           (NB_PC          ),
@@ -67,15 +101,15 @@ module cpu_subsystem
     )
         u_cpu
         (
-            .o_pc           (pc_to_du                ),
-            .o_instr        (cpu_instr_to_du         ),
-            .o_regfile_data (cpu_reg_to_du           ),
-            .o_dmem_data    (cpu_dmem_data_to_du     ),
+            .o_pc           (pc_to_du_out            ),
+            .o_instr        (cpu_instr_to_du_out     ),
+            .o_regfile_data (cpu_reg_to_du_out       ),
+            .o_dmem_data    (cpu_dmem_data_to_du_out ),
             .i_du_rgfile_rd (du_regfile_rd_to_cpu    ),
             .i_regfile_addr (du_regfile_addr_to_cpu  ),
             .i_imem_data    (du_imem_data_to_cpu     ),
             .i_imem_waddr   (du_imem_waddr_to_cpu    ),
-            .i_mem_size     (du_imem_size_to_cpu     ),
+            .i_imem_size    (du_imem_size_to_cpu     ),
             .i_imem_wen     (du_imem_wen_to_cpu      ),
             .i_dmem_raddr   (du_dmem_raddr_to_cpu    ),
             .i_dmem_rsize   (du_dmem_rsize_to_cpu    ),
@@ -85,7 +119,7 @@ module cpu_subsystem
             .clk            (clk                     )
         );
     
-    // Debug Unit
+    //! Debug Unit
     debug_unit_top
     #(
         .NB_PC           (NB_PC          ),
@@ -98,29 +132,54 @@ module cpu_subsystem
     )
         u_debug_unit
         (
-            .o_cpu_en       (debug_unit_cpu_en     ),
-            .o_tx_start     (o_uart_tx_start       ),
-            .o_rd           (o_uart_rd             ),
-            .o_wr           (o_uart_wr             ),
-            .o_wdata        (o_uart_wdata          ),
-            .o_imem_data    (du_imem_data_to_cpu   ),
-            .o_imem_waddr   (du_imem_waddr_to_cpu  ),
-            .o_imem_size    (du_imem_size_to_cpu   ),
-            .o_imem_wen     (du_imem_wen_to_cpu    ),
-            .o_regfile_rd   (du_regfile_rd_to_cpu  ),
-            .o_regfile_raddr(du_regfile_addr_to_cpu),
-            .o_dmem_rd      (du_dmem_ren_to_cpu    ),
-            .o_dmem_rsize   (du_dmem_rsize_to_cpu  ),
-            .o_dmem_raddr   (du_dmem_raddr_to_cpu  ),
-            .i_pc           (pc_to_du              ),
-            .i_instr        (cpu_instr_to_du       ),
-            .i_regfile_data (cpu_reg_to_du         ),
-            .i_dmem_data    (cpu_dmem_data_to_du   ),
-            .i_rx_data      (i_uart_rx_data        ),
-            .i_rx_done      (i_uart_rx_done        ),
-            .i_tx_done      (i_uart_tx_done        ),
-            .i_rst          (i_rst                 ),
-            .clk            (clk                   )
+            .o_cpu_en       (debug_unit_cpu_en_out     ),
+            .o_tx_start     (uart_tx_start_out         ),
+            .o_rd           (uart_rd_out               ),
+            .o_wr           (uart_wr_out               ),
+            .o_wdata        (uart_wdata_out            ),
+            .o_imem_data    (du_imem_data_to_cpu_out   ),
+            .o_imem_waddr   (du_imem_waddr_to_cpu_out  ),
+            .o_imem_size    (du_imem_size_to_cpu_out   ),
+            .o_imem_wen     (du_imem_wen_to_cpu_out    ),
+            .o_regfile_rd   (du_regfile_rd_to_cpu_out  ),
+            .o_regfile_raddr(du_regfile_addr_to_cpu_out),
+            .o_dmem_rd      (du_dmem_ren_to_cpu_out    ),
+            .o_dmem_rsize   (du_dmem_rsize_to_cpu_out  ),
+            .o_dmem_raddr   (du_dmem_raddr_to_cpu_out  ),
+            .i_pc           (pc_to_du                  ),
+            .i_instr        (cpu_instr_to_du           ),
+            .i_regfile_data (cpu_reg_to_du             ),
+            .i_dmem_data    (cpu_dmem_data_to_du       ),
+            .i_rx_data      (uart_rx_data              ),
+            .i_rx_done      (uart_rx_done              ),
+            .i_tx_done      (uart_tx_done              ),
+            .i_rst          (i_rst                     ),
+            .clk            (clk                       )
         );
+
+    //! Debug Unit buffers Logic
+    always @(posedge clk) begin
+        pc_to_du               <= pc_to_du_out                                     ;
+        cpu_instr_to_du        <= cpu_instr_to_du_out                              ;
+        cpu_reg_to_du          <= cpu_reg_to_du_out                                ;
+        cpu_dmem_data_to_du    <= cpu_dmem_data_to_du_out                          ;
+        debug_unit_cpu_en      <= debug_unit_cpu_en_out                            ;
+        du_imem_data_to_cpu    <= du_imem_data_to_cpu_out                          ;
+        du_imem_waddr_to_cpu   <= du_imem_waddr_to_cpu_out                         ;
+        du_imem_size_to_cpu    <= du_imem_size_to_cpu_out                          ;
+        du_imem_wen_to_cpu     <= du_imem_wen_to_cpu_out                           ;
+        du_regfile_rd_to_cpu   <= du_regfile_rd_to_cpu_out                         ;
+        du_regfile_addr_to_cpu <= du_regfile_addr_to_cpu_out                       ;
+        du_dmem_raddr_to_cpu   <= du_dmem_raddr_to_cpu_out[DMEM_ADDR_WIDTH - 1 : 0];
+        du_dmem_rsize_to_cpu   <= du_dmem_rsize_to_cpu_out                         ;
+        du_dmem_ren_to_cpu     <= du_dmem_ren_to_cpu_out                           ;    
+        uart_tx_start          <= uart_tx_start_out                                ;
+        uart_rd                <= uart_rd_out                                      ;
+        uart_wr                <= uart_wr_out                                      ;
+        uart_wdata             <= uart_wdata_out                                   ;
+        uart_rx_data           <= i_uart_rx_data                                   ;
+        uart_rx_done           <= i_uart_rx_done                                   ;
+        uart_tx_done           <= i_uart_tx_done                                   ; 
+    end
     
 endmodule
