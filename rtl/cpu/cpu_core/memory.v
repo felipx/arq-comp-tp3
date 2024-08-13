@@ -116,13 +116,6 @@ module memory
         raddr[3] = base_raddr;
 
         dout_shifted = ({ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0], ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0]} >> (read_shift * 8));
-
-        //if (rd_reg) begin
-        //    o_dout = dout_shifted;
-        //end
-        //else begin
-        //    o_dout = {32{1'b0}};
-        //end
     end
 
     always @(posedge clk) begin
