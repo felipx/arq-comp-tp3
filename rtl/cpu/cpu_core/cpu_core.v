@@ -109,15 +109,18 @@ module cpu_core
     // Branch target Address Calculator Adder output connections
     wire [NB_DATA - 1 : 0] adder_addr_out;
     
+    // Flush Muxes output connections
+    wire flush_mux_1_regWrite_out;
+    wire flush_mux_2_memWrite_out;
+    
     // EX Forwarding Unit output connections
     wire [1 : 0] fowrward_unit_a_out;
     wire [1 : 0] fowrward_unit_b_out;
     
-    // Forwarding Mux A output connections
+    // Forwarding Muxes output connections
     wire [NB_DATA - 1 : 0] forwarding_mux_a_out;
-    
-    // Forwarding Mux A output connections
     wire [NB_DATA - 1 : 0] forwarding_mux_b_out;
+    wire [NB_DATA - 1 : 0] forwarding_mux_c_out;
     
     // ALU output connections
     wire [NB_DATA - 1 : 0] alu_result;
@@ -445,22 +448,7 @@ module cpu_core
             .i_sel   (fowrward_unit_a_out ) 
         );
     
-    wire [NB_DATA - 1 : 0] forwarding_mux_c_out;
-    // Forwarding Mux 3 & ALU input mux
-    mux_3to1
-    #(
-        .DATA_WIDTH (NB_DATA)
-    )
-        u_forwarding_mux_3
-        (
-            .o_data  (forwarding_mux_c_out), 
-            .i_data0 (id_ex_rs2_data_out  ),
-            .i_data1 (wb_mux_out          ),
-            .i_data2 (ex_mem_alu_out      ),
-            .i_sel   (fowrward_unit_b_out ) 
-        );
-    
-    // Forwarding Mux 2 & ALU input mux
+    // Forwarding Mux 2 / ALU input mux
     mux_4to1
     #(
         .DATA_WIDTH (NB_DATA)
@@ -473,6 +461,20 @@ module cpu_core
             .i_data2 (ex_mem_alu_out                                                                        ),
             .i_data3 (id_ex_imm_out                                                                         ),
             .i_sel   ({fowrward_unit_b_out[1] | id_ex_ALUSrc_out, fowrward_unit_b_out[0] | id_ex_ALUSrc_out}) 
+        );
+    
+    // Forwarding Mux 3 & ALU input mux
+    mux_3to1
+    #(
+        .DATA_WIDTH (NB_DATA)
+    )
+        u_forwarding_mux_3
+        (
+            .o_data  (forwarding_mux_c_out), 
+            .i_data0 (id_ex_rs2_data_out  ),
+            .i_data1 (wb_mux_out          ),
+            .i_data2 (ex_mem_alu_out      ),
+            .i_sel   (fowrward_unit_b_out ) 
         );
     
     // ALU
@@ -524,31 +526,28 @@ module cpu_core
             .i_a   (id_ex_pc_out  ),
             .i_b   (id_ex_imm_out )
         );
-//
-//
-    wire regWrite_out;
-    wire memWrite_out;
-    // flush mux 1
+    
+    // Flush Mux 1
     mux_2to1
     #(
         .NB_MUX (1)
     )
         u_flush_mux_1
         (
-            .o_mux (regWrite_out     ),
+            .o_mux (flush_mux_1_regWrite_out  ),
             .i_a   (id_ex_regWrite_out        ),
             .i_b   (1'b0                      ),
             .i_sel (branch_ctrl_unit_flush_out) 
         );
     
-    // flush mux 2
+    // Flush Mux 2
     mux_2to1
     #(
         .NB_MUX (1)
     )
         u_flush_mux_2
         (
-            .o_mux (memWrite_out     ),
+            .o_mux (flush_mux_2_memWrite_out  ),
             .i_a   (id_ex_memWrite_out        ),
             .i_b   (1'b0                      ),
             .i_sel (branch_ctrl_unit_flush_out) 
@@ -562,38 +561,38 @@ module cpu_core
     )
         u_ex_mem_reg
         (
-            .o_regWrite (ex_mem_regWrite_out ),
-            .o_memRead  (ex_mem_memRead_out  ),
-            .o_memWrite (ex_mem_memWrite_out ),
-            .o_memToReg (ex_mem_memToReg_out ),
-            .o_branch   (ex_mem_branch_out   ),
-            .o_jump     (ex_mem_jump_out     ),
-            .o_linkReg  (ex_mem_linkReg_out  ),
-            .o_dataSize (ex_mem_dataSize_out ),
-            .o_pc_next  (ex_mem_pc_next_out  ),
-            .o_branch_addr (ex_mem_branch_addr_out),
-            .o_alu      (ex_mem_alu_out      ),
-            .o_data2    (ex_mem_data_out     ),
-            .o_opcode   (ex_mem_opcode_out   ),
-            .o_rd_addr  (ex_mem_rd_addr_out  ),
-            .o_func3    (ex_mem_func3_out    ),
-            .i_regWrite (regWrite_out  ),
-            .i_memRead  (id_ex_memRead_out   ),
-            .i_memWrite (memWrite_out  ),
-            .i_memToReg (id_ex_memToReg_out  ),
-            .i_branch   (id_ex_branch_out    ),
-            .i_jump     (id_ex_jump_out      ),
-            .i_linkReg  (id_ex_linkReg_out   ),
-            .i_dataSize (id_ex_dataSize_out  ),
-            .i_pc_next  (id_ex_pc_next_out   ),
-            .i_branch_addr (adder_addr_out),
-            .i_alu      (alu_result          ),
-            .i_data2    (forwarding_mux_c_out),
-            .i_opcode   (id_ex_opcode_out    ),
-            .i_rd_addr  (id_ex_rd_addr_out   ),
-            .i_func3    (id_ex_func3_out     ),
-            .i_en       (en                  ),
-            .clk        (clk                 ) 
+            .o_regWrite    (ex_mem_regWrite_out      ),
+            .o_memRead     (ex_mem_memRead_out       ),
+            .o_memWrite    (ex_mem_memWrite_out      ),
+            .o_memToReg    (ex_mem_memToReg_out      ),
+            .o_branch      (ex_mem_branch_out        ),
+            .o_jump        (ex_mem_jump_out          ),
+            .o_linkReg     (ex_mem_linkReg_out       ),
+            .o_dataSize    (ex_mem_dataSize_out      ),
+            .o_pc_next     (ex_mem_pc_next_out       ),
+            .o_branch_addr (ex_mem_branch_addr_out   ),
+            .o_alu         (ex_mem_alu_out           ),
+            .o_data2       (ex_mem_data_out          ),
+            .o_opcode      (ex_mem_opcode_out        ),
+            .o_rd_addr     (ex_mem_rd_addr_out       ),
+            .o_func3       (ex_mem_func3_out         ),
+            .i_regWrite    (flush_mux_1_regWrite_out ),
+            .i_memRead     (id_ex_memRead_out        ),
+            .i_memWrite    (flush_mux_2_memWrite_out ),
+            .i_memToReg    (id_ex_memToReg_out       ),
+            .i_branch      (id_ex_branch_out         ),
+            .i_jump        (id_ex_jump_out           ),
+            .i_linkReg     (id_ex_linkReg_out        ),
+            .i_dataSize    (id_ex_dataSize_out       ),
+            .i_pc_next     (id_ex_pc_next_out        ),
+            .i_branch_addr (adder_addr_out           ),
+            .i_alu         (alu_result               ),
+            .i_data2       (forwarding_mux_c_out     ),
+            .i_opcode      (id_ex_opcode_out         ),
+            .i_rd_addr     (id_ex_rd_addr_out        ),
+            .i_func3       (id_ex_func3_out          ),
+            .i_en          (en                       ),
+            .clk           (clk                      ) 
         );
     
     //
@@ -646,30 +645,6 @@ module cpu_core
             .i_rst   (i_rst                                  ),
             .clk     (clk                                    ) 
         );
-    
-    // Data Memory Control Unit
-    //data_mem_ctrl_unit
-    //#(
-    //    .DATA_WIDTH (NB_DATA)
-    //)
-    //    u_data_mem_ctrl_unit
-    //    (
-    //        .o_data   (data_mem_ctrl_unit_data_out),
-    //        .i_data   (data_memory_out            ),
-    //        .i_opcode (ex_mem_opcode_out          ),
-    //        .i_func3  (ex_mem_func3_out           ),
-    //        .clk      (clk                        )
-    //    );
-    
-    // MEM Forwarding Unit
-    //mem_forwarding_unit
-    //    u_mem_forwarding_unit
-    //    (
-    //        .o_forward_b   (),
-    //        .i_mem_rs2     (),
-    //        .i_wb_rd       (),
-    //        .i_wb_RegWrite () 
-    //    );
     
     // MEM/WB Pipeline Registers
     mem_wb_reg

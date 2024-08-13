@@ -158,7 +158,7 @@ module du_master
 
             STOP: begin
                 // If 0x01 is received go to IDLE
-                if (i_rx_data == 8'h01) begin
+                if (i_rx_data == 8'h02) begin
                     next_state = IDLE;
                 end
             end
@@ -222,7 +222,7 @@ module du_master
                     o_rd = 1'b1;
 
                     if (i_rx_data == STEP) begin
-                        step_mode_next = 1'b1;
+                        step_mode_next = step_mode_reg + 1'b1;
                     end
                     else if (i_rx_data == CONT) begin
                         step_mode_next = 1'b0;
@@ -272,6 +272,8 @@ module du_master
             end
 
             STOP: begin // need to send rst
+                counter_next = counter_reg + 1'b1;
+
                 // Sends '0' every 4 secs
                 if (counter_reg == 32'd099_999_999) begin
                     o_wr         = 1;
