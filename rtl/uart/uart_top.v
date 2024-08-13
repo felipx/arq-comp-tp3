@@ -6,8 +6,8 @@
 
 module uart_top
 # (
-    parameter NB_COUNTER   = 9,                            //! NB of baud generator counter reg
-    parameter NB_DATA      = 8,                            //! NB of UART data reg
+    parameter NB_COUNTER   = 32,                           //! NB of baud generator counter reg
+    parameter NB_DATA      = 8 ,                           //! NB of UART data reg
     parameter NB_FIFO_ADDR = 5                             //! NB of fifo's regs depth
 ) (
     // Outputs
