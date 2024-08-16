@@ -122,9 +122,9 @@ module memory
         if (rd_reg) begin 
             o_dout <= dout_shifted;
         end
-        else begin
-            o_dout = {32{1'b0}};
-        end
+//        else begin
+//            o_dout = {32{1'b0}};
+//        end
     end
 
 endmodule
