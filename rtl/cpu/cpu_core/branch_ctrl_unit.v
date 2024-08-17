@@ -36,22 +36,22 @@ module branch_ctrl_unit
         if (i_branch) begin
             case (i_func3_2)
                 1'b0: begin
-                    if (i_func3_0 == 1'b0 && i_alu_zero) o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
-                    else if (i_func3_0 == 1'b1 && ~i_alu_zero) o_pcSrc = 2'b01; // BEQ taken if zero flag is set
+                    if (i_func3_0 == 1'b0 && i_alu_zero)       o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
+                    else if (i_func3_0 == 1'b1 && ~i_alu_zero) o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
                 end
                 1'b1: begin
-                    if (i_func3_0 == 1'b0 && i_alu_result) o_pcSrc = 2'b01;  // BLT/BLTU taken if less than
-                    else if (i_func3_0 == 1'b1 && ~i_alu_result) o_pcSrc = 2'b01; // BGE/BGEU taken if less than unsigned
+                    if (i_func3_0 == 1'b0 && i_alu_result)       o_pcSrc = 2'b01;  // BLT/BLTU taken if less than
+                    else if (i_func3_0 == 1'b1 && ~i_alu_result) o_pcSrc = 2'b01;  // BGE/BGEU taken if less than unsigned
                 end 
             endcase
             if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
         end
         else if (i_jump && ~i_linkReg) begin
-            o_pcSrc = 2'b01;  // JAL jump target (PC+Imm)
+            o_pcSrc = 2'b10;  // JAL jump target (PC+Imm)
             o_flush = 1'b1;   // Flush pipeline
         end
         else if (i_jump && i_linkReg) begin
-            o_pcSrc = 2'b10;  // JALR jump target (rs1+Imm)
+            o_pcSrc = 2'b11;  // JALR jump target (rs1+Imm)
             o_flush = 1'b1;   // Flush pipeline
         end
     end

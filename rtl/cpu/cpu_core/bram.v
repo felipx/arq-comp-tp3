@@ -1,7 +1,7 @@
 
 module bram
 #(
-    parameter ADDR_WIDTH = 3                 //! Address width
+    parameter ADDR_WIDTH = 8                 //! Address width
 ) (
     // Output
     output reg [7 : 0]          o_dout,

@@ -140,7 +140,7 @@ module du_imem_loader
 
             RECEIVE_FW_3: begin
                 // If received byte is 0x01, new frame comming
-                if (i_rx_data == SOT) begin
+                if (i_rx_data == 8'h01) begin
                     next_state = RECEIVE_FW_1;
                 end
                 // If received byte is EOT, FW receive complete
@@ -241,9 +241,9 @@ module du_imem_loader
             RECEIVE_FW_3: begin
                 // If a byte is received, read it
                 if (i_rx_done) begin
-                    o_rd = 1'b1;
-                    o_wr          = 1;
-                    o_wdata       = ACK;
+                    o_rd       = 1'b1;
+                    o_wr       = 1;
+                    o_wdata    = ACK;
                     o_tx_start = 1'b1;
                 end
 

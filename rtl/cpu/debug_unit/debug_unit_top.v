@@ -29,6 +29,7 @@ module debug_unit_top
     output wire                           o_dmem_rd      ,
     output wire [1 : 0]                   o_dmem_rsize   ,
     output wire [NB_DATA         - 1 : 0] o_dmem_raddr   ,
+    output wire                           o_rst          ,
     
     // Inputs
     input wire [NB_PC          - 1 : 0] i_pc          ,  //! PC input
@@ -99,13 +100,13 @@ module debug_unit_top
             .o_rd              (master_uart_rd        ),
             .o_wr              (master_uart_wr        ),  //check this
             .o_wdata           (master_uart_wdata     ),
+            .o_rst             (o_rst                 ),
             .i_loader_done     (imem_loader_done      ),
             .i_send_regs_done  (regfile_reader_done   ),
             .i_send_dmem_done  (dmem_tx_done          ),
             .i_instr           (i_instr               ),
             .i_rx_data         (i_rx_data             ),
             .i_rx_done         (i_rx_done             ),
-            //.i_tx_done         (                      ),
             .i_rst             (i_rst                 ),
             .clk               (clk                   )
         );
