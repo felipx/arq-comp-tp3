@@ -6,7 +6,7 @@
 
 module counter
 #(
-    parameter NB_COUNTER = 9                      //! NB of COUNTER REG
+    parameter NB_COUNTER = 32                     //! NB of COUNTER REG
 ) (
     // Outputs
     output wire [NB_COUNTER - 1 : 0] o_counter,   //! Counter status output

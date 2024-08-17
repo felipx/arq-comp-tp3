@@ -5,9 +5,7 @@
 //! @version 0.1
 
 module branch_ctrl_unit
-#(
-    parameter NB_DATA = 32
-) (
+(
     // Outputs
     output reg [1 : 0] o_pcSrc ,      //! PC source control signal
     output reg         o_flush ,      //! Pipeline flush signal
@@ -18,8 +16,8 @@ module branch_ctrl_unit
     input wire         i_branch    ,  //! Branch instruction flag input
     input wire         i_jump      ,  //! JAL or JALR instruction flag input
     input wire         i_linkReg   ,  //! JALR instruction flag input
-    input wire [2 : 0] i_func3        //! Instruction func3 field
-    //input wire         clk
+    input wire         i_func3_0   ,  //! Instruction func3 field
+    input wire         i_func3_2      //! Instruction func3 field
 );
     
     // Func3 values for branch instructions
@@ -36,88 +34,26 @@ module branch_ctrl_unit
         o_flush = 1'b0;   // Default to no flush
 
         if (i_branch) begin
-            case (i_func3[2])
+            case (i_func3_2)
                 1'b0: begin
-                    if (i_func3[0] == 1'b0 && i_alu_zero) o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
-                    else if (i_func3[0] == 1'b1 && ~i_alu_zero) o_pcSrc = 2'b01; // BEQ taken if zero flag is set
+                    if (i_func3_0 == 1'b0 && i_alu_zero)       o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
+                    else if (i_func3_0 == 1'b1 && ~i_alu_zero) o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
                 end
                 1'b1: begin
-                    if (i_func3[0] == 1'b0 && i_alu_result) o_pcSrc = 2'b01;  // BLT/BLTU taken if less than
-                    else if (i_func3[0] == 1'b1 && ~i_alu_result) o_pcSrc = 2'b01; // BGE/BGEU taken if less than unsigned
+                    if (i_func3_0 == 1'b0 && i_alu_result)       o_pcSrc = 2'b01;  // BLT/BLTU taken if less than
+                    else if (i_func3_0 == 1'b1 && ~i_alu_result) o_pcSrc = 2'b01;  // BGE/BGEU taken if less than unsigned
                 end 
             endcase
             if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
         end
         else if (i_jump && ~i_linkReg) begin
-            o_pcSrc = 2'b01;  // JAL jump target (PC+Imm)
+            o_pcSrc = 2'b10;  // JAL jump target (PC+Imm)
             o_flush = 1'b1;   // Flush pipeline
         end
         else if (i_jump && i_linkReg) begin
-            o_pcSrc = 2'b10;  // JALR jump target (rs1+Imm)
+            o_pcSrc = 2'b11;  // JALR jump target (rs1+Imm)
             o_flush = 1'b1;   // Flush pipeline
         end
     end
-
-    //always @(*) begin
-    //    // Default values
-    //    o_pcSrc = 2'b00;  // Default to PC + 4
-    //    o_flush = 1'b0;   // Default to no flush
-//
-    //    if (branch) begin
-    //        case (i_func3)
-    //            FUNC3_BEQ : if ( alu_zero  ) o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
-    //            FUNC3_BNE : if (!alu_zero  ) o_pcSrc = 2'b01;  // BNE taken if zero flag is not set
-    //            FUNC3_BLT : if ( alu_result) o_pcSrc = 2'b01;  // BLT taken if less than
-    //            FUNC3_BGE : if (!alu_result) o_pcSrc = 2'b01;  // BGE taken if not less than
-    //            FUNC3_BLTU: if ( alu_result) o_pcSrc = 2'b01;  // BLTU taken if less than unsigned
-    //            FUNC3_BGEU: if (!alu_result) o_pcSrc = 2'b01;  // BGEU taken if not less than unsigned
-    //            default   :                  o_pcSrc = 2'b00;
-    //        endcase
-    //        if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
-    //    end
-    //    else if (i_jump && ~i_linkReg) begin
-    //        o_pcSrc = 2'b01;  // JAL jump target (PC+Imm)
-    //        o_flush = 1'b1;   // Flush pipeline
-    //    end
-    //    else if (i_jump && i_linkReg) begin
-    //        o_pcSrc = 2'b10;  // JALR jump target (rs1+Imm)
-    //        o_flush = 1'b1;   // Flush pipeline
-    //    end
-    //end
-
-    //always @(*) begin
-    //    // Default values
-    //    o_pcSrc = 2'b00;  // Default to PC + 4
-    //    o_flush = 1'b0;   // Default to no flush
-//
-    //    // Determine branch or jump type
-    //    case (i_opcode)
-    //        OPCODE_BRANCH: begin
-    //            case (i_func3)
-    //                FUNC3_BEQ : if (i_alu_zero)    o_pcSrc = 2'b01;  // BEQ taken if zero flag is set
-    //                FUNC3_BNE : if (!i_alu_zero)   o_pcSrc = 2'b01;  // BNE taken if zero flag is not set
-    //                FUNC3_BLT : if (i_alu_result)  o_pcSrc = 2'b01;  // BLT taken if less than
-    //                FUNC3_BGE : if (!i_alu_result) o_pcSrc = 2'b01;  // BGE taken if not less than
-    //                FUNC3_BLTU: if (i_alu_result)  o_pcSrc = 2'b01;  // BLTU taken if less than unsigned
-    //                FUNC3_BGEU: if (!i_alu_result) o_pcSrc = 2'b01;  // BGEU taken if not less than unsigned
-    //                default   :                    o_pcSrc = 2'b00;
-    //            endcase
-    //            if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
-    //        end
-    //        OPCODE_JAL: begin
-    //            o_pcSrc = 2'b01;  // JAL jump target (PC+Imm)
-    //            o_flush = 1'b1;   // Flush pipeline
-    //        end
-    //        OPCODE_JALR: begin
-    //            o_pcSrc = 2'b10;  // JALR jump target (rs1+Imm)
-    //            o_flush = 1'b1;   // Flush pipeline
-    //        end
-    //        default: begin
-    //            o_pcSrc = 2'b00;  // Default to PC + 4
-    //            o_flush = 1'b0;   // Default to no flush
-    //        end
-    //         
-    //    endcase
-    //end
 
 endmodule

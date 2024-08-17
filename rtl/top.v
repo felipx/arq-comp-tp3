@@ -7,7 +7,7 @@ module top
     parameter DMEM_ADDR_WIDTH = 10,  //! Data Memory address width       
 
     // UART Parameters
-    parameter NB_UART_COUNTER = 9 ,  //! NB of baud generator counter reg
+    parameter NB_UART_COUNTER = 32,  //! NB of baud generator counter reg
     parameter NB_UART_DATA    = 8 ,  //! NB of UART data reg
     parameter NB_UART_ADDR    = 7    //! NB of UART fifo's regs depth
                                       
@@ -89,7 +89,7 @@ module top
             .i_rd       (cpu_rd_to_uart      ),
             .i_wr       (cpu_wr_to_uart      ),
             .i_wdata    (cpu_wdata_to_uart   ),
-            .i_tick_cmp (9'd326              ), // 163 -> fBaud = 19200, clk = 50 Mhz // 326 -> fbaud = 19200, clk = 100 MHz
+            .i_tick_cmp (32'd651             ), // 163 -> fBaud = 19200, clk = 50 Mhz // 326 -> fbaud = 19200, clk = 100 MHz
             .i_rst      (i_rst               ),
             .clk        (clk                 )
         );

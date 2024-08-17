@@ -100,7 +100,7 @@ module du_regfile_tx
             
             SEND_REG: begin
                 if (counter_reg == 3'b100 && i_tx_done) begin
-                    if (regfile_addr_reg == 5'd31) begin
+                    if (regfile_addr_reg == 5'd0) begin
                         next_state = IDLE;
                     end
                     else begin

@@ -6,7 +6,7 @@
 
 module memory
 #(
-    parameter ADDR_WIDTH = 5  //! Address width
+    parameter ADDR_WIDTH = 10  //! Address width
 ) (
     // Output
     output reg [31 : 0] o_dout,               //! Data output
@@ -122,9 +122,9 @@ module memory
         if (rd_reg) begin 
             o_dout <= dout_shifted;
         end
-        else begin
-            o_dout = {32{1'b0}};
-        end
+//        else begin
+//            o_dout = {32{1'b0}};
+//        end
     end
 
 endmodule

@@ -10,9 +10,7 @@ module alu
 ) (
     // Outputs
     output reg [NB_DATA - 1 : 0] o_result,  //! ALU result
-    output                       o_zero  ,  //! Zero flag (if result is zero)
-
-                                          
+                                 
     // Inputs                             
     input      [NB_DATA - 1 : 0] i_data1 ,  //! First operand
     input      [NB_DATA - 1 : 0] i_data2 ,  //! Second operand
@@ -48,8 +46,5 @@ module alu
             default:    o_result = 0;
         endcase
     end
-
-    // Result = 0 signal
-    assign o_zero           = (o_result == 0) ? 1'b1 : 1'b0        ;
 
 endmodule
