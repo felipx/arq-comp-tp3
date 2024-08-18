@@ -30,9 +30,14 @@ module if_id_reg
     input wire                    clk         //! Clock input
 );
 
+    reg [NB_PC - 1 : 0] pc     ;
+    reg [NB_PC - 1 : 0] pc_next;
+
     //! IF/ID Model
     always @(posedge clk) begin
         if (i_rst || i_flush) begin
+            pc        <= {NB_PC{1'b0}};
+            pc_next   <= {NB_PC{1'b0}};
             o_pc      <= {NB_PC{1'b0}};
             o_pc_next <= {NB_PC{1'b0}};
             o_instr   <= {NB_INSTR{1'b0}};
@@ -44,8 +49,10 @@ module if_id_reg
             o_func7   <= {7{1'b0}};
         end
         else if (i_en) begin
-            o_pc      <= i_pc            ;
-            o_pc_next <= i_pc_next       ;
+            pc        <= i_pc            ;
+            pc_next   <= i_pc_next       ;
+            o_pc      <= pc              ;
+            o_pc_next <= pc_next         ;
             o_instr   <= i_instr         ;
             o_opcode  <= i_instr[6  :  0];
             o_rd_add  <= i_instr[11 :  7];

@@ -139,13 +139,15 @@ module du_imem_loader
             end
 
             RECEIVE_FW_3: begin
-                // If received byte is 0x01, new frame comming
-                if (i_rx_data == 8'h01) begin
-                    next_state = RECEIVE_FW_1;
-                end
-                // If received byte is EOT, FW receive complete
-                if (i_rx_data == EOT) begin
-                    next_state = IDLE;
+                if (i_rx_done) begin
+                    // If received byte is 0x01, new frame comming
+                    if (i_rx_data == 8'h01) begin
+                        next_state = RECEIVE_FW_1;
+                    end
+                    // If received byte is EOT, FW receive complete
+                    if (i_rx_data == EOT) begin
+                        next_state = IDLE;
+                    end
                 end
             end
 
@@ -215,7 +217,6 @@ module du_imem_loader
                             o_wdata        = ACK;
                             o_tx_start     = 1'b1;
                             cksum_next     = {NB_UART_DATA{1'b0}};
-                            imem_addr_next = {IMEM_ADDR_WIDTH{1'b0}};
                             counter_next   = {NB_COUNTER{1'b0}};
                         end
                         // Else send NAK  
@@ -243,14 +244,20 @@ module du_imem_loader
                 if (i_rx_done) begin
                     o_rd       = 1'b1;
                     o_wr       = 1;
-                    o_wdata    = ACK;
-                    o_tx_start = 1'b1;
-                end
 
-                // If received byte is EOT, FW receive complete
-                if (i_rx_data == EOT) begin
-                    o_done = 1'b1;
-                end
+                    // If received byte is EOT, FW receive complete
+                    if (i_rx_data == EOT) begin
+                        imem_addr_next = {IMEM_ADDR_WIDTH{1'b0}};
+                        o_done         = 1'b1;
+                        o_wdata        = ACK;
+                        o_tx_start     = 1'b1;
+                    end
+                    // If received byte is SOT, new frame is comming
+                    else if (i_rx_data == SOT) begin
+                        o_wdata    = ACK;
+                        o_tx_start = 1'b1;
+                    end
+                end         
             end
 
             default: begin

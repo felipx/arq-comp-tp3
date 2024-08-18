@@ -167,7 +167,6 @@ module cpu_core
     wire [NB_DATA - 1 : 0] wb_mux_out;
     
     reg                           en             ;
-    reg [2 : 0]                   if_id_en       ;
     reg                           du_rgfile_rd_in;
     reg [4 : 0]                   regfile_addr_in;
     reg [NB_DATA         - 1 : 0] imem_data_in   ;
@@ -279,7 +278,6 @@ module cpu_core
             .i_size  (imem_size_in                   ),  // FIXME
             .i_wen   (imem_wen_in                    ),
             .i_ren   (~imem_wen_in & en              ),
-            .i_rst   (i_rst                          ),
             .clk     (clk                            ) 
         );
     
@@ -543,7 +541,7 @@ module cpu_core
         (
             .o_sum (jump_adder_addr_out),
             .i_a   (id_ex_pc_out       ),
-            .i_b   (id_ex_imm_out << 1 )
+            .i_b   (id_ex_imm_out      )
         );
     
     // EX/MEM Pipeline Registers
@@ -635,7 +633,6 @@ module cpu_core
             .i_size  (ex_mem_dataSize_out | dmem_rsize_in    ),
             .i_wen   (ex_mem_memWrite_out                    ),
             .i_ren   (ex_mem_memRead_out | dmem_ren_in       ),
-            .i_rst   (i_rst                                  ),
             .clk     (clk                                    ) 
         );
     

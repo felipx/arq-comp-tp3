@@ -5,7 +5,7 @@ module du_tb ();
     parameter NB_PC              = 32;  //! NB of Program Counter
     parameter NB_INSTRUCTION     = 32;  //! Size of each memory location
     parameter NB_DATA            = 32;  //! Size of Integer Base registers
-    parameter IMEM_ADDR_WIDTH    = 7 ;  //! Instruction Memory address width
+    parameter IMEM_ADDR_WIDTH    = 8 ;  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH    = 10;  //! Data Memory address width
     
     // UART Parameters
@@ -147,40 +147,70 @@ module du_tb ();
         blk_not = 8'hFE;
         cksum   = 8'h00;
 
-        // addi x1, x0, 0xFFF
-        i_imem_data[0] = 32'b111111111111_00000_000_00001_0010011;
+    //    // addi x1, x0, 0xFFF
+    //    i_imem_data[0] = 32'b111111111111_00000_000_00001_0010011;
+    //
+    //    // addi x2, x0, 0xFFF
+    //    i_imem_data[1] = 32'b111111111111_00000_000_00010_0010011;
+    //
+    //    // addi x3, x0, 0xEFF
+    //    i_imem_data[2] = 32'b111011111111_00000_000_00011_0010011;
+    //
+    //    // addi x4, x0, 0x544
+    //    i_imem_data[3] = 32'b010101000100_00000_000_00100_0010011;
+    //    
+    //    // addi x5, x4, 0xFFF
+    //    i_imem_data[4] = 32'b111111111111_00100_000_00101_0010011;
+    //    
+    //    // sub x2, x1, x3
+    //    i_imem_data[5] = 32'b0100000_00011_00001_000_00010_0110011;
+    //    
+    //    // and x12, x2, x4
+    //    i_imem_data[6] = 32'b0000000_00100_00010_111_01100_0110011;
+    //    
+    //    // or x13, x5, x2
+    //    i_imem_data[7] = 32'b0000000_00010_00101_110_01101_0110011;
+    //    
+    //    // add x14, x2, x2
+    //    i_imem_data[8] = 32'b0000000_00010_00010_000_01110_0110011;
+    //    
+    //    // sw x1, 10(x2)
+    //    i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;
+    //    
+    //    i_imem_data[10] = 32'hEEE0_0F93;
 
-        // addi x2, x0, 0xFFF
-        i_imem_data[1] = 32'b111111111111_00000_000_00010_0010011;
 
-        // addi x3, x0, 0xEFF
-        i_imem_data[2] = 32'b111011111111_00000_000_00011_0010011;
-
-        // addi x4, x0, 0x544
-        i_imem_data[3] = 32'b010101000100_00000_000_00100_0010011;
+        i_imem_data[ 0] = 32'h00000137;
+        i_imem_data[ 1] = 32'h40010113;
+        i_imem_data[ 2] = 32'h000001b7;
+        i_imem_data[ 3] = 32'h20018193;
+        i_imem_data[ 4] = 32'h004000ef;
+        i_imem_data[ 5] = 32'hfd010113;
+        i_imem_data[ 6] = 32'h02812623;
+        i_imem_data[ 7] = 32'h03010413;
+        i_imem_data[ 8] = 32'h20000793;
+        i_imem_data[ 9] = 32'hfef42623;
+        i_imem_data[10] = 32'h10000793;
+        i_imem_data[11] = 32'hfef42423;
+        i_imem_data[12] = 32'h000057b7;
+        i_imem_data[13] = 32'h45578793;
+        i_imem_data[14] = 32'hfef42223;
+        i_imem_data[15] = 32'hfec42703;
+        i_imem_data[16] = 32'hfe842783;
+        i_imem_data[17] = 32'h40f707b3;
+        i_imem_data[18] = 32'hfef42023;
+        i_imem_data[19] = 32'hfe042783;
+        i_imem_data[20] = 32'hfcf42e23;
+        i_imem_data[21] = 32'hfdc42783;
+        i_imem_data[22] = 32'hfe442703;
+        i_imem_data[23] = 32'h00e7a023;
+        i_imem_data[24] = 32'h00000793;
+        i_imem_data[25] = 32'h00078513;
+        i_imem_data[26] = 32'h02c12403;
+        i_imem_data[27] = 32'h03010113;
+        i_imem_data[28] = 32'h00008067;
         
-        // addi x5, x4, 0xFFF
-        i_imem_data[4] = 32'b111111111111_00100_000_00101_0010011;
         
-        // sub x2, x1, x3
-        i_imem_data[5] = 32'b0100000_00011_00001_000_00010_0110011;
-        
-        // and x12, x2, x4
-        i_imem_data[6] = 32'b0000000_00100_00010_111_01100_0110011;
-        
-        // or x13, x5, x2
-        i_imem_data[7] = 32'b0000000_00010_00101_110_01101_0110011;
-        
-        // add x14, x2, x2
-        i_imem_data[8] = 32'b0000000_00010_00010_000_01110_0110011;
-        
-        // sw x1, 10(x2)
-        i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;
-        
-        i_imem_data[10] = 32'hEEE0_0F93;
-
-        
-
         #20 i_rst = 1'b1;
         #20 i_rst = 1'b0;
             en    = 1'b1;
@@ -210,7 +240,7 @@ module du_tb ();
         end
 
 
-        for (j = 0; j < 11 ; j = j + 1) begin
+        for (j = 0; j < 29 ; j = j + 1) begin
         
             #10 host_uart_wdata    = i_imem_data[j][7:0];
             #10 host_uart_tx_start = 1'b1;
@@ -241,11 +271,10 @@ module du_tb ();
             end
 
             cksum = cksum + i_imem_data[j][7:0] + i_imem_data[j][15:8] + i_imem_data[j][23:16] + i_imem_data[j][31:24];
-
         end
 
         // Send padding
-        for (j = 0; j < 84 ; j = j + 1) begin
+        for (j = 0; j < 12 ; j = j + 1) begin
             #10 host_uart_wdata = 8'h1A;
             #10 host_uart_tx_start = 1'b1;
             #10 host_uart_tx_start = 1'b0;
@@ -287,7 +316,7 @@ module du_tb ();
         #(TBAUD*1536);
         
         // Send 0x0A
-        #10 host_uart_wdata    = 8'h0A;
+        #10 host_uart_wdata    = 8'h00;
         #10 host_uart_tx_start = 1'b1;
         #10 host_uart_tx_start = 1'b0;
         while (host_uart_tx_done != 1'b1) begin

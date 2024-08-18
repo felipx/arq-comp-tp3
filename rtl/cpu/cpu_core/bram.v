@@ -7,12 +7,11 @@ module bram
     output reg [7 : 0]          o_dout,
 
     // Inputs
-    input                       i_we  ,
-    input                       i_re  ,
+    input                       i_we   ,
+    input                       i_re   ,
     input [ADDR_WIDTH - 1 : 0]  i_waddr,
     input [ADDR_WIDTH - 1 : 0]  i_raddr,
-    input [7 : 0]               i_di  ,
-    input                       i_rst ,
+    input [7 : 0]               i_di   ,
     input                       clk    
 );
 
@@ -32,11 +31,9 @@ module bram
         if (i_we)
             ram[i_waddr] <= i_di;
     end
-
+    
     always @(negedge clk) begin
-        if (i_rst)
-            o_dout <= 0;
-        else if (i_re)
+        if (i_re)
             o_dout <= ram[i_raddr];
     end
 
