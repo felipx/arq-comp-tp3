@@ -20,7 +20,6 @@ module ex_mem_reg
     output reg [1 : 0]              o_dataSize   ,
     output reg [NB_PC      - 1 : 0] o_pc_next    ,  //! PC+4 output
     output reg [NB_PC      - 1 : 0] o_branch_addr,
-    output reg [NB_PC      - 1 : 0] o_jump_addr  ,
     output reg [DATA_WIDTH - 1 : 0] o_alu        ,  //! ALU result output
     output reg [DATA_WIDTH - 1 : 0] o_data2      ,  //! Data for store instructions output
     output reg [4 : 0]              o_rd_addr    ,
@@ -37,7 +36,6 @@ module ex_mem_reg
     input wire [1 : 0]              i_dataSize   , 
     input wire [NB_PC      - 1 : 0] i_pc_next    ,  //! PC+4 input
     input wire [NB_PC      - 1 : 0] i_branch_addr,
-    input wire [NB_PC      - 1 : 0] i_jump_addr  ,
     input wire [DATA_WIDTH - 1 : 0] i_alu        ,  //! ALU result input
     input wire [DATA_WIDTH - 1 : 0] i_data2      ,  //! Data for store instructions input
     input wire [4 : 0]              i_rd_addr    ,
@@ -61,7 +59,6 @@ module ex_mem_reg
             o_dataSize    <= 2'b00             ;
             o_pc_next     <= {NB_PC{1'b0}}     ;
             o_branch_addr <= {NB_PC{1'b0}}     ;
-            o_jump_addr   <= {NB_PC{1'b0}}     ;
             o_alu         <= {DATA_WIDTH{1'b0}};
             o_data2       <= {DATA_WIDTH{1'b0}};
             o_rd_addr     <= {5{1'b0}}         ;
@@ -78,7 +75,6 @@ module ex_mem_reg
             o_dataSize    <= i_dataSize   ;
             o_pc_next     <= i_pc_next    ;
             o_branch_addr <= i_branch_addr;
-            o_jump_addr   <= i_jump_addr  ;
             o_alu         <= i_alu        ;
             o_data2       <= i_data2      ;
             o_rd_addr     <= i_rd_addr    ;

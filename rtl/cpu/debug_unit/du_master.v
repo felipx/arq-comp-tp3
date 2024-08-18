@@ -44,7 +44,7 @@ module du_master
     localparam CONT = 8'h01;
     localparam STEP = 8'h02;
 
-    localparam COUNTER_TICKS = 32'd099_999_999;
+    localparam COUNTER_TICKS = 32'd199_999_999;
 
     //! Internal States
     localparam [NB_STATE - 1 : 0] IDLE         = 8'b00000001;  // 0x01

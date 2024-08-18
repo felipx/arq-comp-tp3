@@ -112,7 +112,7 @@ module debug_unit_top
         );
     
     
-    // Debug Unit FW Loader
+    //! Debug Unit FW Loader
     du_imem_loader
     #(
         .NB_UART_DATA    (NB_UART_DATA   ),
@@ -188,6 +188,7 @@ module debug_unit_top
             .clk          (clk                   )
         );
 
+    //! Internal Buffers Logic
     always @(posedge clk) begin
         tx_start <= master_tx_start   | imem_loader_tx_start   | regfile_reader_tx_start   | dmem_tx_uart_start;
         rd       <= master_uart_rd    | imem_loader_uart_rd    | dmem_tx_uart_rd                               ;

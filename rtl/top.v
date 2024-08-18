@@ -5,34 +5,34 @@ module top
     parameter NB_DATA         = 32,  //! Size of Integer Base registers
     parameter IMEM_ADDR_WIDTH = 10,  //! Instruction Memory address width
     parameter DMEM_ADDR_WIDTH = 10,  //! Data Memory address width       
-
+    
     // UART Parameters
     parameter NB_UART_COUNTER = 32,  //! NB of baud generator counter reg
     parameter NB_UART_DATA    = 8 ,  //! NB of UART data reg
     parameter NB_UART_ADDR    = 7    //! NB of UART fifo's regs depth
-                                      
+                                 
 ) (
     // Ouputs
-    output wire                   o_RsTx,
-
+    output wire o_RsTx,
+    
     // Inputs
     input  wire i_RsRx,
     input  wire i_rst ,
-    input  wire i_clk    // i_clk if pll is used else clk
+    input  wire i_clk
 );
     
-    wire clk       ; // if pll is used
-    wire pll_locked;
-
     //! Connections
-    wire                        cpu_rd_to_uart;
-    wire                        cpu_wr_to_uart;
-    wire [NB_UART_DATA - 1 : 0] cpu_wdata_to_uart;
+    wire                        clk                 ;
+    wire                        pll_locked          ;
+    wire                        cpu_rd_to_uart      ;
+    wire                        cpu_wr_to_uart      ;
+    wire [NB_UART_DATA - 1 : 0] cpu_wdata_to_uart   ;
     wire                        cpu_tx_start_to_uart;
-    wire [NB_UART_DATA - 1 : 0] uart_rx_data_to_cpu;
-    wire                        uart_rx_done_to_cpu;
-    wire                        uart_tx_done_to_cpu;
+    wire [NB_UART_DATA - 1 : 0] uart_rx_data_to_cpu ;
+    wire                        uart_rx_done_to_cpu ;
+    wire                        uart_tx_done_to_cpu ;
     
+    // MMCM or PLL
     pll
         u_ppl_0
         (
@@ -89,9 +89,21 @@ module top
             .i_rd       (cpu_rd_to_uart      ),
             .i_wr       (cpu_wr_to_uart      ),
             .i_wdata    (cpu_wdata_to_uart   ),
-            .i_tick_cmp (32'd651             ), // 163 -> fBaud = 19200, clk = 50 Mhz // 326 -> fbaud = 19200, clk = 100 MHz
+            .i_tick_cmp (32'd54              ),
             .i_rst      (i_rst               ),
             .clk        (clk                 )
         );
     
+    ///////////////////////////////////////////////
+    // UART TICK COUNTER VALUES                  //
+    // ------------------------------------------//
+    // tickVal = fclk/(16*baudRate)              //
+    // ------------------------------------------//
+    // fclk (MHz) | baudRate | tickVal |         //
+    //     50        19200       163             //
+    //    100         9600       651             //
+    //    100        19200       326             //
+    //    100       115200        54             //
+    ///////////////////////////////////////////////
+
 endmodule

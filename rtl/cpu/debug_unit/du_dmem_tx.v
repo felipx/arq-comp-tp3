@@ -1,4 +1,8 @@
-
+//! @title DEBUG DATA MEMORY TRANSMITTER MODULE
+//! @file du_dmem_tx.v
+//! @author Felipe Montero Bruni
+//! @date 8-2024
+//! @version 0.1
 
 module du_dmem_tx 
 #(
