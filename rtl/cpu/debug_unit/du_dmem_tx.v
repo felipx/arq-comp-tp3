@@ -1,4 +1,8 @@
-
+//! @title DEBUG DATA MEMORY TRANSMITTER MODULE
+//! @file du_dmem_tx.v
+//! @author Felipe Montero Bruni
+//! @date 8-2024
+//! @version 0.1
 
 module du_dmem_tx 
 #(
@@ -90,7 +94,7 @@ module du_dmem_tx
                 end
             end
             READ: begin
-                if (counter_reg == 3'b101) begin
+                if (counter_reg == 3'b100) begin
                     next_state = SEND;
                 end
             end
@@ -144,7 +148,7 @@ module du_dmem_tx
 
                 counter_next = counter_reg + 1'b1;
 
-                if (counter_reg == 3'b101) begin
+                if (counter_reg == 3'b100) begin
                     counter_next = {NB_COUNTER{1'b0}};
                     rx_data_next = i_dmem_data;
                 end

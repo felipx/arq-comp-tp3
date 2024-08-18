@@ -18,13 +18,11 @@ module memory
     input  wire [1 : 0]              i_size ,  //! Write/Read size (byte, half, word) input
     input  wire                      i_wen  ,  //! Write enable input
     input  wire                      i_ren  ,  //! Read enable input
-    input  wire                      i_rst  ,  //! Reset
     input  wire                      clk       //! Clock
 );
 
     localparam RAM_ADDR_WIDTH = ADDR_WIDTH - 2;
 
-    reg                          rd_reg      ;
     reg [3 : 0]                  ram_wen     ;
     reg [RAM_ADDR_WIDTH - 1 : 0] waddr [3:0] ;
     reg [RAM_ADDR_WIDTH - 1 : 0] raddr [3:0] ;
@@ -58,7 +56,6 @@ module memory
                     .i_waddr (waddr[i]                      ),
                     .i_raddr (raddr[i]                      ),
                     .i_di    (din_shifted[(8*(i+1)-1) : 8*i]),
-                    .i_rst   (i_rst                         ),
                     .clk     (clk                           )
                 );
         end
@@ -98,33 +95,19 @@ module memory
         din_shifted = ({i_din, i_din} >> (write_shift * 8));
     end
 
-    // Read Enable Reg Logic
-    always @(negedge clk) begin
-        if (i_rst) begin
-            rd_reg <= 1'b0;
-        end
-        else begin
-            rd_reg <= i_ren;
-        end
-    end
-
     // Read Logic
     always @(*) begin
+        o_dout = {32{1'b0}};
         raddr[0] = base_raddr + (read_shift >= 2'd1);
         raddr[1] = base_raddr + (read_shift >= 2'd2);
         raddr[2] = base_raddr + (read_shift >= 2'd3);
         raddr[3] = base_raddr;
 
         dout_shifted = ({ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0], ram_dout[3], ram_dout[2], ram_dout[1], ram_dout[0]} >> (read_shift * 8));
-    end
 
-    always @(posedge clk) begin
-        if (rd_reg) begin 
-            o_dout <= dout_shifted;
+        if (i_ren) begin 
+            o_dout = dout_shifted;
         end
-//        else begin
-//            o_dout = {32{1'b0}};
-//        end
     end
 
 endmodule

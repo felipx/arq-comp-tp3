@@ -11,7 +11,7 @@ module cpu_subsystem
     parameter NB_DATA            = 32,  //! SIze of DMEM data
     parameter NB_REG             = 32,  //! Size of Integer Base registers
     parameter IMEM_ADDR_WIDTH    = 10,  //! Instruction Memory address width
-    parameter DMEM_ADDR_WIDTH    = 10 ,  //! Data Memory address width
+    parameter DMEM_ADDR_WIDTH    = 10,  //! Data Memory address width
     parameter NB_UART_DATA       = 8  
 ) (
     // Outputs
@@ -34,11 +34,10 @@ module cpu_subsystem
     localparam NB_REGFILE_ADDR = 5;
 
     //! Internal Buffers
-    reg [NB_PC           - 1 : 0] pc_to_du           ;
-    reg [NB_INSTRUCTION  - 1 : 0] cpu_instr_to_du    ;
-    reg [NB_REG          - 1 : 0] cpu_reg_to_du      ;
-    reg [NB_DATA         - 1 : 0] cpu_dmem_data_to_du;
-
+    reg [NB_PC           - 1 : 0] pc_to_du              ;
+    reg [NB_INSTRUCTION  - 1 : 0] cpu_instr_to_du       ;
+    reg [NB_REG          - 1 : 0] cpu_reg_to_du         ;
+    reg [NB_DATA         - 1 : 0] cpu_dmem_data_to_du   ;
     reg                           debug_unit_cpu_en     ;
     reg [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu   ;
     reg [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu  ;
@@ -50,15 +49,13 @@ module cpu_subsystem
     reg [1 : 0]                   du_dmem_rsize_to_cpu  ;
     reg                           du_dmem_ren_to_cpu    ;
     reg                           du_rst                ;
-
-    reg                           uart_tx_start;
-    reg                           uart_rd      ;
-    reg                           uart_wr      ;
-    reg [NB_UART_DATA - 1 : 0]    uart_wdata   ;
-
-    reg [NB_UART_DATA - 1 : 0]    uart_rx_data;
-    reg                           uart_rx_done;
-    reg                           uart_tx_done;
+    reg                           uart_tx_start         ;
+    reg                           uart_rd               ;
+    reg                           uart_wr               ;
+    reg [NB_UART_DATA - 1 : 0]    uart_wdata            ;
+    reg [NB_UART_DATA - 1 : 0]    uart_rx_data          ;
+    reg                           uart_rx_done          ;
+    reg                           uart_tx_done          ;
 
     //! Connections
     // CPU to DU
@@ -80,6 +77,7 @@ module cpu_subsystem
     wire                           du_dmem_ren_to_cpu_out    ;
     wire                           du_rst_out                ;
 
+    // UART
     wire                        uart_tx_start_out;
     wire                        uart_rd_out      ;
     wire                        uart_wr_out      ;
@@ -161,7 +159,7 @@ module cpu_subsystem
             .clk            (clk                       )
         );
 
-    //! Debug Unit buffers Logic
+    //! Internal Buffers Logic
     always @(posedge clk) begin
         pc_to_du               <= pc_to_du_out                                     ;
         cpu_instr_to_du        <= cpu_instr_to_du_out                              ;

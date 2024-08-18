@@ -47,11 +47,11 @@ module branch_ctrl_unit
             if (o_pcSrc == 2'b01) o_flush = 1'b1;  // Flush if branch taken
         end
         else if (i_jump && ~i_linkReg) begin
-            o_pcSrc = 2'b10;  // JAL jump target (PC+Imm)
+            o_pcSrc = 2'b01;  // JAL jump target (PC+Imm)
             o_flush = 1'b1;   // Flush pipeline
         end
         else if (i_jump && i_linkReg) begin
-            o_pcSrc = 2'b11;  // JALR jump target (rs1+Imm)
+            o_pcSrc = 2'b10;  // JALR jump target (rs1+Imm)
             o_flush = 1'b1;   // Flush pipeline
         end
     end
