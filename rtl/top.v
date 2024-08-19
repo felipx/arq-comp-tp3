@@ -31,6 +31,8 @@ module top
     wire [NB_UART_DATA - 1 : 0] uart_rx_data_to_cpu ;
     wire                        uart_rx_done_to_cpu ;
     wire                        uart_tx_done_to_cpu ;
+    wire                        rsRx                ;
+    wire                        rst                 ;
     
     // MMCM or PLL
     pll
@@ -40,6 +42,24 @@ module top
             .locked_0   (pll_locked),
             .clk_in1_0  (i_clk     ),
             .reset_0    (i_rst     )
+        );
+
+    // Reset signal 2-flip-flop synchronizer
+    s2ff
+        u_rst_s2ff
+        (
+            .async_in (i_rst),
+            .sync_out (rst  ), 
+            .clk      (clk  ) 
+        );
+
+    // UART Rx signal 2-flip-flop synchronizer
+    s2ff
+        u_uart_rx_s2ff
+        (
+            .async_in (i_RsRx),
+            .sync_out (rsRx  ), 
+            .clk      (clk   ) 
         );
     
     // CPU Subsystem
@@ -63,7 +83,7 @@ module top
             .i_uart_rx_done  (uart_rx_done_to_cpu ),
             .i_uart_tx_done  (uart_tx_done_to_cpu ),
             .i_en            (pll_locked          ),
-            .i_rst           (i_rst               ),
+            .i_rst           (rst                 ),
             .clk             (clk                 )
         );
     
@@ -84,13 +104,13 @@ module top
             .o_rx_done  (uart_rx_done_to_cpu ),
             .o_rx_empty (                    ),
             .o_rx_full  (                    ),     
-            .i_rx       (i_RsRx              ),
+            .i_rx       (rsRx                ),
             .i_tx_start (cpu_tx_start_to_uart),
             .i_rd       (cpu_rd_to_uart      ),
             .i_wr       (cpu_wr_to_uart      ),
             .i_wdata    (cpu_wdata_to_uart   ),
             .i_tick_cmp (32'd54              ),
-            .i_rst      (i_rst               ),
+            .i_rst      (rst                 ),
             .clk        (clk                 )
         );
     
