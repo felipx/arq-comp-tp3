@@ -218,3 +218,13 @@ set_property -dict { PACKAGE_PIN A9    IOSTANDARD LVCMOS33 } [get_ports { i_RsRx
 ## Configuration options, can be used for all designs
 set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property CFGBVS VCCO [current_design]
+
+set refclk [get_clocks -of_objects [get_pins {u_rst_s2ff/sync_ff1_reg/C}]]   
+set_input_delay -clock $refclk -max 2 [get_ports i_rst]  
+set_input_delay -clock $refclk -min 1 [get_ports i_rst] 
+set_max_delay -datapath_only -from [get_ports i_rst] -to [get_cells {u_rst_s2ff/sync_ff1_reg}] 5.5
+
+set refclk [get_clocks -of_objects [get_pins {u_uart_rx_s2ff/sync_ff1_reg/C}]]   
+set_input_delay -clock $refclk -max 2 [get_ports i_RsRx]  
+set_input_delay -clock $refclk -min 1 [get_ports i_RsRx] 
+set_max_delay -datapath_only -from [get_ports i_RsRx] -to [get_cells {u_uart_rx_s2ff/sync_ff1_reg}] 5.5
