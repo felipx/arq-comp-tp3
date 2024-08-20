@@ -35,8 +35,8 @@ module top
     wire                        rst                 ;
     
     // MMCM or PLL
-    pll
-        u_ppl_0
+    mmcm
+        u_mmcm_0
         (
             .clk_out1_0 (clk       ),
             .locked_0   (pll_locked),
