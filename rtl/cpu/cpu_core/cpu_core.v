@@ -574,17 +574,19 @@ module cpu_core
     //
 
     branch_ctrl_unit
+    #(
+        .NB_DATA (NB_DATA)
+    )
         u_branch_ctrl_unit
         (
-            .o_pcSrc      (branch_ctrl_unit_pc_out   ),
-            .o_flush      (branch_flush_out          ),
-            .i_alu_result (ex_mem_alu_out[0]         ),
-            .i_alu_zero   (~ex_mem_alu_out[0]        ),
-            .i_branch     (ex_mem_branch_out         ),
-            .i_jump       (ex_mem_jump_out           ),
-            .i_linkReg    (ex_mem_linkReg_out        ),
-            .i_func3_0    (ex_mem_func3_out[0]       ),
-            .i_func3_2    (ex_mem_func3_out[2]       )
+            .o_pcSrc      (branch_ctrl_unit_pc_out),
+            .o_flush      (branch_flush_out       ),
+            .i_alu_result (ex_mem_alu_out         ),
+            .i_branch     (ex_mem_branch_out      ),
+            .i_jump       (ex_mem_jump_out        ),
+            .i_linkReg    (ex_mem_linkReg_out     ),
+            .i_func3_0    (ex_mem_func3_out[0]    ),
+            .i_func3_2    (ex_mem_func3_out[2]    )
         );
     
     // Debug Unit's Data Memory Read Mux
