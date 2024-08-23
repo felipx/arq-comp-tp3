@@ -69,9 +69,9 @@ module memory
             case ({i_waddr[1:0], i_size})
                 // SB
                 4'b0001: ram_wen = 4'b0001;
-                4'b0101: ram_wen = 4'b0000;
-                4'b1001: ram_wen = 4'b0000;
-                4'b1101: ram_wen = 4'b0000;
+                4'b0101: ram_wen = 4'b0010;
+                4'b1001: ram_wen = 4'b0100;
+                4'b1101: ram_wen = 4'b1000;
                 // SH
                 4'b0010: ram_wen = 4'b0011;
                 4'b0110: ram_wen = 4'b0110;
