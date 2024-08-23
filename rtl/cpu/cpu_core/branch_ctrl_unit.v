@@ -14,7 +14,6 @@ module branch_ctrl_unit
     
     // Inputs
     input wire [NB_DATA - 1 : 0] i_alu_result,  //! First bit of ALU result
-    //input wire                   i_alu_zero  ,  //! ALU zero flag
     input wire                   i_branch    ,  //! Branch instruction flag input
     input wire                   i_jump      ,  //! JAL or JALR instruction flag input
     input wire                   i_linkReg   ,  //! JALR instruction flag input
