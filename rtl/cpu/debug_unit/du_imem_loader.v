@@ -20,7 +20,6 @@ module du_imem_loader
     output reg [NB_UART_DATA    - 1 : 0] o_wdata     ,  //! UART FIFO Tx write data
     output reg [NB_INSTRUCTION  - 1 : 0] o_imem_data ,
     output reg [IMEM_ADDR_WIDTH - 1 : 0] o_imem_waddr,
-    output reg [1 : 0]                   o_imem_wsize,
     output reg                           o_imem_wen  ,
 
     // Inputs
@@ -165,7 +164,6 @@ module du_imem_loader
         o_wdata         = 8'h00;
         o_imem_data     = {NB_INSTRUCTION{1'b0}};
         o_imem_waddr    = {IMEM_ADDR_WIDTH{1'b0}};
-        o_imem_wsize    = 2'b00;
         o_imem_wen      = 1'b0;
         rx_data_next    = rx_data_reg;
         data_count_next = data_count_reg;
@@ -195,7 +193,6 @@ module du_imem_loader
                 if (data_count_reg == 3'b100 & imem_write_reg) begin
                     o_imem_data     = rx_data_reg;
                     o_imem_waddr    = imem_addr_reg;
-                    o_imem_wsize    = 2'b11;
                     o_imem_wen      = 1'b1;
                     imem_addr_next  = imem_addr_reg + 3'd4;
                     data_count_next = {NB_INSTR_COUNT{1'b0}};
@@ -267,7 +264,6 @@ module du_imem_loader
                 o_wdata         = 8'h00;
                 o_imem_data     = {NB_INSTRUCTION{1'b0}};
                 o_imem_waddr    = {IMEM_ADDR_WIDTH{1'b0}};
-                o_imem_wsize    = 2'b00;
                 o_imem_wen      = 1'b0;
                 o_tx_start      = 1'b0;
                 rx_data_next    = rx_data_reg;

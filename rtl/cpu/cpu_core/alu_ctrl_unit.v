@@ -32,17 +32,6 @@ module alu_ctrl_unit
             2'b00: begin // Load/Store Instructions
                 o_alu_op = ALU_ADD;
             end
-            2'b01: begin // Branch Instructions
-                case (i_funct3)
-                    3'b000: o_alu_op = ALU_SUB;  // BEQ
-                    3'b001: o_alu_op = ALU_SUB;  // BNE
-                    3'b100: o_alu_op = ALU_SLT;  // BLT
-                    3'b101: o_alu_op = ALU_SLT;  // BGE
-                    3'b110: o_alu_op = ALU_SLTU; // BLTU
-                    3'b111: o_alu_op = ALU_SLTU; // BGEU
-                    default: o_alu_op = ALU_ADD;
-                endcase
-            end
             2'b10: begin // I-Type Arithmetic Instructions
                 case (i_funct3)
                     3'b000: o_alu_op = ALU_ADD;  // ADDI

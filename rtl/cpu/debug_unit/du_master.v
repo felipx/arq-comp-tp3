@@ -14,7 +14,6 @@ module du_master
     output reg                        o_load_start     ,
     output reg                        o_send_regs_start,
     output reg                        o_send_dmem_start,
-    output reg [1 : 0]                o_imem_rsize     ,
     output reg                        o_tx_start       ,
     output reg                        o_rd             ,  //! UART FIFO Rx read enable output
     output reg                        o_wr             ,  //! UART FIFO Tx write enable output
@@ -176,7 +175,6 @@ module du_master
         o_load_start      = 1'b0;
         o_send_regs_start = 1'b0;
         o_send_dmem_start = 1'b0;
-        o_imem_rsize      = 2'b00;
         o_rd              = 1'b0;
         o_wr              = 1'b0;
         o_wdata           = 8'h00;
@@ -235,7 +233,6 @@ module du_master
             
             CONT_MODE: begin
                 o_cpu_en     = 1'b1;
-                o_imem_rsize = 2'b11;
 
                 if (i_instr == 32'h1A1A1A1A) begin
                    stop_flag_next = 1'b1; 
@@ -252,7 +249,6 @@ module du_master
             end
 
             STEP_MODE: begin
-                o_imem_rsize = 2'b11;
                 if (step_counter_reg == 3'b000) begin
                     o_cpu_en = 1'b1;
                     step_counter_next = step_counter_reg + 1'b1;
@@ -322,7 +318,6 @@ module du_master
                 o_load_start      = 1'b0;
                 o_send_regs_start = 1'b0;
                 o_send_dmem_start = 1'b0;
-                o_imem_rsize      = 2'b00;
                 o_rd              = 1'b0;
                 o_wr              = 1'b0;
                 o_wdata           = 8'h00;
