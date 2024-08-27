@@ -645,7 +645,6 @@ module cpu_core
             .i_data2       (forwarding_mux_b_out),
             .i_rd_addr     (id_ex_rd_addr_out   ),
             .i_func3       (id_ex_func3_out     ),
-            .i_flush       (1'b0                ),
             .i_en          (en                  ),
             .i_rst         (i_rst | du_rst      ),
             .clk           (clk                 ) 

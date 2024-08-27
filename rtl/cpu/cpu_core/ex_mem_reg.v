@@ -30,7 +30,6 @@ module ex_mem_reg
     input wire [DATA_WIDTH - 1 : 0] i_data2      ,  //! Data for store instructions input
     input wire [4 : 0]              i_rd_addr    ,
     input wire [2 : 0]              i_func3      ,
-    input wire                      i_flush      ,
     input wire                      i_en         ,  //! Enable signal input
     input wire                      i_rst        ,
     input wire                      clk             //! Clock signal    
@@ -38,7 +37,7 @@ module ex_mem_reg
 
     //! IF/EX Register Model
     always @(posedge clk) begin
-        if (i_rst | i_flush) begin
+        if (i_rst) begin
             o_regWrite    <= 1'b0              ;
             o_memRead     <= 1'b0              ;
             o_memWrite    <= 1'b0              ;
