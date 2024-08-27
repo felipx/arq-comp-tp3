@@ -109,7 +109,7 @@ module top
             .i_rd       (cpu_rd_to_uart      ),
             .i_wr       (cpu_wr_to_uart      ),
             .i_wdata    (cpu_wdata_to_uart   ),
-            .i_tick_cmp (32'd54              ),
+            .i_tick_cmp (32'd27              ),
             .i_rst      (rst                 ),
             .clk        (clk                 )
         );
@@ -121,6 +121,7 @@ module top
     // ------------------------------------------//
     // fclk (MHz) | baudRate | tickVal |         //
     //     50        19200       163             //
+    //     50       115200        27             //
     //    100         9600       651             //
     //    100        19200       326             //
     //    100       115200        54             //

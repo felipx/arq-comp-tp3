@@ -41,7 +41,6 @@ module cpu_subsystem
     reg                           debug_unit_cpu_en     ;
     reg [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu   ;
     reg [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu  ;
-    reg [1 : 0]                   du_imem_size_to_cpu   ;
     reg                           du_imem_wen_to_cpu    ;
     reg                           du_regfile_rd_to_cpu  ;
     reg [NB_REGFILE_ADDR - 1 : 0] du_regfile_addr_to_cpu;
@@ -68,7 +67,6 @@ module cpu_subsystem
     wire                           debug_unit_cpu_en_out     ;
     wire [NB_INSTRUCTION  - 1 : 0] du_imem_data_to_cpu_out   ;
     wire [IMEM_ADDR_WIDTH - 1 : 0] du_imem_waddr_to_cpu_out  ;
-    wire [1 : 0]                   du_imem_size_to_cpu_out   ;
     wire                           du_imem_wen_to_cpu_out    ;
     wire                           du_regfile_rd_to_cpu_out  ;
     wire [NB_REGFILE_ADDR - 1 : 0] du_regfile_addr_to_cpu_out;
@@ -109,7 +107,6 @@ module cpu_subsystem
             .i_regfile_addr (du_regfile_addr_to_cpu  ),
             .i_imem_data    (du_imem_data_to_cpu     ),
             .i_imem_waddr   (du_imem_waddr_to_cpu    ),
-            .i_imem_size    (du_imem_size_to_cpu     ),
             .i_imem_wen     (du_imem_wen_to_cpu      ),
             .i_dmem_raddr   (du_dmem_raddr_to_cpu    ),
             .i_dmem_rsize   (du_dmem_rsize_to_cpu    ),
@@ -140,7 +137,6 @@ module cpu_subsystem
             .o_wdata        (uart_wdata_out            ),
             .o_imem_data    (du_imem_data_to_cpu_out   ),
             .o_imem_waddr   (du_imem_waddr_to_cpu_out  ),
-            .o_imem_size    (du_imem_size_to_cpu_out   ),
             .o_imem_wen     (du_imem_wen_to_cpu_out    ),
             .o_regfile_rd   (du_regfile_rd_to_cpu_out  ),
             .o_regfile_raddr(du_regfile_addr_to_cpu_out),
@@ -168,7 +164,6 @@ module cpu_subsystem
         debug_unit_cpu_en      <= debug_unit_cpu_en_out                            ;
         du_imem_data_to_cpu    <= du_imem_data_to_cpu_out                          ;
         du_imem_waddr_to_cpu   <= du_imem_waddr_to_cpu_out                         ;
-        du_imem_size_to_cpu    <= du_imem_size_to_cpu_out                          ;
         du_imem_wen_to_cpu     <= du_imem_wen_to_cpu_out                           ;
         du_regfile_rd_to_cpu   <= du_regfile_rd_to_cpu_out                         ;
         du_regfile_addr_to_cpu <= du_regfile_addr_to_cpu_out                       ;

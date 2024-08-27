@@ -13,13 +13,16 @@ module regfile
     output reg [DATA_WIDTH - 1 : 0] o_dout2,  //! Data output for read port 2
     
     // Inputs
-    input wire [4              : 0] i_addr1,  //! Read register address 1
-    input wire [4              : 0] i_addr2,  //! Read register address 2
-    input wire [4              : 0] i_waddr,  //! Write register address
-    input wire [DATA_WIDTH - 1 : 0] i_wdata,  //! Data input for write port
-    input wire                      i_wen  ,  //! Write enable signal
-    input wire                      i_rst  ,  //! Reset signal
-    input wire                      clk       //! Clock signal
+    input wire [4              : 0] i_addr1 ,  //! Read register address 1
+    input wire [4              : 0] i_addr2 ,  //! Read register address 2
+    input wire [4              : 0] i_waddr1,  //! Write port 1 register address
+    input wire [4              : 0] i_waddr2,  //! Write port 2 register address
+    input wire [DATA_WIDTH - 1 : 0] i_wdata1,  //! Data input for write port 1
+    input wire [DATA_WIDTH - 1 : 0] i_wdata2,  //! Data input for write port 2
+    input wire                      i_wen1  ,  //! Write enable 1 signal
+    input wire                      i_wen2  ,  //! Write enable 2 signal
+    input wire                      i_rst   ,  //! Reset signal
+    input wire                      clk        //! Clock signal
 );
 
     //! Local Parameters
@@ -40,12 +43,14 @@ module regfile
             end
         end
         else begin
-            if (i_wen) begin
-                if (i_waddr != {ADDR_WIDTH{1'b0}}) begin  // Check if writing to x0 register
-                    reg_array[i_waddr] <= i_wdata;
+            if (i_wen1) begin
+                if (i_waddr1 != {ADDR_WIDTH{1'b0}}) begin  // Check if writing to x0 register
+                    reg_array[i_waddr1] <= i_wdata1;
                 end
-                else begin
-                    reg_array[i_waddr] <= {DATA_WIDTH{1'b0}};
+            end
+            if (i_wen2) begin
+                if (i_waddr2 != {ADDR_WIDTH{1'b0}}) begin  // Check if writing to x0 register
+                    reg_array[i_waddr2] <= i_wdata2;
                 end
             end
         end
@@ -53,20 +58,13 @@ module regfile
 
     //! Read Port 1
     always @(*) begin
-        if (i_addr1 == {DATA_DEPTH{1'b0}}) begin
-            o_dout1 = {DATA_WIDTH{1'b0}};           // x0 register is hardwired to zero
-        end else begin
-            o_dout1 = reg_array[i_addr1];
-        end
+        o_dout1 = reg_array[i_addr1];
+
     end
 
     //! Read Port 2
     always @(*) begin
-        if (i_addr2 == {DATA_DEPTH{1'b0}}) begin
-            o_dout2 = {DATA_WIDTH{1'b0}};           // x0 register is hardwired to zero
-        end else begin
-            o_dout2 = reg_array[i_addr2];
-        end
+        o_dout2 = reg_array[i_addr2];
     end
 
 endmodule
