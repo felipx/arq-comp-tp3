@@ -128,7 +128,7 @@ module du_master
             end
 
             CONT_MODE: begin
-                if (stop_counter_reg == 2'b11) begin
+                if (stop_counter_reg == 2'b01) begin
                    next_state = SEND_REGS; 
                 end
             end
@@ -242,7 +242,7 @@ module du_master
                     stop_counter_next = stop_counter_reg + 1'b1;
                 end
 
-                if (stop_counter_reg == 2'b11) begin
+                if (stop_counter_reg == 2'b01) begin
                    stop_counter_next = {3{1'b0}};
                    stop_flag_next    = 1'b0;
                 end
@@ -297,11 +297,11 @@ module du_master
 
                 if (i_rx_done) begin
                     o_rd = 1'b1;
-                end
-
-                if (i_rx_data == 8'h02) begin
-                    o_rst = 1'b1;
-                    stop_counter_next = stop_counter_reg + 1'b1;
+                
+                    if (i_rx_data == 8'h01) begin
+                        o_rst = 1'b1;
+                        stop_counter_next = stop_counter_reg + 1'b1;
+                    end
                 end
 
                 if (stop_counter_reg != 3'b000) begin

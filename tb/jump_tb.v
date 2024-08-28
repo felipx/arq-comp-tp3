@@ -160,16 +160,16 @@ module jump_tb ();
         i_imem_data[3] = 32'b000000000100_00000_000_00001_0010011;   // x1 needed by jalr
         
         // jalr x31, 0x1C(x1)
-        //i_imem_data[4] = 32'b000000011100_00001_000_11111_1100111;  // stall and forward from mem
+        i_imem_data[4] = 32'b000000011100_00001_000_11111_1100111;  // stall and forward from mem
 
         // addi x2, x0, 0xFFF
-        i_imem_data[4] = 32'b111111111111_00000_000_00010_0010011;
+        i_imem_data[5] = 32'b111111111111_00000_000_00010_0010011;
 
         // jalr x31, 0x1C(x1)
         //i_imem_data[5] = 32'b000000011100_00001_000_11111_1100111;  // forward from mem
 
         // addi x3, x0, 0xFFF
-        i_imem_data[5] = 32'b111111111111_00000_000_00011_0010011;
+        //i_imem_data[5] = 32'b111111111111_00000_000_00011_0010011;
         
         // jalr x31, 0x1C(x1)
         i_imem_data[6] = 32'b000000011100_00001_000_11111_1100111;  // forward from wb

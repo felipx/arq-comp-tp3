@@ -177,6 +177,9 @@ module forwarding_tb ();
         // sw x1, 10(x2)
         i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;  // mem[10A] = 0xFFFFFFFF
         
+        // addi x31, x0, 0xEEE
+        i_imem_data[10] = 32'b111011101110_00000_000_11111_0010011;
+        
 
         #20 i_rst = 1'b1;
         #20 i_rst = 1'b0;
@@ -207,7 +210,7 @@ module forwarding_tb ();
         end
 
 
-        for (j = 0; j < 10 ; j = j + 1) begin
+        for (j = 0; j < 11 ; j = j + 1) begin
         
             #10 host_uart_wdata    = i_imem_data[j][7:0];
             #10 host_uart_tx_start = 1'b1;
@@ -242,7 +245,7 @@ module forwarding_tb ();
         end
 
         // Send padding
-        for (j = 0; j < 88 ; j = j + 1) begin
+        for (j = 0; j < 84 ; j = j + 1) begin
             #10 host_uart_wdata = 8'h1A;
         #10 host_uart_tx_start = 1'b1;
         #10 host_uart_tx_start = 1'b0;
