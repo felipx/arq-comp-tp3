@@ -160,22 +160,25 @@ module forwarding_tb ();
         i_imem_data[3] = 32'b010101000100_00000_000_00100_0010011;
         
         // addi x5, x4, 0xFFF
-        i_imem_data[4] = 32'b111111111111_00100_000_00101_0010011;
+        i_imem_data[4] = 32'b111111111111_00100_000_00101_0010011;   // x5 = 0x543
         
         // sub x2, x1, x3
-        i_imem_data[5] = 32'b0100000_00011_00001_000_00010_0110011;
+        i_imem_data[5] = 32'b0100000_00011_00001_000_00010_0110011;  // x2 = 0x100
         
         // and x12, x2, x4
-        i_imem_data[6] = 32'b0000000_00100_00010_111_01100_0110011;
+        i_imem_data[6] = 32'b0000000_00100_00010_111_01100_0110011;  // x12 = 0x100
         
         // or x13, x5, x2
-        i_imem_data[7] = 32'b0000000_00010_00101_110_01101_0110011;
+        i_imem_data[7] = 32'b0000000_00010_00101_110_01101_0110011;  // x13 = 0x543
         
         // add x14, x2, x2
-        i_imem_data[8] = 32'b0000000_00010_00010_000_01110_0110011;
+        i_imem_data[8] = 32'b0000000_00010_00010_000_01110_0110011;  // x14 = 0x200
         
         // sw x1, 10(x2)
-        i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;
+        i_imem_data[9] = 32'b0000000_00001_00010_010_01010_0100011;  // mem[10A] = 0xFFFFFFFF
+        
+        // addi x31, x0, 0xEEE
+        i_imem_data[10] = 32'b111011101110_00000_000_11111_0010011;
         
 
         #20 i_rst = 1'b1;
@@ -207,7 +210,7 @@ module forwarding_tb ();
         end
 
 
-        for (j = 0; j < 10 ; j = j + 1) begin
+        for (j = 0; j < 11 ; j = j + 1) begin
         
             #10 host_uart_wdata    = i_imem_data[j][7:0];
             #10 host_uart_tx_start = 1'b1;
@@ -242,7 +245,7 @@ module forwarding_tb ();
         end
 
         // Send padding
-        for (j = 0; j < 88 ; j = j + 1) begin
+        for (j = 0; j < 84 ; j = j + 1) begin
             #10 host_uart_wdata = 8'h1A;
         #10 host_uart_tx_start = 1'b1;
         #10 host_uart_tx_start = 1'b0;

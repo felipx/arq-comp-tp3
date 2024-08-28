@@ -22,7 +22,6 @@ module debug_unit_top
     output wire [NB_UART_DATA    - 1 : 0] o_wdata        ,  //! UART Tx write data
     output wire [NB_INSTRUCTION  - 1 : 0] o_imem_data    ,
     output wire [IMEM_ADDR_WIDTH - 1 : 0] o_imem_waddr   ,
-    output wire [1 : 0]                   o_imem_size    ,
     output wire                           o_imem_wen     ,
     output wire                           o_regfile_rd   ,
     output wire [4 : 0]                   o_regfile_raddr,
@@ -53,12 +52,10 @@ module debug_unit_top
     wire                        master_load_fw_start     ;
     wire                        master_send_regs_start   ;
     wire                        master_send_dmem_start   ;
-    wire [1 : 0]                master_imem_rsize        ;
     wire                        master_tx_start          ;
     wire                        master_uart_rd           ;
     wire                        master_uart_wr           ;
     wire [NB_UART_DATA - 1 : 0] master_uart_wdata        ;
-    wire [1 : 0]                imem_loader_imem_wsize   ;
     wire                        imem_loader_done         ;
     wire                        imem_loader_tx_start     ;
     wire                        imem_loader_uart_rd      ;
@@ -75,8 +72,6 @@ module debug_unit_top
     wire [NB_UART_DATA - 1 : 0] dmem_tx_uart_wdata       ;
 
     // Output Logic
-    assign o_imem_size = master_imem_rsize | imem_loader_imem_wsize;
-
     assign o_tx_start = tx_start;
     assign o_rd       = rd      ;
     assign o_wr       = wr      ;
@@ -95,7 +90,6 @@ module debug_unit_top
             .o_load_start      (master_load_fw_start  ),
             .o_send_regs_start (master_send_regs_start),
             .o_send_dmem_start (master_send_dmem_start),
-            .o_imem_rsize      (master_imem_rsize     ),
             .o_tx_start        (master_tx_start       ),
             .o_rd              (master_uart_rd        ),
             .o_wr              (master_uart_wr        ),  //check this
@@ -129,7 +123,6 @@ module debug_unit_top
             .o_wdata      (imem_loader_uart_wdata),
             .o_imem_data  (o_imem_data           ),
             .o_imem_waddr (o_imem_waddr          ),
-            .o_imem_wsize (imem_loader_imem_wsize),
             .o_imem_wen   (o_imem_wen            ),
             .i_start      (master_load_fw_start  ),
             .i_rx_done    (i_rx_done             ),

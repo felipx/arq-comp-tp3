@@ -71,7 +71,7 @@ def parse_instruction(line: str) -> tuple[str, str, str, str]:
     """
     parts = line.replace(',', '').split()
     instr = parts[0]
-    if instr == 'jalr':
+    if instr == 'jalr' or instr == 'lb' or instr == 'lh' or instr == 'lw' or instr == 'lbu' or instr == 'lhu':
         # Handling of 'jalr' instruction
         rd = parts[1]
         imm, rs1 = parts[2].split('(')  # Split immediate and register
